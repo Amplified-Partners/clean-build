@@ -53,7 +53,13 @@ Mixing the three without labels launders uncertainty as truth. The neutrality cl
 
 **Inference**: The absence is not a search failure; the two-way search (IBM-only then third-party) returned nothing, so the methodology does not exist as a public document.
 
-**OPINION (confidence 65%)**: for a Claude-ecosystem SMB stack, staying with Qdrant as the vector layer is right while the incumbent is in use and no pain has surfaced. The 35% residual covers: unknown OpenClaw query-pattern specifics, unknown Baking-pipeline Qdrant-specific features, unknown taxonomy richness requirements. 65% is **below** the 85% Medium threshold — the agent stays with the incumbent (no switch cost) rather than committing to a migration. Threshold logic routes correctly without requiring escalation.
+**OPINION (confidence 65%)**: for a Claude-ecosystem SMB stack, staying with Qdrant as the vector layer is right while the incumbent is in use and no pain has surfaced. The 35% residual covers: unknown OpenClaw query-pattern specifics, unknown Baking-pipeline Qdrant-specific features, unknown taxonomy richness requirements.
+
+**Handling under the rule**: 65% sits below the 85% Medium threshold, so **steps 1–4 above applied in full**. Step 1 (named uncertainty): the three residual unknowns above. Step 2 (bounded research): one Perplexity query on agent-ecosystem vector-DB preferences. Step 3: gap did not fully close — confidence updated from an earlier draft to 65% but remained below-floor. Step 4: surfaced to the architect in-session with both options (stay vs migrate) and the residual uncertainty. Architect confirmed the reading. Only then was the outcome recorded as a decision.
+
+## Open items
+
+- `[LOGIC TO BE CONFIRMED]` Below-floor rule may warrant an explicit carve-out for **status-quo-preserving non-actions** (e.g., choosing not to migrate an incumbent) versus **active changes**. As currently written, both routes require the step-4 surface to the architect. That is workable but possibly over-strict for pure "do nothing" outcomes. Architect decision pending on whether to tighten this, and if so whether the threshold changes or an explicit exception lane is named.
 
 ## Interaction with other rules
 
