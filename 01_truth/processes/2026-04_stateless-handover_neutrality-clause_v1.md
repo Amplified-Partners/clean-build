@@ -67,7 +67,7 @@ The facts are identical. The analysis is available but not binding.
 
 ## Status
 
-- Candidate truth. Not yet promoted in `00_authority/MANIFEST.md`.
+- Candidate truth. Indexed under **Candidate authority** in `00_authority/MANIFEST.md` (v34). Not yet promoted to **Authoritative now**.
 - The first handover written under this clause is `03_shadow/job-wrapups/2026-04-23_amplified-partners-orchestration-session_wrapup.md`.
 
 ## Open items
