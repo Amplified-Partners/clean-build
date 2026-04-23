@@ -53,7 +53,7 @@ Mixing the three without labels launders uncertainty as truth. The neutrality cl
 
 **Inference**: The absence is not a search failure; the two-way search (IBM-only then third-party) returned nothing, so the methodology does not exist as a public document.
 
-**OPINION (confidence 85%)**: for a Claude-ecosystem SMB stack, staying with Qdrant as the vector layer is right while the incumbent is in use and no pain has surfaced. The 15% residual covers: unknown OpenClaw query-pattern specifics, unknown Baking-pipeline Qdrant-specific features, unknown taxonomy richness requirements.
+**OPINION (confidence 65%)**: for a Claude-ecosystem SMB stack, staying with Qdrant as the vector layer is right while the incumbent is in use and no pain has surfaced. The 35% residual covers: unknown OpenClaw query-pattern specifics, unknown Baking-pipeline Qdrant-specific features, unknown taxonomy richness requirements. 65% is **below** the 85% Medium threshold — the agent stays with the incumbent (no switch cost) rather than committing to a migration. Threshold logic routes correctly without requiring escalation.
 
 ## Interaction with other rules
 
