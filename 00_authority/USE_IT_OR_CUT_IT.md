@@ -32,14 +32,19 @@ Pairs with the prevention principle: *"Is it useful?"* asked before building. Us
 4. **Cut means remove**: file deleted, references purged, change logged. Not "archived for later" — archival is itself implementation-not-used.
 5. **Exception: reference/provenance**. Items under `90_archive/` and audit trails (superseded baton passes, prior decisions, historical snapshots) are **not** subject to this rule. They exist for provenance, not for use.
 
-## Counter-test before applying
+## Counter-test before cutting
 
-Before cutting, ask two questions:
+Two **gates**. Both must be cleared before the cut — they shape *how* to cut, not *whether*.
 
-1. **Did anyone try it?** Unused-because-never-tried is different from unused-because-tried-and-failed. For not-tried items: run one test before cutting.
-2. **Is it load-bearing?** Check whether anything depends on it. If yes, cut requires migrating dependents first.
+1. **Tried?** If not — run one test first. Do not cut blind.
+2. **Load-bearing?** If yes — migrate dependents first.
 
-Both answers yes → cut. Answers mixed → log and review next cycle.
+Sequence by risk:
+
+- **Tried + not load-bearing** → cut now. Safest, clearest case.
+- **Tried + load-bearing** → migrate dependents, then cut.
+- **Not tried + not load-bearing** → test; if still unused, cut.
+- **Not tried + load-bearing** → migrate dependents, test, then cut. Hardest case. If the gate-clearing cost exceeds the bloat cost, log and defer to the next cycle.
 
 ## Interaction with other rules
 
