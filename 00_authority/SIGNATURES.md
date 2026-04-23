@@ -55,7 +55,7 @@ Applies to anything committed to any Amplified-Partners repository: documents, c
 Low-key by design. Trust the agent; the tooling is a catch, not a gate.
 
 - **Pre-commit hook** (to be built as a follow-on): scans staged markdown and scripts for a signature pattern. Warns on miss. Blocks only on missing signatures inside `00_authority/`.
-- **PR template**: reminder line that reviewer confirms signatures present.
+- **PR template** (to be created as a follow-on): reminder line that reviewer confirms signatures present.
 - **`AGENTS.md`**: first-60-seconds entry cites this file so every session sees the rule early.
 
 Absence of a signature on a committed artefact is a process defect to fix, not a person to blame. Fix-forward: add the signature in the next commit and note the miss in the wrap-up.
