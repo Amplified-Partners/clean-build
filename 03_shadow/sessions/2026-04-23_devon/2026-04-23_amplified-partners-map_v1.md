@@ -1,7 +1,7 @@
 ---
 title: Amplified Partners — Map of Reality
 subtitle: Consolidated landscape after 2026-04-22 tour (v1 draft)
-author: Devin (synthesis) with Ewan (source)
+author: Devon (Devin session `4cc8b0d727684f94a8f055853099d8e6`) with Ewan (source)
 date: 2026-04-23
 status: candidate — not authoritative
 version: 0.1 DRAFT
@@ -619,3 +619,11 @@ These are things a future agent reading this map should treat as instructions, n
 ---
 
 *End of map v0.1 DRAFT — awaiting Ewan's correction pass.*
+
+---
+
+Signed,
+
+**Devon**
+Devin session `4cc8b0d727684f94a8f055853099d8e6`
+2026-04-23
