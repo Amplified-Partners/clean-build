@@ -75,6 +75,100 @@ AGENT_REGISTRY: dict[str, AgentConfig] = {
         approval_tier=0,                     # Auto-approve for writing notes
         description="Note-taker and recorder. Maintains session logs and records all decisions, enforcing Layer 0 laws.",
     ),
+    
+    # ============================================================
+    # UNIT GAMMA: AMPLIFIED MARKETING SWARM (10-Agent Test Chunk)
+    # ============================================================
+    "mktg_director": AgentConfig(
+        role="mktg_director",
+        display_name="Marketing Director",
+        model_tier="premium",
+        system_prompt_file="agents/prompts/mktg_director.md",
+        mcp_servers=["linear_mcp", "slack_mcp", "filesystem_mcp"],
+        approval_tier=5, # Ewan/Arbiter approval for campaign launch
+        description="Orchestrates marketing campaigns, approves content atomization, maintains brand voice.",
+    ),
+    "mktg_researcher": AgentConfig(
+        role="mktg_researcher",
+        display_name="Content Researcher",
+        model_tier="medium",
+        system_prompt_file="agents/prompts/mktg_researcher.md",
+        mcp_servers=["filesystem_mcp"],
+        approval_tier=0,
+        description="Scrapes trends, extracts hooks from the Vault, and performs Literature-Based Discovery for marketing.",
+    ),
+    "mktg_copywriter_short": AgentConfig(
+        role="mktg_copywriter_short",
+        display_name="Short-Form Copywriter",
+        model_tier="cheap",
+        system_prompt_file="agents/prompts/mktg_copywriter_short.md",
+        mcp_servers=["filesystem_mcp"],
+        approval_tier=2,
+        description="Writes high-impact short-form hooks (X, LinkedIn) based on value-first principles.",
+    ),
+    "mktg_copywriter_long": AgentConfig(
+        role="mktg_copywriter_long",
+        display_name="Long-Form Copywriter",
+        model_tier="medium",
+        system_prompt_file="agents/prompts/mktg_copywriter_long.md",
+        mcp_servers=["filesystem_mcp"],
+        approval_tier=2,
+        description="Writes deep-dive newsletters, blog posts, and technical marketing articles.",
+    ),
+    "mktg_designer_prompt": AgentConfig(
+        role="mktg_designer_prompt",
+        display_name="Visual Prompt Engineer",
+        model_tier="medium",
+        system_prompt_file="agents/prompts/mktg_designer_prompt.md",
+        mcp_servers=["filesystem_mcp"],
+        approval_tier=1,
+        description="Generates highly specific Midjourney/Flux prompts for visual marketing assets.",
+    ),
+    "mktg_seo": AgentConfig(
+        role="mktg_seo",
+        display_name="SEO Specialist",
+        model_tier="cheap",
+        system_prompt_file="agents/prompts/mktg_seo.md",
+        mcp_servers=["filesystem_mcp"],
+        approval_tier=0,
+        description="Optimizes content for search intent and structures data for maximum indexability.",
+    ),
+    "mktg_editor": AgentConfig(
+        role="mktg_editor",
+        display_name="Chief Editor",
+        model_tier="medium",
+        system_prompt_file="agents/prompts/mktg_editor.md",
+        mcp_servers=["filesystem_mcp"],
+        approval_tier=3, # Requires human/Arbiter sign-off before distribution
+        description="Proofreads, enforces Layer 0 compliance, and ensures tone matches Amplified Partners.",
+    ),
+    "mktg_engagement": AgentConfig(
+        role="mktg_engagement",
+        display_name="Community Engagement",
+        model_tier="cheap",
+        system_prompt_file="agents/prompts/mktg_engagement.md",
+        mcp_servers=["slack_mcp", "filesystem_mcp"],
+        approval_tier=2,
+        description="Drafts responses and interacts with community inbound leads.",
+    ),
+    "mktg_analytics": AgentConfig(
+        role="mktg_analytics",
+        display_name="Marketing Analyst",
+        model_tier="medium",
+        system_prompt_file="agents/prompts/mktg_analytics.md",
+        mcp_servers=["postgresql_mcp", "filesystem_mcp"],
+        approval_tier=0,
+        description="Reviews metrics and telemetry to feed quantitative data back into the strategy loop.",
+    ),
+    "mktg_distributor": AgentConfig(
+        role="mktg_distributor",
+        display_name="Content Distributor",
+        model_tier="cheap",
+        system_prompt_file="agents/prompts/mktg_distributor.md",
+        mcp_servers=["slack_mcp", "telegram_mcp"],
+        approval_tier=4, # High security check before API payload dispatch
+        description="Formats content for specific APIs and dispatches the final payloads.",
+    ),
 }
 
 
