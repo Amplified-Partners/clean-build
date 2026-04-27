@@ -147,6 +147,8 @@
 | `drafter.py` | 150 | Draft response generation via Claude |
 | `config.py` | 101 | Email account config, confidence thresholds |
 | `status.py` | 88 | Status reporting |
+| `main.py` | 47 | CLI entry point |
+| `__init__.py` | 1 | Package init |
 
 **Also in vault:** `gmail_automation.py` (130 lines) — simpler Gmail triage script using Google API directly. Predecessor to the email agent module.
 
