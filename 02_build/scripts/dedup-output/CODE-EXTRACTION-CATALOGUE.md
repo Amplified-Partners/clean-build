@@ -4,6 +4,7 @@
 **Signed-by:** Devon (Devin) | Session `7cd95caf339c46a2896fbf6ffbda02be`
 **Scope:** All code files in `corpus-raw/vault/` and `clean-build/02_build/`
 **Method:** Read every code file. Assessed function, completeness, and whether it's the best version. Separated signal from noise.
+**Note:** All `corpus-raw/vault/` paths are `[SOURCE REQUIRED]` — verify against the `corpus-raw` repo (`devon/initial-corpus-dump` branch). Clean-build paths verified in-repo.
 
 ---
 
