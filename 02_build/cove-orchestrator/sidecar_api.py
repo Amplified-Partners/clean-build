@@ -5,6 +5,8 @@ from pydantic import BaseModel
 from temporalio.client import Client
 from temporal.workflows.sidecar_workflow import SidecarPickToLightWorkflow
 from temporal.workflows.dogfood_workflow import CouncilWorkflow
+import os
+import glob
 
 app = FastAPI(title="Sidecar Headless API")
 
@@ -84,5 +86,50 @@ async def consult_council(request: CouncilRequest):
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+class VaultSearchRequest(BaseModel):
+    query: str
+
+@app.post("/vault/search")
+async def search_vault(request: VaultSearchRequest):
+    """
+    Provides a searchable interface to the local markdown 'Vault'.
+    """
+    clean_build_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
+    corpus_raw_dir = os.path.abspath(os.path.join(clean_build_dir, "../corpus-raw"))
+    perplexity_export_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../perplexity-ai-export/exports"))
+    search_dirs = [clean_build_dir, corpus_raw_dir, perplexity_export_dir]
+    
+    results = []
+    query_lower = request.query.lower()
+    
+    for base_dir in search_dirs:
+        if not os.path.exists(base_dir):
+            continue
+        for root, dirs, files in os.walk(base_dir):
+            # Skip program files, only search the knowledge base
+            if "02_build" in root or ".git" in root or "node_modules" in root or "flat_surface" in root:
+                continue
+            for file in files:
+                if file.endswith(".md") or file.endswith(".txt"):
+                    filepath = os.path.join(root, file)
+                    try:
+                        with open(filepath, 'r', encoding='utf-8') as f:
+                            content = f.read()
+                            if query_lower in content.lower():
+                                idx = content.lower().find(query_lower)
+                                start = max(0, idx - 60)
+                                end = min(len(content), idx + 120)
+                                snippet = content[start:end].replace('\n', ' ')
+                                # Format for UI
+                                results.append({
+                                    "file": file,
+                                    "path": filepath.replace(os.path.abspath(os.path.join(clean_build_dir, "..")), ""),
+                                    "snippet": f"...{snippet}..."
+                                })
+                    except Exception:
+                        continue
+                    
+    return {"status": "success", "results": results[:30]}
 
 # Run with: uvicorn sidecar_api:app --reload --port 8001
