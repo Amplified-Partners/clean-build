@@ -136,7 +136,7 @@ Signed-by: Devon (Devin session `aa4d863ad679468692e75a40b8825358`) — 2026-04-
 - Added `00_authority/TAXONOMY.md` to **Authoritative now**: canonical entity definitions (company structure, agent roster, locked terminology, operating model). Covers the Amplified Partners entity hierarchy, Devon/OpenClaw/Cursor roles, and terminology that was previously only in session chat.
 - Frontmatter `date` advanced to 2026-04-29.
 
-Signed-by: Devon (Devin) | 2026-04-29
+Signed-by: Devon (Devin session unknown — committed on main before this PR) | 2026-04-29
 
 ### v35 — 2026-04-23
 

@@ -95,7 +95,7 @@ The principle: one person does one thing. Clean boundaries. No stepping on each 
 ## What is not decided yet (as of 2026-04-29)
 
 - `[DECISION REQUIRED]` — Legal registration of Amplified Partners Ltd. Required before Google My Business can be set up under the brand.
-- `[DECISION REQUIRED]` — The confirmed product name for Amplified Personal (content captured in `PERSONAL-VAULT.md`; name deferred by Ewan).
+- `[DECISION REQUIRED]` — The confirmed product name for Amplified Personal (content captured in `ground-truth/PERSONAL-VAULT.md` `[SOURCE REQUIRED — not in this repo]`; name deferred by Ewan).
 - `[LOGIC TO BE CONFIRMED]` — Legal sub-entity structure for each department/product (currently all functions of one entity).
 
 ---
