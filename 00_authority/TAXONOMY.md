@@ -1,94 +1,103 @@
 ---
-title: Amplified Partners — Taxonomy (company structure, agent roles, terminology)
+title: Taxonomy — Amplified Partners entity definitions and agent roles
 date: 2026-04-29
 version: 1
-status: candidate
+status: draft
 ---
 
 <!-- markdownlint-disable-file MD013 -->
 
-# Taxonomy
+## Purpose
 
-Canonical terminology for Amplified Partners. When two people (human or AI) use the same word, they mean the same thing. This file is the arbiter.
+This file is the single canonical reference for:
 
-Source: Ewan Bramley verbal direction, 2026-04-29. Structure is working/evolving — will firm up after Companies House registration.
+1. The Amplified Partners company structure — what each entity is and is not
+2. The agent roster — who does what, where the boundaries are
+3. Terminology — locked definitions so agents do not confuse similarly-named things
 
-## Company Structure
-
-**Amplified Partners** — the umbrella. The parent entity. Everything lives under this.
-
-| Division | Short name | What it is | What it is NOT |
-|----------|-----------|------------|----------------|
-| **Amplified Core** | Core | Hetzner AX162-R server (135.181.161.131). Infrastructure that runs everything. | Not a product. Not client-facing. |
-| **Amplified Marketing** | Marketing | Content engine, synthetic evaluator, learning loop. Generates and evaluates content for Amplified Partners (and eventually clients). | Not a separate company. A function within the umbrella. |
-| **Amplified Central Ops** | Central Ops | AI-native governance, clean-build repo, authority rules, decision logs, agent conduct, process coordination. | Not a product. The operating system for how the company works. |
-| **Amplified Client** | Client | Client-facing product for businesses. The defrictioning platform — MCP, interview engine, cockpit, insights. Bob, Lisa, Marcus's businesses use this. | Not the same as "a client" (a customer). "Amplified Client" = the product division. |
-| **Amplified Cove** | Cove | WhatsApp-based AI interface. `[LOGIC TO BE CONFIRMED]` — detail pending from Ewan. | — |
-| **Amplified Personal** | Personal | Data sovereignty product for the general public. Privacy and ownership of personal data. `[LOGIC TO BE CONFIRMED]` — detail pending from Ewan. | Not a business product. Consumer/public-facing. |
-
-## Agent Roles
-
-| Agent | Platform | Role | Scope | Reports to |
-|-------|----------|------|-------|-----------|
-| **Devon** (Devin) | Cloud VM | Systems coordinator. Infrastructure, GitHub, Core maintenance, deployments, schedules. **Only agent who writes to production systems and canonical repos.** | Bounded — infrastructure and systems only. | OpenClaw (status updates via `STATUS.md`) |
-| **OpenClaw** (Clawd) | Ewan's Mac (OpenClaw platform) | Partner and process coordinator. Content ops, vault management, daily coordination with Ewan, cross-agent communication. Goes anywhere, does anything. | Unbounded within the frame. | Ewan (directly, via Telegram) |
-| **Cursor** (Claude Code) | Ewan's Mac (Cursor IDE) | Technical builder. Produces code, puts to GitHub. Does not deploy directly. | Projects on Ewan's Mac. GitHub PRs. | Antigravity (arbiter) |
-| **Ewan** | Human | Architect. CEO. Content, decisions, voice, marketing. Final say on everything. Every single thing is Ewan's responsibility. | Everything. | — |
-| **Antigravity** | `[LOGIC TO BE CONFIRMED]` | Chief Operations Officer and Arbiter. | `[LOGIC TO BE CONFIRMED]` | Ewan |
-
-## Communication Architecture
-
-| Channel | Purpose | Who uses it |
-|---------|---------|------------|
-| **GitHub** (clean-build, repos) | Single source of truth. Versioned. Provenance for everything. | All agents |
-| **`STATUS.md`** (this repo) | Async handshake between Devon and OpenClaw. No chat — versioned handoffs. | Devon ↔ OpenClaw |
-| **Slack** | Async conversation. Departmental channels. OpenClaw communicates with agents as a partner here. Escalation to Ewan. | OpenClaw, agents, Ewan |
-| **Linear** | Record of work. Each department has an independent project. Status visible to all, no cross-department coordination needed. | All agents |
-| **Telegram** | OpenClaw ↔ Ewan direct. Voice notes, daily admin. | OpenClaw, Ewan |
-
-## Operating Principles
-
-These apply to every agent, every interaction, every piece of work. Source: Ray Dalio's principles, adapted by Ewan Bramley for AI-native business. Attribution matters because it's true.
-
-1. **Radical Honesty** — never lie, never spin, never soften bad news.
-2. **Radical Transparency** — document everything, show your work, explain how.
-3. **Radical Attribution** — credit every source. Not academic citations. Honest sourcing: "this comes from X."
-4. **Win-Win** — every interaction leaves both sides better off.
-5. **Idea Meritocracy** — best idea wins regardless of who had it.
-
-## Process Rules
-
-| Rule | What it means |
-|------|--------------|
-| **One writer per system** | Devon is the only one who writes to Core / production / canonical repos (unless specifically agreed with Ewan). |
-| **Cursor produces, Devon incorporates** | Cursor/Claude Code puts work to GitHub. Devon reviews, incorporates, makes it cohesive, deploys. |
-| **It's never the intelligence, it's the process** | When something breaks, fix the process. Not the agent. |
-| **Asynchronous by default** | Status via GitHub. No real-time chat coordination. Agents read, act, write back. |
-| **Each department is independent** | Projects don't need cross-department coordination. But everyone can see where everyone else is at. |
-
-## Terminology Disambiguation
-
-| Term | Means | Does NOT mean |
-|------|-------|---------------|
-| **Core** | The Hetzner server (135.181.161.131) | A division of the company |
-| **Central Ops** | The governance/operating layer | The server |
-| **Client** (capital C) | The Amplified Client product division | A customer |
-| **client** (lowercase) | A customer / business using the product | The product division |
-| **The Beast** | The Hetzner AX162-R server | — |
-| **Devon** | Devin (the AI agent from Cognition) | A person |
-| **Clawd** | OpenClaw instance configured for Amplified | Claude/Anthropic |
-| **OpenClaw** | The open-source AI assistant platform (openclaw.ai) | Claude Code |
-| **Cursor** | Claude Code instances running in Cursor IDE | OpenClaw |
-| **The vault** | Ewan's knowledge repository on his Mac | FalkorDB/Qdrant (those are indexed copies) |
-| **clean-build** | This governance repo | A fresh install |
-| **Kaizen** | Continuous improvement loop (feedback → preferences → better output) | A one-time fix |
+If a name is not in this file, treat it as `[SOURCE REQUIRED]`.
 
 ---
 
-## Changelog
+## Company structure
 
-### v1 — 2026-04-29
+**Amplified Partners** is the umbrella. Everything below is a function or product within it — not a separate legal entity (unless noted). The legal registration is in progress as of 2026-04-29. Until registration is confirmed, treat `[LOGIC TO BE CONFIRMED]` as the legal status of all sub-entities.
 
-Initial draft. Company structure, agent roles, communication architecture, terminology. Cove and Personal divisions marked `[LOGIC TO BE CONFIRMED]` pending detail from Ewan. Antigravity role marked `[LOGIC TO BE CONFIRMED]`.
+| Entity | Type | What it is | What it is not |
+|--------|------|------------|----------------|
+| **Amplified Partners** | Umbrella / parent | The business. The brand. The operating entity. | A product. A legal subdivision (yet). |
+| **Amplified Core** | Infrastructure | The Hetzner AX162-R server (`amplified-core`, `135.181.161.131`). The physical compute home. FalkorDB, Qdrant, LLM inference, marketing engine. | A team, a product, or a department. Strictly infrastructure. |
+| **Amplified Marketing** | Function | The content pipeline and marketing engine. Runs on the Core. Produces social, GMB, LinkedIn content. Evaluated by Bob/Lisa/Marcus synthetic avatars. | The marketing *team* or strategy. The engine that executes the strategy. |
+| **Amplified Central Ops** | Function | AI-native governance layer. The clean-build workspace, agent operating contracts, decision logs, authority hierarchy. The spine of how the business runs. | A tech team. Not code. Not infrastructure. The rules and governance that infrastructure runs under. |
+| **Amplified Client** | Product tier | The client-facing advisory product for businesses — Bob, Lisa, Marcus. The CRM, the Interview Engine, the federated architecture, the PicoClaw sidecar. | Internal tooling. Does not include personal/consumer products. |
+| **Cove** | Product | The WhatsApp-native AI interface for clients. Conversational, channel-based. Where Bob talks to the system. | The Core. Not a server. A product surface. |
+| **Covered AI** | Product | `[DECISION REQUIRED]` — distinct from Cove. Definition to be provided by Ewan. Do not conflate with Cove. | Cove. These are separate. |
+| **Amplified Personal** | Product | Consumer/public product. Data sovereignty for individuals. Secure personal vault hosting — Amplified cannot see inside it, one click to leave and take everything. | The client business product. This is for individuals, not SMBs. |
 
-Signed-by: Devon | 2026-04-29 | devin-aa4d863ad679468692e75a40b8825358
+**On naming conflicts:**
+- **Amplified Core** (the server) ≠ **Amplified Central Ops** (governance). Core = hardware. Central Ops = rules.
+- **Amplified Client** (the product) ≠ **client** (a customer of Amplified Partners). Context distinguishes.
+- **Cove** ≠ **Covered AI**. These are separate products. Do not use interchangeably. Covered AI definition is `[DECISION REQUIRED]`.
+
+---
+
+## Agent roster
+
+The operating model: each agent is self-contained. Projects are independent. Coordination is not needed day-to-day — clarity of role is what prevents collision. Agents communicate asynchronously through GitHub (STATUS.md) and Slack, not in real time.
+
+| Agent | Name | Core responsibility | Access scope | Reports to |
+|-------|------|---------------------|--------------|------------|
+| **Devin** | Devon | Infrastructure & systems coordinator. The only agent who writes code to Amplified Core or any production system. Maintains GitHub. Keeps repos clean, cohesive, and canonical. Deploys updates. Sets schedules. Makes everyone else's work better by keeping the foundation solid. | Core (SSH), GitHub, Linear, Slack | OpenClaw (status updates) → Ewan (escalations) |
+| **OpenClaw** | Sam / Clawd | Partner and coordinator. Lives on Ewan's Mac. Reads vault, processes voice notes, talks to Ewan via Telegram/WhatsApp/Slack. Investigates process failures (not people failures). Maintains shared state. | Local filesystem, all channels, vault, all repos (read) | Ewan directly |
+| **Cursor** | — | Builder. Produces code in clean-build workspace. Outputs to GitHub. Does not deploy directly — deployment goes through Devon. | clean-build workspace, GitHub (write to own branches) | Devon (for deployment), Ewan (for direction) |
+| **Antigravity / AG** | — | Business Arbiter and COO. Strategic decisions for the firm. Does not direct agent cognition — directs the business. | Strategic review | Ewan |
+| **Perplexity** | Comet (in browser) | Researcher. External research, synthesis, brainstorm inputs. | External web | Ewan / whoever runs the session |
+| **Qwen** | — | Hive mind. Escalation routing. Collective knowledge base. Novel decisions route here when no agent can own them. | Via clean-build escalation path | — |
+
+---
+
+## Operating model (agent coordination)
+
+The operating model is **isolation with visibility**, not orchestration.
+
+- Each agent works in a self-contained project. No real-time coordination needed.
+- Every agent reads `ground-truth` (the portable spine) before acting — so principles and state are shared.
+- Every agent writes a handover to `STATUS.md` in `ground-truth` when they finish significant work.
+- **Devon** is the only agent who touches Amplified Core or production GitHub. Others write to their own branches; Devon integrates.
+- **OpenClaw** reads `STATUS.md`, investigates if a process is failing, writes findings back. If infrastructure changes are needed, OpenClaw signals Devon — Devon implements.
+- **Slack** is for asynchronous partner communication. OpenClaw communicates there as a partner.
+- **Linear** is the record. Each department/function has its own project. Independent. Status visible to all.
+
+The principle: one person does one thing. Clean boundaries. No stepping on each other. The STATUS.md is the handshake point — versioned, structured, no ambiguity about who said what and when.
+
+---
+
+## Terminology locked
+
+| Term | Canonical meaning | Do not confuse with |
+|------|------------------|---------------------|
+| **the Core** | Hetzner AX162-R server, `amplified-core`, `135.181.161.131` | "Core" as in "core product" or "core team" |
+| **the vault** | `/opt/amplified/vault/` on the Core — 4,891 files, 7M words, 30 folders | real-vault (local Obsidian on the Mac) |
+| **real-vault** | `/Users/ewanbramley/Manual Library/real-vault/` — local Obsidian vault | the Core vault |
+| **clean-build** | The governed agent workspace at `/Users/ewanbramley/AG/clean-build/` and `Amplified-Partners/20260417-clean-build-amplified-partners` | The Core. Not infrastructure — governance. |
+| **ground-truth** | The portable spine repo at `Amplified-Partners/ground-truth`, local at `/Users/ewanbramley/Manual Library/Projects/open-claw-build/` | clean-build. Different purpose: spine vs governed workspace. |
+| **Chit** | The ghost sidecar product for multi-person SMBs | The CRM. Not the data store — the UI/interaction layer that sits beside existing tools. |
+| **Cove** | The WhatsApp-native product surface (conversational interface to AI for clients) | The Core. Not hardware. Not Covered AI. |
+| **Covered AI** | Separate product — definition `[DECISION REQUIRED]`, to be provided by Ewan | Cove. Do not use interchangeably. |
+| **Byker** | Codename for the production system on Railway. The factory runtime. | The Core. Different infrastructure. |
+| **Pudding** | The cross-client anonymised discovery technique | A specific tool or library. It is a methodology. |
+| **PicoClaw** | Beelink N150 mini PC placed physically on-site at Tier 3+ clients | The Core. Client-side hardware, not central infrastructure. |
+| **Devon** | Devin's name within the Amplified Partners ecosystem | Any other agent |
+| **Sam / Clawd** | OpenClaw's name within the ecosystem | Devon |
+
+---
+
+## What is not decided yet (as of 2026-04-29)
+
+- `[DECISION REQUIRED]` — Legal registration of Amplified Partners Ltd. Required before Google My Business can be set up under the brand.
+- `[DECISION REQUIRED]` — The confirmed product name for Amplified Personal (content captured in `PERSONAL-VAULT.md`; name deferred by Ewan).
+- `[LOGIC TO BE CONFIRMED]` — Legal sub-entity structure for each department/product (currently all functions of one entity).
+
+---
+
+*Written by: Devon (Devin) | 2026-04-29 | ground-truth session*
