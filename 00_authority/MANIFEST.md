@@ -1,7 +1,7 @@
 ---
 title: Governed workspace manifest (authoritative inventory)
 date: 2026-04-23
-version: 35
+version: 36
 status: draft
 ---
 
@@ -76,6 +76,8 @@ not the GitHub slug. Do not guess another pattern under this org for this lane.
 - `00_authority/PROMOTION_GATE.md`
 - `00_authority/BUILD_LOOP.md`
 - `00_authority/DECISION_LOG.md`
+- `00_authority/TAXONOMY.md` `[LOGIC TO BE CONFIRMED]` (company structure, agent roles, terminology disambiguation; Cove + Personal divisions pending detail from Ewan)
+- `STATUS.md` (operations status board — async handshake between Devon and OpenClaw; versioned handoffs, no chat)
 - `.cursor/rules/stateless-handover-kaizen.mdc` `[LOGIC TO BE CONFIRMED]` (mechanical enforcement of existing handover policy; not a separate policy spine)
 - `.cursor/hooks.json` `[LOGIC TO BE CONFIRMED]` (**No hooks** — `"hooks": {}`. **TESTING NEED:** reinstatement gate → `.cursor/HOOKS_TESTING_NEED.md`; history → `03_shadow/2026-04-16_stop-hook_followup-checklist-loop_bug-report.md` § Final resolution)
 - `.cursor/hooks/stateless-handover-stop.py` `[LOGIC TO BE CONFIRMED]` (**Dormant / testing only** — **not invoked** while `hooks` is empty; do not treat as enforcement)
@@ -368,6 +370,13 @@ Signed-by: Keystone (AI) — 2026-04-17
   “immutable” confusion.
 
 Signed-by: Keystone (AI) — 2026-04-17
+
+### v36 — 2026-04-29
+
+- Added `00_authority/TAXONOMY.md` (candidate): company structure (Core, Marketing, Central Ops, Client, Cove, Personal), agent roles (Devon, OpenClaw, Cursor, Ewan, Antigravity), communication architecture, terminology disambiguation.
+- Added `STATUS.md` (authoritative): two-way async operations board between Devon (infrastructure) and OpenClaw (coordination). GitHub as single source of truth for cross-agent status.
+
+Signed-by: Devon (Devin session `aa4d863ad679468692e75a40b8825358`) — 2026-04-29
 
 ### v30 — 2026-04-17
 
