@@ -37,15 +37,23 @@ def list_collections() -> list[dict[str, Any]]:
     result = []
     for col in collections:
         info = client.get_collection(col.name)
+        vector_size = None
+        try:
+            vparams = info.config.params.vectors
+            if hasattr(vparams, "size"):
+                vector_size = vparams.size
+            elif isinstance(vparams, dict):
+                first = next(iter(vparams.values()), None)
+                if first and hasattr(first, "size"):
+                    vector_size = first.size
+        except Exception:
+            pass
+
         result.append({
             "name": col.name,
             "points_count": info.points_count,
-            "vectors_count": info.vectors_count,
-            "vector_size": (
-                info.config.params.vectors.size
-                if hasattr(info.config.params.vectors, "size")
-                else None
-            ),
+            "vectors_count": getattr(info, "vectors_count", info.points_count),
+            "vector_size": vector_size,
             "status": info.status.value if info.status else "unknown",
         })
     return result
