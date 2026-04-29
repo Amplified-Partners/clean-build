@@ -1,7 +1,7 @@
 ---
 title: Governed workspace manifest (authoritative inventory)
-date: 2026-04-23
-version: 35
+date: 2026-04-29
+version: 36
 status: draft
 ---
 
@@ -63,6 +63,7 @@ not the GitHub slug. Do not guess another pattern under this org for this lane.
 
 - `AGENTS.md`
 - `00_authority/AGENTS.md`
+- `00_authority/TAXONOMY.md` (entity definitions, agent roles, locked terminology — company structure, operating model)
 - `00_authority/README.md`
 - `00_authority/MANIFEST.md`
 - `00_authority/NORTH_STAR.md`
@@ -122,6 +123,13 @@ not the GitHub slug. Do not guess another pattern under this org for this lane.
   - `90_archive/context/2026-04-16_operator-voice-capsule_ewan.md` `[NARRATIVE] [NON-AUTHORITATIVE]` (human operator voice; not policy)
 
 ## Changelog
+
+### v36 — 2026-04-29
+
+- Added `00_authority/TAXONOMY.md` to **Authoritative now**: canonical entity definitions (company structure, agent roster, locked terminology, operating model). Covers the Amplified Partners entity hierarchy, Devon/OpenClaw/Cursor roles, and terminology that was previously only in session chat.
+- Frontmatter `date` advanced to 2026-04-29.
+
+Signed-by: Devon (Devin) | 2026-04-29
 
 ### v35 — 2026-04-23
 
