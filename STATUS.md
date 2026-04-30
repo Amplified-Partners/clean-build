@@ -24,11 +24,11 @@ Two-way async handshake between Devon (infrastructure) and OpenClaw (coordinatio
 
 ## Current Infrastructure State
 
-**Full inventory → [`02_build/INFRASTRUCTURE.md`](02_build/INFRASTRUCTURE.md)** — single source of truth for all 39 containers, scheduled jobs, compose file locations, and server specs.
+**Full inventory → [`02_build/INFRASTRUCTURE.md`](02_build/INFRASTRUCTURE.md)** — single source of truth for all 40 containers, scheduled jobs, compose file locations, and server specs.
 
 Quick summary (2026-04-30):
-- **39 containers** total on Amplified Core (135.181.161.131)
-- **34 running**, **2 paused/stopped intentionally**, **3 one-time init containers (exited)**
+- **40 containers** total on Amplified Core (135.181.161.131)
+- **37 running**, **1 paused intentionally** (ch-pipeline), **2 stopped** (minio-init one-time, voice-pipeline exited 6 weeks)
 - **ch-pipeline paused** by Ewan (2026-04-30) — Companies House data preserved, not ready for production
 - **voice-pipeline stopped** — exited 6 weeks ago
 - Kaizen cron jobs now scheduled (Internal: weekly Sunday 5am, External: monthly 1st 5am)
@@ -74,7 +74,7 @@ Signed-by: Devon | 2026-04-29 | devin-aa4d863ad679468692e75a40b8825358
 
 ### v2 — 2026-04-30
 
-- Infrastructure state section replaced with pointer to `02_build/INFRASTRUCTURE.md` (canonical, complete inventory of all 39 containers).
+- Infrastructure state section replaced with pointer to `02_build/INFRASTRUCTURE.md` (canonical, complete inventory of all 40 containers).
 - Scheduled jobs and API auth sections removed from STATUS.md — now live in the infrastructure manifest.
 - ch-pipeline paused by Ewan; voice-pipeline noted as stopped.
 

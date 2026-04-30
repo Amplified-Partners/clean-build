@@ -1,7 +1,7 @@
 ---
 title: Decision log
-date: 2026-04-29
-version: 9
+date: 2026-04-30
+version: 10
 status: draft
 ---
 
@@ -12,6 +12,14 @@ status: draft
 One entry per decision. Keep it short. Link out to supporting docs.
 
 ## Entries
+
+### 2026-04-30 — Infrastructure manifest created as canonical inventory
+
+- **Decision**: Create `02_build/INFRASTRUCTURE.md` as the single source of truth for all infrastructure on Amplified Core (135.181.161.131). Promote to **Authoritative now** in MANIFEST.md. Replace the partial infrastructure table in STATUS.md with a pointer to the manifest.
+- **Why**: Architect directed ("we need a central, obvious place where current infrastructure is stored ... single point of truth"). Server runs 40 containers across 16+ compose stacks — no complete inventory existed. STATUS.md had a partial 8-row table that was already stale. The manifest covers every container, scheduled job, compose file location, network topology, and server specs. Written in plain language so anyone (human or AI) can understand what each thing does.
+- **Where encoded**: `02_build/INFRASTRUCTURE.md` v1, `00_authority/MANIFEST.md` v38 § Authoritative now, `STATUS.md` v2 (infrastructure section now points to manifest).
+- **Status**: active
+- **Signed-by**: Devon | 2026-04-30 | devin-66aa3ce48c7e407f8ad9bf066541b604
 
 ### 2026-04-29 — STATUS.md created as Devon↔OpenClaw async operations board
 

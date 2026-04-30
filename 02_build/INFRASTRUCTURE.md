@@ -185,6 +185,6 @@ Source: `/root/cove-repo/infrastructure/`
 
 ### v1 — 2026-04-30
 
-Infrastructure manifest created. Full audit of all 39 containers on Amplified Core server. ch-pipeline paused (data preserved). voice-pipeline noted as stopped (6 weeks).
+Infrastructure manifest created. Full audit of all 40 containers on Amplified Core server. ch-pipeline paused (data preserved). voice-pipeline noted as stopped (6 weeks).
 
 Signed-by: Devon | 2026-04-30 | devin-66aa3ce48c7e407f8ad9bf066541b604

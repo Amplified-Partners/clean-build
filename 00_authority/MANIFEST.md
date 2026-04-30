@@ -78,7 +78,7 @@ not the GitHub slug. Do not guess another pattern under this org for this lane.
 - `00_authority/BUILD_LOOP.md`
 - `00_authority/DECISION_LOG.md`
 - `STATUS.md` (operations status board — async handshake between Devon and OpenClaw; versioned handoffs, no chat)
-- `02_build/INFRASTRUCTURE.md` (canonical infrastructure manifest — single source of truth for all containers, services, scheduled jobs, and server specs on Amplified Core)
+- `02_build/INFRASTRUCTURE.md` (canonical infrastructure manifest — single source of truth for all 40 containers, services, scheduled jobs, and server specs on Amplified Core)
 - `.cursor/rules/stateless-handover-kaizen.mdc` `[LOGIC TO BE CONFIRMED]` (mechanical enforcement of existing handover policy; not a separate policy spine)
 - `.cursor/hooks.json` `[LOGIC TO BE CONFIRMED]` (**No hooks** — `"hooks": {}`. **TESTING NEED:** reinstatement gate → `.cursor/HOOKS_TESTING_NEED.md`; history → `03_shadow/2026-04-16_stop-hook_followup-checklist-loop_bug-report.md` § Final resolution)
 - `.cursor/hooks/stateless-handover-stop.py` `[LOGIC TO BE CONFIRMED]` (**Dormant / testing only** — **not invoked** while `hooks` is empty; do not treat as enforcement)
@@ -132,7 +132,7 @@ not the GitHub slug. Do not guess another pattern under this org for this lane.
 
 ### v38 — 2026-04-30
 
-- Added `02_build/INFRASTRUCTURE.md` to **Authoritative now**: canonical infrastructure manifest for the Core server. Full inventory of all 39 containers, scheduled jobs, compose file locations, network topology, and server specs. Replaces the partial infrastructure table that was in `STATUS.md`.
+- Added `02_build/INFRASTRUCTURE.md` to **Authoritative now**: canonical infrastructure manifest for the Core server. Full inventory of all 40 containers, scheduled jobs, compose file locations, network topology, and server specs. Replaces the partial infrastructure table that was in `STATUS.md`.
 - `STATUS.md` infrastructure section now points to `02_build/INFRASTRUCTURE.md` instead of maintaining a separate partial list.
 
 Signed-by: Devon | 2026-04-30 | devin-66aa3ce48c7e407f8ad9bf066541b604
