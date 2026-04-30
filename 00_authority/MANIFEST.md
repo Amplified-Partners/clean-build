@@ -122,7 +122,8 @@ not the GitHub slug. Do not guess another pattern under this org for this lane.
   - `90_archive/2026-03_amplified-consolidated-architecture_full.txt` `[NON-AUTHORITATIVE]`
   - `90_archive/context/README.md` `[NON-AUTHORITATIVE]` (context folder convention)
   - `90_archive/context/2026-04-16_operator-voice-capsule_ewan.md` `[NARRATIVE] [NON-AUTHORITATIVE]` (human operator voice; not policy)
-  - `90_archive/specifications/mac-drop-2026-04/` `[NON-AUTHORITATIVE]` (15 major specifications from Ewan's Mac drop — constitutional documents, architectural specs, methodology references. Source: "New Folder With Items 2.zip", 521 files, 125MB. See `90_archive/specifications/mac-drop-2026-04/README.md` for full index.)
+  - `90_archive/specifications/mac-drop-2026-04/` `[NON-AUTHORITATIVE]` (15 major specifications from Ewan's Mac drop — constitutional documents, architectural specs, methodology references. Source: "New Folder With Items 2.zip", 521 files, 125MB.)
+    - `README.md` `[NON-AUTHORITATIVE]` (directory index — ingestion context, file inventory, promotion path)
     - `ATTRIBUTION-AND-CURATION-v1.md` `[NON-AUTHORITATIVE]` (965 lines — data provenance law + 5 Curator agents; status in source: "Constitutional — Active")
     - `VALIDATION-METHODOLOGY-v2.md` `[NON-AUTHORITATIVE]` (1,370 lines — 7 gates, 11 rubrics, 10 Enforcers, 12 lenses; status in source: "Draft — ready for implementation")
     - `CODE-TAXONOMY-AND-KAIZEN-v1.md` `[NON-AUTHORITATIVE]` (1,069 lines — error registry + code taxonomy + Kaizen department; status in source: "Constitutional — Active")

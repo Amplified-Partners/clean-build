@@ -15,7 +15,7 @@ created_by: Devon (Devin session aa4d863ad679468692e75a40b8825358)
 
 15 major specifications extracted from the Mac drop. These represent months of architectural thinking that was previously only on Ewan's Mac — not in the vault, not in GitHub, not discoverable by any agent.
 
-### Constitutional Documents (The Five Pillars)
+### Constitutional Documents & Conventions (The Seven Pillars)
 
 These form an interlocking system. They reference each other and are designed to be read together.
 
