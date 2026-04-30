@@ -44,7 +44,7 @@ This is `03_shadow/` material — not authoritative. Intended for Ewan's review 
 - **No GPU.** Ollama runs on CPU. Video rendering and inference share the same compute pool.
 - Hostname: `amplified-core` · IP: `135.181.161.131`
 
-### What's running (38 containers, 36 healthy)
+### What's running (38 containers; 9 with health checks passing, 1 unhealthy)
 
 **Do not rebuild any of these — extend or call them.**
 
@@ -114,7 +114,7 @@ This is `03_shadow/` material — not authoritative. Intended for Ewan's review 
 | `agent-service-toolkit/` | 7,743 | LangGraph agent framework fork (JoshuaC215). **Use this when LangGraph migration triggers.** |
 | `vault-to-qdrant.py` | 418 | Monitors `.md` changes, chunks, embeds, upserts. Pattern for any new ingestion. |
 
-**Vault:** `/opt/amplified/vault/` — 4,755 files across 25 directories.
+**Vault:** `/opt/amplified/vault/` — 4,891 files across 32 top-level directories (verified via Beast SSH, 2026-04-30).
 
 ### CRM codebase (`Amplified-Partners/crm`)
 
