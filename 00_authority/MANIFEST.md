@@ -122,6 +122,10 @@ not the GitHub slug. Do not guess another pattern under this org for this lane.
   - `90_archive/2026-03_amplified-consolidated-architecture_full.txt` `[NON-AUTHORITATIVE]`
   - `90_archive/context/README.md` `[NON-AUTHORITATIVE]` (context folder convention)
   - `90_archive/context/2026-04-16_operator-voice-capsule_ewan.md` `[NARRATIVE] [NON-AUTHORITATIVE]` (human operator voice; not policy)
+  - `90_archive/beautiful-and-golden/` `[NON-AUTHORITATIVE]` (archived architecture docs from the beautiful-and-golden sibling repo, preserved before tombstoning)
+    - `90_archive/beautiful-and-golden/ARCHITECTURE.md` `[NON-AUTHORITATIVE]`
+    - `90_archive/beautiful-and-golden/PUBLIC_README.md` `[NON-AUTHORITATIVE]`
+    - `90_archive/beautiful-and-golden/SUSTAINABILITY.md` `[NON-AUTHORITATIVE]`
   - `90_archive/specifications/mac-drop-2026-04/` `[NON-AUTHORITATIVE]` (15 major specifications from Ewan's Mac drop — constitutional documents, architectural specs, methodology references. Source: "New Folder With Items 2.zip", 521 files, 125MB.)
     - `README.md` `[NON-AUTHORITATIVE]` (directory index — ingestion context, file inventory, promotion path)
     - `ATTRIBUTION-AND-CURATION-v1.md` `[NON-AUTHORITATIVE]` (965 lines — data provenance law + 5 Curator agents; status in source: "Constitutional — Active")
@@ -181,6 +185,18 @@ Signed-by: Devon (Devin session `aa4d863ad679468692e75a40b8825358`) — 2026-04-
 - Frontmatter `date` advanced to 2026-04-29.
 
 Signed-by: Devon (Devin session unknown — committed on main before this PR) | 2026-04-29
+
+### v36-pre (archive beautiful-and-golden) — 2026-04-26
+
+- Indexed new `90_archive/beautiful-and-golden/` entries (3 files: `ARCHITECTURE.md`, `PUBLIC_README.md`, `SUSTAINABILITY.md`) under "Reference only". Archived from sibling repo before tombstoning.
+
+Signed-by: Devon (Devin session `devin-ab66d8a5c2b64927b65a4ab87acc47ee`) — 2026-04-26
+
+### v36-pre (bibliography fix) — 2026-04-23
+
+- Bibliography fix follow-up to v35: root `AGENTS.md` section heading renamed from "Agent session (clean-build) — first 60 seconds" to "Agent session — first 60 seconds" created 5 dead cross-references. Updated all live references: `README.md`, `01_truth/README.md`, `00_authority/README.md` (bumped to v8), `00_authority/NORTH_STAR.md` (bumped to v12), `00_authority/PARTNER_TRANSFER_INSTRUCTIONS.md` (bumped to v10). `00_authority/DECISION_LOG.md` entry at line 65 is a historical record of the 2026-04-17 decision as-named-then; left intact per additive-edits rule.
+
+Signed-by: Devon (Devin session `4cc8b0d727684f94a8f055853099d8e6`) — 2026-04-23
 
 ### v35 — 2026-04-23
 
