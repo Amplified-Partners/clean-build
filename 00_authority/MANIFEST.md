@@ -138,6 +138,12 @@ Signed-by: Devon (Devin session `aa4d863ad679468692e75a40b8825358`) — 2026-04-
 
 Signed-by: Devon (Devin session unknown — committed on main before this PR) | 2026-04-29
 
+### v36-pre (bibliography fix) — 2026-04-23
+
+- Bibliography fix follow-up to v35: root `AGENTS.md` section heading renamed from "Agent session (clean-build) — first 60 seconds" to "Agent session — first 60 seconds" created 5 dead cross-references. Updated all live references: `README.md`, `01_truth/README.md`, `00_authority/README.md` (bumped to v8), `00_authority/NORTH_STAR.md` (bumped to v12), `00_authority/PARTNER_TRANSFER_INSTRUCTIONS.md` (bumped to v10). `00_authority/DECISION_LOG.md` entry at line 65 is a historical record of the 2026-04-17 decision as-named-then; left intact per additive-edits rule.
+
+Signed-by: Devon (Devin session `4cc8b0d727684f94a8f055853099d8e6`) — 2026-04-23
+
 ### v35 — 2026-04-23
 
 - `00_authority/SIGNATURES.md` bumped to v2: PR template reference fix (`.github/pull_request_template.md` now exists).
