@@ -16,3 +16,4 @@ __pycache__/
 .venv/
 node_modules/
 02_build/librarian-api/librarian.db
+02_build/.env
