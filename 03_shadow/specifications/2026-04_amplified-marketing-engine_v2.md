@@ -70,7 +70,7 @@ This is `03_shadow/` material — not authoritative. Intended for Ewan's review 
 
 | Container | Purpose |
 |-----------|---------|
-| `amplified-marketing-engine` | **Marketing Engine v0.4.0** — port 8000, 3-tier API auth (admin/pipeline/readonly). Full pipeline: research → generate → queue → evaluate → learn. |
+| `amplified-marketing-engine` | **Marketing Engine v0.4.0** — port 8000, 3-tier API auth (admin/pipeline/readonly). Full pipeline: research → generate → evaluate → queue → learn. |
 | `amplified-knowledge-mcp` | **MCP server for FalkorDB + Qdrant** — the canonical knowledge interface. Tools: `query_graph`, `search_vectors`, `ingest_knowledge`, `update_entity`, `tag_entity`, `archive_entity`, `get_audit_log`. **All knowledge ops route through here — do not write directly to FalkorDB or Qdrant.** |
 | `enforcer` | 10-min health checks. Currently flagging `ch-pipeline`, `voice-pipeline`, `minio-init`. |
 | `kaizen-optimizer` | Standalone Kaizen loop, running. |
@@ -91,7 +91,7 @@ This is `03_shadow/` material — not authoritative. Intended for Ewan's review 
 
 ### The live marketing pipeline
 
-**Pipeline:** `research → generate → queue → evaluate → learn`. Sequential cron, port 8000, 3-tier auth.
+**Pipeline:** `research → generate → evaluate → queue → learn`. Sequential cron, port 8000, 3-tier auth.
 
 - **Stage 1 — Research:** `agents/research_agent.py` (461 lines). Source: SearXNG (243+ sources). Grounding: Qdrant + FalkorDB via `amplified-knowledge-mcp`.
 - **Stage 2 — Content generation:** `agents/content_agent.py` (369 lines). Atomiser: `agents/content_atomizer.py` (317 lines) — pillar content → 5 platform variants. Routes through LiteLLM → llama3.1:8b currently.
@@ -137,7 +137,7 @@ This is `03_shadow/` material — not authoritative. Intended for Ewan's review 
 
 | Artifact | What it provides |
 |----------|-----------------|
-| **Layer 0 Amplified Laws** (`agents/prompts/layer0_laws.py`, authoritative: `00_authority/EIGHT_LAWS.md`) | 8 physically locked laws: (1) Don't Hurt Anyone, (2) HR Is Absolute, (3) No Telling People Off, (4) Radical Honesty, (5) Radical Transparency, (6) Ideas Meritocracy, (7) Radical Attribution, (8) Win-Win or Don't Play. **Kaizen cannot modify these.** |
+| **Layer 0 Amplified Laws** (`agents/prompts/layer0_laws.py`, `00_authority/EIGHT_LAWS.md` `[NOT YET INDEXED IN MANIFEST.md]`) | 8 physically locked laws: (1) Don't Hurt Anyone, (2) HR Is Absolute, (3) No Telling People Off, (4) Radical Honesty, (5) Radical Transparency, (6) Ideas Meritocracy, (7) Radical Attribution, (8) Win-Win or Don't Play. **Kaizen cannot modify these.** |
 | **APDS** (knowledge note) | 5-stage autonomous discovery: Harvest → Extract → Label → Match → Score. FalkorDB schema. Container architecture. |
 | **Pudding Technique** (knowledge note) | Swanson LBD adapted for business. Neutral taxonomy at ingestion, lens at query time. Mathematical validation (p < 0.001). |
 | **Three-Brain Isolation** (`01_truth/processes/`) | Amplified Brain / Per-Client Brain / Federated Brain. Privacy by architecture. |
@@ -152,7 +152,7 @@ This is `03_shadow/` material — not authoritative. Intended for Ewan's review 
 | Perplexity proposal | Amplified reality | Verdict |
 |--------------------|--------------------|---------|
 | Hetzner Beast with Docker, Ollama, vLLM, Qdrant, PostgreSQL, Redis, MinIO, Prometheus, Grafana | **Already running.** 38 containers (9 health checks passing, 1 unhealthy). Core has FalkorDB, Qdrant, LiteLLM, PostgreSQL, Redis, MinIO, SearXNG, Traefik, Ollama (70b + 8b + qwen3-coder + nomic-embed), Cove Temporal stack, knowledge-mcp, backups. Missing: Grafana (not yet configured). Prometheus config exists in `02_build/config/`. | Exists. Fill monitoring gap when pipeline is heavier. |
-| LangGraph state machine for orchestration | **Not yet implemented.** Current pipeline is sequential cron (research → generate → queue → evaluate → learn). LangGraph would add: conditional routing, parallel branches, human-in-the-loop breakpoints, state checkpointing. | **Genuine upgrade.** Worth building when pipeline complexity justifies it. |
+| LangGraph state machine for orchestration | **Not yet implemented.** Current pipeline is sequential cron (research → generate → evaluate → queue → learn). LangGraph would add: conditional routing, parallel branches, human-in-the-loop breakpoints, state checkpointing. | **Genuine upgrade.** Worth building when pipeline complexity justifies it. |
 | RAG grounding / "zero hallucination" | **Already running.** Qdrant (57K embeddings) + FalkorDB (9K nodes) feed the research agent. Content grounded against vault. | Exists. Perplexity overclaims "zero hallucination." Our deterministic sandwich is more honest. |
 | OCEAN personality profiling from social media | **Not implemented. Should not be.** Scraping social media for psychographic profiling violates GDPR/DPA 2018 and contradicts our Data Protection Architecture (Amplified never holds personal data). | **Reject as described.** See §Privacy-safe alternative below. |
 | VARK learning style detection | **Not implemented.** Interesting for content adaptation but the ANN-based approach Perplexity describes requires individual-level data we don't hold. | **Reject individual profiling. Adapt the concept** — see §Content adaptation below. |
@@ -179,7 +179,7 @@ This is `03_shadow/` material — not authoritative. Intended for Ewan's review 
 
 5. **Blinkers without ceilings.** Agents operate with full autonomy inside defined constraints. The constraints are the blinkers. There is no ceiling on ingenuity within them.
 
-6. **Layer 0 Amplified Laws** (`agents/prompts/layer0_laws.py`, authoritative: `00_authority/EIGHT_LAWS.md`) — physically locked. Kaizen cannot modify them. 8 laws: (1) Don't Hurt Anyone, (2) HR Is Absolute, (3) No Telling People Off, (4) Radical Honesty, (5) Radical Transparency, (6) Ideas Meritocracy, (7) Radical Attribution, (8) Win-Win or Don't Play.
+6. **Layer 0 Amplified Laws** (`agents/prompts/layer0_laws.py`, `00_authority/EIGHT_LAWS.md` `[NOT YET INDEXED IN MANIFEST.md]`) — physically locked. Kaizen cannot modify them. 8 laws: (1) Don't Hurt Anyone, (2) HR Is Absolute, (3) No Telling People Off, (4) Radical Honesty, (5) Radical Transparency, (6) Ideas Meritocracy, (7) Radical Attribution, (8) Win-Win or Don't Play.
 
 ### System boundary model
 
@@ -332,7 +332,7 @@ The intelligence is in understanding trades and archetypes deeply (50+ business 
 
 **Why:** Video is the highest-engagement format on every platform. Programmatic generation means: same template, different data, hundreds of variations at near-zero marginal cost.
 
-**Constraint: Beast is CPU-only.** No GPU. The AX162-R was chosen with video load in mind (96 threads, 256GB RAM), but render times will be slower than GPU-equivalent. Benchmark render queue depth and concurrency vs Ollama inference load before committing to scale.
+**Constraint: Beast is CPU-only.** No GPU. The AX162-R was chosen with video load in mind (96 threads, 251 GB RAM), but render times will be slower than GPU-equivalent. Benchmark render queue depth and concurrency vs Ollama inference load before committing to scale.
 
 **Architecture:**
 
@@ -410,7 +410,7 @@ Value tracking → karma, engagement, DMs → feeds back to Kaizen
 
 **What:** Replace the current sequential cron pipeline with a LangGraph state machine that supports conditional routing, parallel branches, and human-in-the-loop breakpoints.
 
-**Why:** The current pipeline is linear (research → generate → queue → evaluate → learn). As channels multiply (text + video + email + Reddit), the pipeline needs branching. LangGraph provides:
+**Why:** The current pipeline is linear (research → generate → evaluate → queue → learn). As channels multiply (text + video + email + Reddit), the pipeline needs branching. LangGraph provides:
 - **Deterministic graph edges** (satisfies our 90/10 principle)
 - **Probabilistic node internals** (LLM calls wrapped in structured output)
 - **State checkpointing** (resume from failure, not restart)
