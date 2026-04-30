@@ -126,11 +126,13 @@ Source: `/root/cove-repo/infrastructure/`
 
 ## Voice services
 
+**Voice/telephony stack not finalised.** Active subscriptions: Deepgram, Twilio, Telnyx, Retell, Vapi, Cartesia, Eleven Labs. Current deployment uses Deepgram (STT / noise suppression) + Twilio (UK number, WhatsApp API access) + Anthropic. Final provider choices TBD.
+
 | Container | Image | Status | Purpose |
 |-----------|-------|--------|---------|
-| **amplified-voice-agent** | `amplified-voice-agent-voice-agent` | Running | Voice AI agent. Port 8080 exposed to host. Source: `/opt/amplified-voice-agent/` |
-| **xai-phone-agent** | `xai-phone-agent-xai-phone-agent` | Running | xAI-powered phone agent. Internal port 8080. Source: `/opt/xai-phone-agent/` |
-| **voice-pipeline** | `voice-pipeline-voice-pipeline` | **Stopped** | Voice processing pipeline. Exited 6 weeks ago. Source: `/root/services/voice-pipeline/` |
+| **amplified-voice-agent** | `amplified-voice-agent-voice-agent` | Running | Voice AI agent. Currently wired: Twilio (+441917433558), Deepgram STT, Anthropic conversation, FalkorDB knowledge. Port 8080 exposed to host. Routes to `voice.beast.amplifiedpartners.ai`. Source: `/opt/amplified-voice-agent/` |
+| **xai-phone-agent** | `xai-phone-agent-xai-phone-agent` | Running | xAI/Grok voice experiment (voice: "Sal"). No Twilio — uses xAI native voice API. Routes to `phone.beast.amplifiedpartners.ai`. Source: `/opt/xai-phone-agent/` |
+| **voice-pipeline** | `voice-pipeline-voice-pipeline` | **Stopped** | Voice processing pipeline (Deepgram + LiteLLM + Redis). Exited 6 weeks ago. Source: `/root/services/voice-pipeline/` |
 
 ## Dashboards and tools
 
