@@ -1,7 +1,7 @@
 ---
 title: Governed workspace manifest (authoritative inventory)
-date: 2026-04-29
-version: 37
+date: 2026-04-30
+version: 38
 status: draft
 ---
 
@@ -128,6 +128,12 @@ not the GitHub slug. Do not guess another pattern under this org for this lane.
     - `90_archive/beautiful-and-golden/SUSTAINABILITY.md` `[NON-AUTHORITATIVE]`
 
 ## Changelog
+
+### v38 — 2026-04-30
+
+- Version numbering housekeeping: two `v36-pre` changelog entries (archive beautiful-and-golden, bibliography fix) were absorbed during merge resolution without incrementing the frontmatter version. Bumped 37 → 38 to account for these edits per `AGENTS.md` § "PR reviewers — what to flag" item 3. No content changes — numbering-only fix.
+
+Signed-by: Devon (Devin session `devin-ab66d8a5c2b64927b65a4ab87acc47ee`) — 2026-04-30
 
 ### v37 — 2026-04-29
 
