@@ -1,7 +1,7 @@
 ---
 title: Governed workspace manifest (authoritative inventory)
 date: 2026-04-29
-version: 37
+version: 38
 status: draft
 ---
 
@@ -122,8 +122,30 @@ not the GitHub slug. Do not guess another pattern under this org for this lane.
   - `90_archive/2026-03_amplified-consolidated-architecture_full.txt` `[NON-AUTHORITATIVE]`
   - `90_archive/context/README.md` `[NON-AUTHORITATIVE]` (context folder convention)
   - `90_archive/context/2026-04-16_operator-voice-capsule_ewan.md` `[NARRATIVE] [NON-AUTHORITATIVE]` (human operator voice; not policy)
+  - `90_archive/specifications/mac-drop-2026-04/` `[NON-AUTHORITATIVE]` (15 major specifications from Ewan's Mac drop — constitutional documents, architectural specs, methodology references. Source: "New Folder With Items 2.zip", 521 files, 125MB. See `90_archive/specifications/mac-drop-2026-04/README.md` for full index.)
+    - `ATTRIBUTION-AND-CURATION-v1.md` `[NON-AUTHORITATIVE]` (965 lines — data provenance law + 5 Curator agents; status in source: "Constitutional — Active")
+    - `VALIDATION-METHODOLOGY-v2.md` `[NON-AUTHORITATIVE]` (1,370 lines — 7 gates, 11 rubrics, 10 Enforcers, 12 lenses; status in source: "Draft — ready for implementation")
+    - `CODE-TAXONOMY-AND-KAIZEN-v1.md` `[NON-AUTHORITATIVE]` (1,069 lines — error registry + code taxonomy + Kaizen department; status in source: "Constitutional — Active")
+    - `SCORING-UNIFICATION-HYPOTHESIS-v2.md` `[NON-AUTHORITATIVE]` (878 lines — codes as unified scoring layer; status in source: "Hypothesis — Under Investigation")
+    - `DOPPELGANGER-TESTING-AND-AGENT-VERSIONING-v1.md` `[NON-AUTHORITATIVE]` (684 lines — CI/CD for agent cognition; status in source: "Specification — ready for testing")
+    - `FILE-NAMING-CONVENTION-v1.md` `[NON-AUTHORITATIVE]` (706 lines — universal file naming convention)
+    - `DUAL-CODE-ORGANISATION-v1.md` `[NON-AUTHORITATIVE]` (826 lines — pattern taxonomy + conformance scoring)
+    - `vault-extraction-pipeline-design.md` `[NON-AUTHORITATIVE]` (922 lines — Convergence → HoundDog → DocBench → PUDDING → 8 output streams)
+    - `amplified-agents-master.md` `[NON-AUTHORITATIVE]` (921 lines — agent architecture, 7 failure patterns, therapy suite)
+    - `business-brain-framework.md` `[NON-AUTHORITATIVE]` (334 lines — 6-layer Business Brain stack, DAD sandwich)
+    - `process-scaffold-framework.md` `[NON-AUTHORITATIVE]` (603 lines — APQC + BPMN + ISO 9001, Layer 4)
+    - `amplified-integration-layer.md` `[NON-AUTHORITATIVE]` (468 lines — AI Sidecar, client IT integration)
+    - `AMPLIFIED-SEARCH-ORCHESTRATION-METHODOLOGY.md` `[NON-AUTHORITATIVE]` (770 lines — AMAS, 5-engine adaptive search)
+    - `PUDDING-VALUE-MATHEMATICAL-MODEL-v1.md` `[NON-AUTHORITATIVE]` (656 lines — mathematical model for pudding run value)
+    - `pudding-taxonomy-synthesis.md` `[NON-AUTHORITATIVE]` (1,374 lines — complete pudding reference)
 
 ## Changelog
+
+### v38 — 2026-04-29
+
+- Added `90_archive/specifications/mac-drop-2026-04/` to **Reference only**: 15 major specifications from Ewan's Mac drop ("New Folder With Items 2.zip", 521 files, 125MB). Includes 5 constitutional documents (Attribution, Validation, Code-Taxonomy, Scoring-Unification, Doppelganger-Testing), 2 constitutional conventions (File-Naming, Dual-Code-Organisation), and 8 architectural specifications (vault extraction pipeline, agent architecture, business brain, process scaffold, integration layer, search orchestration, pudding value model, pudding taxonomy synthesis). All indexed as `[NON-AUTHORITATIVE]` pending promotion review.
+
+Signed-by: Devon (Devin session `aa4d863ad679468692e75a40b8825358`) — 2026-04-29
 
 ### v37 — 2026-04-29
 
