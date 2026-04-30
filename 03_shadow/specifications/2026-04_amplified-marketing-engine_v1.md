@@ -156,7 +156,7 @@ The current sequential pipeline (cron, 4am UTC) evolves into a staged, gated pip
 
 **Process:**
 - APDS Harvest pulls from: Perplexity searches, RSS feeds, Reddit monitoring, trade press, academic sources.
-- APDS Extract + Label: entities tagged with PUDDING 2026 taxonomy (`WHAT.HOW.SCALE.TIME`).
+- APDS Extract + Label: entities tagged with PUDDING 2026 taxonomy (`WHAT.HOW.SCALE.TIME.PATTERN`).
 - APDS Match + Score: cross-domain bridge discovery. Emergence score `E = (B × D × N) / R`.
 - Output: research briefs with attributed sources and confidence bands (PROVEN / VALID / HYPOTHESIS).
 
@@ -247,7 +247,7 @@ This gives us personalisation without profiling. The intelligence is in the segm
 ```
 Research brief
     ↓
-Script Node → VARK-matched scripts from Claude
+Script Node → segment-adapted scripts from Claude (by trade, archetype, channel)
     ↓
 Asset Node → source images + generate voiceover (ElevenLabs or local TTS)
     ↓
