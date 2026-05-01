@@ -6,7 +6,7 @@ This is the governed workspace for Amplified Partners AI agents. It follows Comp
 1. `00_authority/` — ground-truth rules, MANIFEST.md is the index
 2. `01_truth/processes/` — SOPs and standard procedures
 3. `02_build/` — build artefacts
-4. `03_shadow/` — handovers and job wrapups
+4. `03_shadow/` — experiments, wrap-ups, Kaizen probes (never authoritative)
 
 ## Key rules
 - Every committed artefact must be signed (agent name + ISO date + session ID)
@@ -19,3 +19,7 @@ This is the governed workspace for Amplified Partners AI agents. It follows Comp
 - Filing: `NN_tier/TYPE/YYYY-MM-DD_kebab-slug_vN.md`
 - Imperative voice, must/may only (no "should consider")
 - One concept per file, cross-link rather than merge
+
+---
+
+Signed-by: Devon | 2026-05-01 | session 873af571838a40d29455d1579d2e7d75
