@@ -24,7 +24,7 @@ signed_by: "Devon, 2026-05-01, devin-f32d587cc3e54f959c5309d93f72bc97"
 | CRM API route modules | 16 | 5,964 |
 | Command Centre API endpoints | 24 | 863 |
 | Marketing Engine API endpoints | 19 | ~600 |
-| MCP Servers (Cove Orchestrator) | 8 | ~2,350 |
+| MCP Servers (Cove Orchestrator) | 8 | ~2,160 |
 | MCP Servers (CRM) | 5 | 2,256 |
 | NightScout Intelligence Pipeline | 7 | ~895 |
 | Telephony & Voice (all locations) | 6 modules | ~3,900 |
@@ -258,7 +258,7 @@ signed_by: "Devon, 2026-05-01, devin-f32d587cc3e54f959c5309d93f72bc97"
 **Repo:** `Amplified-Partners/clean-build`
 **Location:** `02_build/cove-orchestrator/mcp-servers/`
 **Framework:** FastMCP (Python MCP SDK)
-**Total:** 8 servers, 37 tools, ~2,350 lines
+**Total:** 8 servers, 37 tools, ~2,160 lines
 
 | Server | File | Lines | Tools | What It Does |
 |--------|------|-------|-------|-------------|
