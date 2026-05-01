@@ -1,7 +1,7 @@
 ---
 title: Decision log
 date: 2026-05-01
-version: 13
+version: 14
 status: draft
 ---
 
@@ -12,6 +12,14 @@ status: draft
 One entry per decision. Keep it short. Link out to supporting docs.
 
 ## Entries
+
+### 2026-05-01 — Copilot instructions file created for workspace-aware suggestions
+
+- **Decision**: Create `.github/copilot-instructions.md` — a Copilot agent instruction file summarising the authority hierarchy, key rules, and naming conventions so GitHub Copilot suggestions align with the governed workspace.
+- **Why**: Part of org-wide Copilot optimisation. Without project-specific instructions, Copilot suggests generic code that ignores the signature requirement, authority tiers, and naming conventions. The file is a summary pointing at canonical sources, not a new authority surface.
+- **Where encoded**: `.github/copilot-instructions.md`
+- **Status**: active
+- **Signed-by**: Devon | 2026-05-01 | session 873af571838a40d29455d1579d2e7d75
 
 ### 2026-05-01 — Systems and API Register created as candidate authority
 
