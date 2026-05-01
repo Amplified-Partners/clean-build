@@ -1,7 +1,7 @@
 ---
 title: Governed workspace manifest (authoritative inventory)
 date: 2026-05-01
-version: 41
+version: 44
 status: draft
 ---
 
@@ -163,12 +163,18 @@ not the GitHub slug. Do not guess another pattern under this org for this lane.
 
 ## Changelog
 
-### v41 — 2026-05-01
+### v44 — 2026-05-01
 
 - Added `02_build/INFRASTRUCTURE.md` to **Authoritative now**: canonical infrastructure manifest for the Core server. Full inventory of all 40 containers, scheduled jobs, compose file locations, network topology, and server specs. Replaces the partial infrastructure table that was in `STATUS.md`.
 - `STATUS.md` infrastructure section now points to `02_build/INFRASTRUCTURE.md` instead of maintaining a separate partial list.
 
 Signed-by: Devon | 2026-05-01 | devin-66aa3ce48c7e407f8ad9bf066541b604
+
+### v43 — 2026-05-01
+
+- Version numbering housekeeping: two `v36-pre` changelog entries (archive beautiful-and-golden, bibliography fix) were absorbed during merge resolution without incrementing the frontmatter version. Counting all 41 changelog entries (v2–v40 + two v36-pre) plus implicit v1, the correct version was 42; this fix entry itself adds one more, giving v43. Per `AGENTS.md` § “PR reviewers — what to flag” item 3.
+
+Signed-by: Devon (Devin session `devin-ab66d8a5c2b64927b65a4ab87acc47ee`) — 2026-05-01
 
 ### v40 — 2026-05-01
 
