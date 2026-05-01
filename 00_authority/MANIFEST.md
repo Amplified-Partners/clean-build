@@ -1,7 +1,7 @@
 ---
 title: Governed workspace manifest (authoritative inventory)
 date: 2026-05-01
-version: 44
+version: 45
 status: draft
 ---
 
@@ -116,6 +116,7 @@ not the GitHub slug. Do not guess another pattern under this org for this lane.
 ## Reference only (sanitised; never authoritative by default)
 
 - `.cursor/HOOKS_TESTING_NEED.md` `[NON-AUTHORITATIVE]` (**TESTING NEED** — gate checklist before any Cursor hook wiring; production posture is **no hooks**)
+- `.github/copilot-instructions.md` `[NON-AUTHORITATIVE]` (Copilot agent instructions summary — points at canonical sources, not an independent authority surface)
 - `README.md` `[NON-AUTHORITATIVE]` (root quick-start pointer to authority entrypoints)
 - `90_archive/` `[NON-AUTHORITATIVE]`
   - `90_archive/README.md` `[NON-AUTHORITATIVE]` (archive gate for agents — no bulk-read of `inbox/` dumps; triage vs promotion)
@@ -162,6 +163,12 @@ not the GitHub slug. Do not guess another pattern under this org for this lane.
     - `P10-kill-switch-master-reference.md` `[NON-AUTHORITATIVE]` (510 lines — binary shutdown architecture)
 
 ## Changelog
+
+### v45 — 2026-05-01
+
+- Added `.github/copilot-instructions.md` to **Reference only** as `[NON-AUTHORITATIVE]`: Copilot agent instructions summary pointing at canonical sources (`00_authority/`, `01_truth/`, `02_build/`, `03_shadow/`, `90_archive/`). Not an independent authority surface.
+
+Signed-by: Devon | 2026-05-01 | session 873af571838a40d29455d1579d2e7d75
 
 ### v44 — 2026-05-01
 
