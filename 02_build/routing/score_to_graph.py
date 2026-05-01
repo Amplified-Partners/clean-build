@@ -319,7 +319,7 @@ class GraphWriter:
                 "jaccard": params["jaccard_slot"],
                 "recipe_id": recipe_id,
             })
-            if not self._dry_run and result is not None and result.result_set == []:
+            if not self._dry_run and result is not None and result.relationships_created == 0:
                 logger.warning(
                     "Recipe %s: one or more concepts not found in graph "
                     "(A=%s, B=%s, C=%s) — BRIDGES edges not created",
@@ -378,6 +378,7 @@ class GraphWriter:
     def close(self) -> None:
         """Clean up connection resources."""
         self._graph = None
+        self._dry_run = True
         logger.debug("GraphWriter closed")
 
 
