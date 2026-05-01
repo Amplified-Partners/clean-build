@@ -169,17 +169,19 @@ Source: `/root/cove-repo/infrastructure/`
 | Kaizen | `/opt/amplified/apps/kaizen/docker-compose.yml` | kaizen-optimizer |
 | Enforcer | `/opt/amplified/apps/enforcer/docker-compose.yml` | enforcer |
 | LiteLLM | `/opt/amplified/apps/litellm/docker-compose.yml` | litellm |
-| Langfuse | `/opt/amplified/apps/langfuse/docker-compose.yml` | langfuse |
+| Langfuse | `/opt/amplified/apps/langfuse/docker-compose.yml` | langfuse, minio-init |
 | Ollama | `/opt/amplified/apps/ollama/docker-compose.yml` | ollama |
 | SearXNG | `/opt/amplified/apps/searxng/docker-compose.yml` | searxng |
 | OpenClaw Agents | `/opt/amplified/apps/openclaw-agents/docker-compose.yml` | openclaw-agents |
 | Knowledge MCP | `/opt/amplified/apps/amplified-knowledge-mcp/docker-compose.yml` | amplified-knowledge-mcp |
-| Cove | `/root/cove-repo/infrastructure/docker-compose.yml` | cove-api, cove-translator, cove-temporal, cove-temporal-ui, cove-postgres, cove-worker-* |
+| Cove (primary) | `/root/cove-repo/infrastructure/docker-compose.yml` | cove-api, cove-translator, cove-temporal, cove-temporal-ui, cove-postgres, cove-worker-* |
+| Cove (orchestrator) | `/opt/amplified/agent-stack/cove-orchestrator/docker/docker-compose.yml` | docker-postgres-1, docker-temporal-1 |
 | Voice Agent | `/opt/amplified-voice-agent/docker-compose.yml` | amplified-voice-agent |
 | Voice Pipeline | `/root/services/voice-pipeline/docker-compose.yml` | voice-pipeline |
 | xAI Phone Agent | `/opt/xai-phone-agent/docker-compose.yml` | xai-phone-agent |
 | Nexus Dashboard | `/opt/nexus/dashboard/docker-compose.yml` | nexus-dashboard |
 | Base infra | `/opt/amplified/docker-compose.yml` | postgres, redis, falkordb, qdrant, clickhouse, minio, portainer, amplified-code-server |
+| _(standalone)_ | `docker run` | watchtower |
 
 ---
 
