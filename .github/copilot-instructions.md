@@ -6,7 +6,7 @@ This is the governed workspace for Amplified Partners AI agents. It follows Comp
 1. `00_authority/` — ground-truth rules, MANIFEST.md is the index
 2. `01_truth/` — truth-shaped candidates (processes, schemas, interfaces)
 3. `02_build/` — build artefacts
-4. `03_shadow/` — experiments, wrap-ups, Kaizen probes (never authoritative)
+4. `03_shadow/` — experiments, wrap-ups, Kaizen probes (never authoritative by default)
 
 ## Key rules
 - Every committed artefact must be signed (agent name + ISO date + session ID)
