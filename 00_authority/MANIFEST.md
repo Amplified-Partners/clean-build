@@ -1,7 +1,7 @@
 ---
 title: Governed workspace manifest (authoritative inventory)
-date: 2026-04-30
-version: 40
+date: 2026-05-01
+version: 41
 status: draft
 ---
 
@@ -108,6 +108,7 @@ not the GitHub slug. Do not guess another pattern under this org for this lane.
   - `01_truth/schemas/README.md` `[LOGIC TO BE CONFIRMED]` (folder purpose stub)
 - `01_truth/interfaces/` `[LOGIC TO BE CONFIRMED]` (API contracts to be populated)
   - `01_truth/interfaces/README.md` `[LOGIC TO BE CONFIRMED]` (folder purpose stub)
+- `01_truth/SYSTEMS-AND-API-REGISTER.md` `[LOGIC TO BE CONFIRMED]` (single register of all APIs, MCP servers, telephony systems, code modules, and their locations across all Amplified Partners repos)
 - `02_build/README.md` `[LOGIC TO BE CONFIRMED]` (runnable artefacts routing stub)
 - `03_shadow/README.md` `[LOGIC TO BE CONFIRMED]` (experiment routing stub)
 - `03_shadow/job-wrapups/README.md` `[NON-AUTHORITATIVE]` (wrap-ups/escalation notes location; learning only)
@@ -162,13 +163,18 @@ not the GitHub slug. Do not guess another pattern under this org for this lane.
 
 ## Changelog
 
-### v40 — 2026-04-30
+### v41 — 2026-04-30
 
 - Added `02_build/INFRASTRUCTURE.md` to **Authoritative now**: canonical infrastructure manifest for the Core server. Full inventory of all 40 containers, scheduled jobs, compose file locations, network topology, and server specs. Replaces the partial infrastructure table that was in `STATUS.md`.
 - `STATUS.md` infrastructure section now points to `02_build/INFRASTRUCTURE.md` instead of maintaining a separate partial list.
 
 Signed-by: Devon | 2026-04-30 | devin-66aa3ce48c7e407f8ad9bf066541b604
 
+### v40 — 2026-05-01
+
+- Added `01_truth/SYSTEMS-AND-API-REGISTER.md` to **Candidate authority**: comprehensive register of all pre-built systems, APIs (124 CRM endpoints, 24 Command Centre endpoints, 19 Marketing Engine endpoints), 13 MCP servers, telephony/voice inventory (7 providers, 6 modules across 8 files), NightScout pipeline, content engine, safety layer, and cross-repo location index. `[LOGIC TO BE CONFIRMED]` pending Ewan review.
+
+Signed-by: Devon (Devin session `f32d587cc3e54f959c5309d93f72bc97`) — 2026-05-01
 ### v39 — 2026-04-29
 
 - Added 15 more specifications to `90_archive/specifications/mac-drop-2026-04/` (Phase 2 ingestion): APDS engineering spec, AMF methodology framework, master architecture, Beast rebuild spec, Kaizen Department spec, Kaizen Cove build plan, Visual Polish System build guide, Extraction Department spec, RIC, Watchman expansion strategy, Curator Gate spec, Insight Catalogue, P7/P8/P10 safety/celebration systems. All `[NON-AUTHORITATIVE]`. Total archive now 30 files (33,153 lines).

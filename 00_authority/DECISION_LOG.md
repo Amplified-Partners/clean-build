@@ -1,7 +1,7 @@
 ---
 title: Decision log
-date: 2026-04-30
-version: 12
+date: 2026-05-01
+version: 13
 status: draft
 ---
 
@@ -13,11 +13,19 @@ One entry per decision. Keep it short. Link out to supporting docs.
 
 ## Entries
 
+### 2026-05-01 — Systems and API Register created as candidate authority
+
+- **Decision**: Create `01_truth/SYSTEMS-AND-API-REGISTER.md` — a single register documenting all pre-built APIs, MCP servers, telephony systems, and code modules across all Amplified Partners repos. Indexed in MANIFEST.md v40 as `[LOGIC TO BE CONFIRMED]`.
+- **Why**: Architect directed ("we need a register somewhere ... a document that tells us what's where because nobody can remember"). Automated scan found 124 CRM REST endpoints, 24 Command Centre endpoints, 19 Marketing Engine endpoints, 13 MCP servers (8 Cove with 37 tools + 5 CRM), and a complete telephony inventory (7 providers, 6 modules across 8 files) — far more than the ~20 originally expected. Without a single register, this knowledge existed only in the codebase and was not discoverable without grepping every repo.
+- **Where encoded**: `01_truth/SYSTEMS-AND-API-REGISTER.md` v1, `00_authority/MANIFEST.md` v40 § Candidate authority.
+- **Status**: candidate (pending Ewan review)
+- **Signed-by**: Devon (Devin session `f32d587cc3e54f959c5309d93f72bc97`) — 2026-05-01
+
 ### 2026-04-30 — Infrastructure manifest created as canonical inventory
 
 - **Decision**: Create `02_build/INFRASTRUCTURE.md` as the single source of truth for all infrastructure on Amplified Core (135.181.161.131). Promote to **Authoritative now** in MANIFEST.md. Replace the partial infrastructure table in STATUS.md with a pointer to the manifest.
 - **Why**: Architect directed ("we need a central, obvious place where current infrastructure is stored ... single point of truth"). Server runs 40 containers across 16+ compose stacks — no complete inventory existed. STATUS.md had a partial 8-row table that was already stale. The manifest covers every container, scheduled job, compose file location, network topology, and server specs. Written in plain language so anyone (human or AI) can understand what each thing does.
-- **Where encoded**: `02_build/INFRASTRUCTURE.md` v1, `00_authority/MANIFEST.md` v40 § Authoritative now, `STATUS.md` v2 (infrastructure section now points to manifest).
+- **Where encoded**: `02_build/INFRASTRUCTURE.md` v1, `00_authority/MANIFEST.md` v41 § Authoritative now, `STATUS.md` v2 (infrastructure section now points to manifest).
 - **Status**: active
 - **Signed-by**: Devon | 2026-04-30 | devin-66aa3ce48c7e407f8ad9bf066541b604
 
