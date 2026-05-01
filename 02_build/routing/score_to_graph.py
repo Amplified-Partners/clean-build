@@ -123,7 +123,8 @@ _LINK_RECIPE_CONCEPTS = """
 MATCH (a:Concept {id: $concept_a_id})
 MATCH (b:Concept {id: $concept_b_id})
 MATCH (c:Concept {id: $concept_c_id})
-MERGE (a)-[:BRIDGES {jaccard: $jaccard, recipe_id: $recipe_id}]->(c)
+MERGE (a)-[:BRIDGES {jaccard: $jaccard, recipe_id: $recipe_id}]->(b)
+MERGE (b)-[:BRIDGES {jaccard: $jaccard, recipe_id: $recipe_id}]->(c)
 """
 
 _UPSERT_SIGNAL = """
@@ -311,13 +312,20 @@ class GraphWriter:
         self._query(_UPSERT_RECIPE, params)
 
         if params["concept_a_id"] and params["concept_b_id"] and params["concept_c_id"]:
-            self._query(_LINK_RECIPE_CONCEPTS, {
+            result = self._query(_LINK_RECIPE_CONCEPTS, {
                 "concept_a_id": params["concept_a_id"],
                 "concept_b_id": params["concept_b_id"],
                 "concept_c_id": params["concept_c_id"],
                 "jaccard": params["jaccard_slot"],
                 "recipe_id": recipe_id,
             })
+            if not self._dry_run and result is not None and result.result_set == []:
+                logger.warning(
+                    "Recipe %s: one or more concepts not found in graph "
+                    "(A=%s, B=%s, C=%s) — BRIDGES edges not created",
+                    recipe_id, params["concept_a_id"],
+                    params["concept_b_id"], params["concept_c_id"],
+                )
 
         logger.debug("Upserted recipe %s (score=%s)", recipe_id, params["advanced_score"])
         return recipe_id
