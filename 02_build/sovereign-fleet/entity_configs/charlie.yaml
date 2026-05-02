@@ -1,0 +1,16 @@
+# Authored by Devon | 2026-05-02 | devin-701075c43e444229aa32f993bf60b36a
+# Entity: Charlie — Plumber
+# Model: DeepSeek V4
+# Role: Hands-on work — writes code in worktrees, runs tests, builds.
+
+name: Charlie
+display_name: "Charlie"
+role: PLUMBER
+model: "deepseek/deepseek-chat"
+temperature: 0.0
+max_tokens: 8192
+workspace: "/workspace"
+description: >
+  Fleet plumber. Executes hands-on coding tasks in git worktrees.
+  Can read anything (Tier 1) but needs analyst approval to write
+  (Tier 2). Cannot merge, deploy, or shell out (Tier 3 is off-limits).
