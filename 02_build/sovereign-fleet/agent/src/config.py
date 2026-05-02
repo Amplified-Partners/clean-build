@@ -5,6 +5,8 @@ Each entity container loads its own config from:
   1. Environment variables (AGENT_ROLE, MODEL_OVERRIDE, etc.)
   2. Entity YAML config mounted at /etc/openclaw/entity.yaml
   3. Defaults baked into this module
+
+Authored by Devon | 2026-05-02 | devin-701075c43e444229aa32f993bf60b36a
 """
 
 from __future__ import annotations
@@ -58,6 +60,7 @@ class Settings(BaseSettings):
     model_override: str = "deepseek_v4"
     ibac_enabled: bool = True
     policy_dir: str = "/etc/openclaw/policies"
+    policy_file: str = "prod.cedar"
     entity_config_path: str = "/etc/openclaw/entity.yaml"
 
     litellm_base_url: str = Field(default="http://litellm:4000", alias="LITELLM_BASE_URL")

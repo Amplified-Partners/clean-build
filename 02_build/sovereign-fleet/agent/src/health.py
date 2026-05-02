@@ -1,4 +1,7 @@
-"""Health check module for the Sovereign Fleet agent."""
+"""Health check module for the Sovereign Fleet agent.
+
+Authored by Devon | 2026-05-02 | devin-701075c43e444229aa32f993bf60b36a
+"""
 
 from __future__ import annotations
 

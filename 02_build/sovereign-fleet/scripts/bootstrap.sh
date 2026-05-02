@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # OpenClaw Sovereign Fleet — Bootstrap Script
 # Run once on a fresh host to set up the fleet.
+# Authored by Devon | 2026-05-02 | devin-701075c43e444229aa32f993bf60b36a
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

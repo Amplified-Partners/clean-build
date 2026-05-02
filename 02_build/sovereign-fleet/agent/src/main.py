@@ -7,6 +7,8 @@ and exposes HTTP endpoints for task execution and health.
 
 Usage:
     uvicorn src.main:app --host 0.0.0.0 --port 8000
+
+Authored by Devon | 2026-05-02 | devin-701075c43e444229aa32f993bf60b36a
 """
 
 from __future__ import annotations
@@ -51,8 +53,9 @@ async def lifespan(app: FastAPI):  # type: ignore[type-arg]
     )
 
     if settings.ibac_enabled:
-        count = policy_engine.load_directory(settings.policy_dir)
-        logger.info("IBAC: loaded %d rules from %s", count, settings.policy_dir)
+        policy_path = str(Path(settings.policy_dir) / settings.policy_file)
+        count = policy_engine.load_file(policy_path)
+        logger.info("IBAC: loaded %d rules from %s", count, policy_path)
     else:
         logger.warning("IBAC is DISABLED — all actions auto-allowed")
 

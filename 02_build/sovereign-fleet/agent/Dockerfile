@@ -1,3 +1,4 @@
+# Authored by Devon | 2026-05-02 | devin-701075c43e444229aa32f993bf60b36a
 FROM python:3.11-slim AS base
 
 RUN apt-get update && apt-get install -y --no-install-recommends \

@@ -11,6 +11,8 @@ The engine supports the four constructs used in prod.cedar:
   - forbid(principal, action, resource)
   - Role membership (Agent in Role::"Agent")
   - Context conditions (approved_by_analyst, approved_by_arbiter, intent_token_valid)
+
+Authored by Devon | 2026-05-02 | devin-701075c43e444229aa32f993bf60b36a
 """
 
 from __future__ import annotations

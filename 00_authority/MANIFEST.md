@@ -1,6 +1,6 @@
 ---
 title: Governed workspace manifest (authoritative inventory)
-date: 2026-05-01
+date: 2026-05-02
 version: 45
 status: draft
 ---
@@ -165,6 +165,12 @@ not the GitHub slug. Do not guess another pattern under this org for this lane.
     - `P10-kill-switch-master-reference.md` `[NON-AUTHORITATIVE]` (510 lines — binary shutdown architecture)
 
 ## Changelog
+
+### v45 — 2026-05-02
+
+- Added three entries to **Candidate authority** for the OpenClaw Sovereign Fleet (`02_build/sovereign-fleet/`): `README.md`, `policies/prod.cedar`, `docker-compose.yml`. All `[LOGIC TO BE CONFIRMED]` pending Ewan review of the IBAC design.
+
+Signed-by: Devon | 2026-05-02 | devin-701075c43e444229aa32f993bf60b36a
 
 ### v44 — 2026-05-01
 

@@ -3,6 +3,8 @@
 Validate Cedar policy files — checks syntax and reports rules found.
 
 Usage: python scripts/validate-policies.py policies/
+
+Authored by Devon | 2026-05-02 | devin-701075c43e444229aa32f993bf60b36a
 """
 
 import sys

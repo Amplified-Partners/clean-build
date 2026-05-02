@@ -4,6 +4,8 @@ Action definitions for the Sovereign Fleet.
 Each action maps to a Cedar Action:: identifier and defines
 what the agent can do. The IBAC engine authorizes each action
 before execution.
+
+Authored by Devon | 2026-05-02 | devin-701075c43e444229aa32f993bf60b36a
 """
 
 from __future__ import annotations

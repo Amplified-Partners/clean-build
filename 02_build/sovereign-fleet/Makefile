@@ -1,5 +1,6 @@
 # OpenClaw Sovereign Fleet — Makefile
 # One command to rule them all.
+# Authored by Devon | 2026-05-02 | devin-701075c43e444229aa32f993bf60b36a
 
 .PHONY: help setup up down logs status health build clean validate-policies
 

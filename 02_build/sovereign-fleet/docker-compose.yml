@@ -1,6 +1,7 @@
 # OpenClaw Sovereign Fleet — Docker Compose (Production)
 # ======================================================
 # Three IBAC-governed agent entities + Traefik ingress + Tailscale mesh.
+# Authored by Devon | 2026-05-02 | devin-701075c43e444229aa32f993bf60b36a
 #
 # Usage:
 #   docker compose up -d              # start everything
@@ -70,6 +71,7 @@ services:
       - AGENT_ROLE=ORCHESTRATOR
       - MODEL_OVERRIDE=kimi_k2
       - IBAC_ENABLED=true
+      - POLICY_FILE=${POLICY_FILE:-prod.cedar}
       - LITELLM_BASE_URL=${LITELLM_BASE_URL:-http://litellm:4000}
       - LITELLM_API_KEY=${LITELLM_API_KEY:-}
       - LITELLM_MODEL_KIMI=${LITELLM_MODEL_KIMI:-openai/moonshot-v1-auto}
@@ -104,6 +106,7 @@ services:
       - AGENT_ROLE=ARBITER
       - MODEL_OVERRIDE=claude_opus
       - IBAC_ENABLED=true
+      - POLICY_FILE=${POLICY_FILE:-prod.cedar}
       - LITELLM_BASE_URL=${LITELLM_BASE_URL:-http://litellm:4000}
       - LITELLM_API_KEY=${LITELLM_API_KEY:-}
       - LITELLM_MODEL_OPUS=${LITELLM_MODEL_OPUS:-anthropic/claude-sonnet-4-20250514}
@@ -138,6 +141,7 @@ services:
       - AGENT_ROLE=PLUMBER
       - MODEL_OVERRIDE=deepseek_v4
       - IBAC_ENABLED=true
+      - POLICY_FILE=${POLICY_FILE:-prod.cedar}
       - LITELLM_BASE_URL=${LITELLM_BASE_URL:-http://litellm:4000}
       - LITELLM_API_KEY=${LITELLM_API_KEY:-}
       - LITELLM_MODEL_DEEPSEEK=${LITELLM_MODEL_DEEPSEEK:-deepseek/deepseek-chat}

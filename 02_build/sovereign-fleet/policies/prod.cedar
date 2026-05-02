@@ -1,6 +1,7 @@
 // OpenClaw Sovereign Fleet — Production Cedar Policies
 // ====================================================
 // IBAC (Intent-Based Access Control) for the three-entity fleet.
+// Authored by Devon | 2026-05-02 | devin-701075c43e444229aa32f993bf60b36a
 // Loaded at container startup; changes require restart + Arbiter approval.
 //
 // Entities:  Kimmy (Orchestrator), Alpha (Arbiter), Charlie (Plumber)

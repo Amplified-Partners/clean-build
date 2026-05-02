@@ -1,6 +1,7 @@
 // OpenClaw Sovereign Fleet — Development Cedar Policies
 // =====================================================
 // Relaxed variant for local development and testing.
+// Authored by Devon | 2026-05-02 | devin-701075c43e444229aa32f993bf60b36a
 // All agents get broader permissions; approval gates still exist
 // but are auto-satisfied in dev mode.
 
