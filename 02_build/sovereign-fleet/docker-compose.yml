@@ -1,0 +1,172 @@
+# OpenClaw Sovereign Fleet — Docker Compose (Production)
+# ======================================================
+# Three IBAC-governed agent entities + Traefik ingress + Tailscale mesh.
+#
+# Usage:
+#   docker compose up -d              # start everything
+#   docker compose logs -f            # tail all logs
+#   docker compose ps                 # check status
+#
+# Requires: .env file (copy from .env.template)
+
+services:
+  # ────────────────────────────────────────────────────
+  # INGRESS & NETWORKING
+  # ────────────────────────────────────────────────────
+  traefik:
+    image: traefik:v3.0
+    container_name: fleet-traefik
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--providers.docker.network=fleet-net"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--log.level=INFO"
+    ports:
+      - "${TRAEFIK_HTTP_PORT:-8180}:80"
+      - "${TRAEFIK_HTTPS_PORT:-8443}:443"
+      - "${TRAEFIK_DASHBOARD_PORT:-8181}:8080"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    networks:
+      - fleet-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "traefik", "healthcheck"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+
+  tailscale:
+    image: tailscale/tailscale:latest
+    container_name: fleet-tailscale
+    hostname: sovereign-fleet
+    environment:
+      - TS_AUTHKEY=${TS_AUTHKEY}
+      - TS_STATE_DIR=/var/lib/tailscale
+      - TS_EXTRA_ARGS=--advertise-tags=tag:fleet
+    volumes:
+      - tailscale_data:/var/lib/tailscale
+      - /dev/net/tun:/dev/net/tun
+    cap_add:
+      - net_admin
+      - sys_module
+    networks:
+      - fleet-net
+    restart: unless-stopped
+
+  # ────────────────────────────────────────────────────
+  # THE SOVEREIGN FLEET
+  # ────────────────────────────────────────────────────
+
+  entity_kimmy:
+    build:
+      context: ./agent
+      dockerfile: Dockerfile
+    container_name: entity_kimmy
+    environment:
+      - AGENT_ROLE=ORCHESTRATOR
+      - MODEL_OVERRIDE=kimi_k2
+      - IBAC_ENABLED=true
+      - LITELLM_BASE_URL=${LITELLM_BASE_URL:-http://litellm:4000}
+      - LITELLM_API_KEY=${LITELLM_API_KEY:-}
+      - LITELLM_MODEL_KIMI=${LITELLM_MODEL_KIMI:-openai/moonshot-v1-auto}
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+    volumes:
+      - ${WORKSPACE_KIMMY:-../Entity_Kimmy}:/workspace
+      - ./policies:/etc/openclaw/policies:ro
+      - ./entity_configs/kimmy.yaml:/etc/openclaw/entity.yaml:ro
+    networks:
+      - fleet-net
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.kimmy.rule=Host(`kimmy.internal`)"
+      - "traefik.http.services.kimmy.loadbalancer.server.port=8000"
+    depends_on:
+      traefik:
+        condition: service_healthy
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+        reservations:
+          memory: 256M
+
+  entity_alpha:
+    build:
+      context: ./agent
+      dockerfile: Dockerfile
+    container_name: entity_alpha
+    environment:
+      - AGENT_ROLE=ARBITER
+      - MODEL_OVERRIDE=claude_opus
+      - IBAC_ENABLED=true
+      - LITELLM_BASE_URL=${LITELLM_BASE_URL:-http://litellm:4000}
+      - LITELLM_API_KEY=${LITELLM_API_KEY:-}
+      - LITELLM_MODEL_OPUS=${LITELLM_MODEL_OPUS:-anthropic/claude-sonnet-4-20250514}
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+    volumes:
+      - ${WORKSPACE_ALPHA:-../Entity_Alpha}:/workspace
+      - ./policies:/etc/openclaw/policies:ro
+      - ./entity_configs/alpha.yaml:/etc/openclaw/entity.yaml:ro
+    networks:
+      - fleet-net
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.alpha.rule=Host(`alpha.internal`)"
+      - "traefik.http.services.alpha.loadbalancer.server.port=8000"
+    depends_on:
+      traefik:
+        condition: service_healthy
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+        reservations:
+          memory: 256M
+
+  entity_charlie:
+    build:
+      context: ./agent
+      dockerfile: Dockerfile
+    container_name: entity_charlie
+    environment:
+      - AGENT_ROLE=PLUMBER
+      - MODEL_OVERRIDE=deepseek_v4
+      - IBAC_ENABLED=true
+      - LITELLM_BASE_URL=${LITELLM_BASE_URL:-http://litellm:4000}
+      - LITELLM_API_KEY=${LITELLM_API_KEY:-}
+      - LITELLM_MODEL_DEEPSEEK=${LITELLM_MODEL_DEEPSEEK:-deepseek/deepseek-chat}
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+    volumes:
+      - ${WORKSPACE_CHARLIE:-../Entity_Charlie}:/workspace
+      - ./policies:/etc/openclaw/policies:ro
+      - ./entity_configs/charlie.yaml:/etc/openclaw/entity.yaml:ro
+    networks:
+      - fleet-net
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.charlie.rule=Host(`charlie.internal`)"
+      - "traefik.http.services.charlie.loadbalancer.server.port=8000"
+    depends_on:
+      traefik:
+        condition: service_healthy
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+        reservations:
+          memory: 256M
+
+networks:
+  fleet-net:
+    name: fleet-net
+    driver: bridge
+
+volumes:
+  tailscale_data:

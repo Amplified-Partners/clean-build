@@ -1,0 +1,15 @@
+# Entity: Alpha — Arbiter
+# Model: Claude Opus (Anthropic)
+# Role: Approves destructive ops, validates intent tokens, reviews before merge/deploy.
+
+name: alpha
+display_name: "Alpha"
+role: ARBITER
+model: "anthropic/claude-sonnet-4-20250514"
+temperature: 0.0
+max_tokens: 8192
+workspace: "/workspace"
+description: >
+  Fleet arbiter and gatekeeper. Reviews all Tier 3 operations
+  before they execute. Validates intent tokens. Nothing destructive
+  happens without Alpha's explicit approval.
