@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import logging
 import os
+import shlex
 from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Any
@@ -226,6 +227,57 @@ async def identity() -> dict[str, Any]:
     }
 
 
+# ── Path sandbox ───────────────────────────────────────────────────
+
+WORKSPACE_ROOT = Path(settings.workspace_dir).resolve()
+
+
+def _sandbox_path(path: str) -> Path:
+    """Resolve a path and verify it lives inside the workspace.
+
+    Prevents path-traversal attacks (e.g. ../../etc/passwd).
+    Raises HTTP 403 if the resolved path escapes the workspace.
+    """
+    resolved = Path(path).resolve()
+    if not (resolved == WORKSPACE_ROOT or str(resolved).startswith(str(WORKSPACE_ROOT) + os.sep)):
+        raise HTTPException(
+            status_code=403,
+            detail=f"Path escapes workspace sandbox: {path}",
+        )
+    return resolved
+
+
+# Shell command allowlist — only these binaries may be executed.
+ALLOWED_SHELL_COMMANDS = {
+    "git", "grep", "rg", "find", "ls", "cat", "head", "tail", "wc",
+    "make", "python", "python3", "pip", "npm", "node", "docker",
+    "pytest", "ruff", "black", "mypy",
+}
+
+
+def _validate_shell_command(command: str) -> list[str]:
+    """Parse and validate a shell command against the allowlist.
+
+    Returns the parsed argument list. Raises HTTP 403 if the
+    command binary is not in ALLOWED_SHELL_COMMANDS.
+    """
+    try:
+        parts = shlex.split(command)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=f"Invalid command syntax: {exc}")
+
+    if not parts:
+        raise HTTPException(status_code=400, detail="Empty command")
+
+    binary = Path(parts[0]).name
+    if binary not in ALLOWED_SHELL_COMMANDS:
+        raise HTTPException(
+            status_code=403,
+            detail=f"Command '{binary}' is not in the allowed command list",
+        )
+    return parts
+
+
 # ── Action dispatch ────────────────────────────────────────────────
 
 
@@ -246,21 +298,21 @@ async def _dispatch_action(req: ActionRequest) -> dict[str, Any]:
 
 
 def _read_file(path: str) -> dict[str, Any]:
-    """Read a file from the workspace."""
-    target = Path(path)
+    """Read a file from the workspace (sandboxed)."""
+    target = _sandbox_path(path)
     if not target.exists():
         raise HTTPException(status_code=404, detail=f"File not found: {path}")
     content = target.read_text(encoding="utf-8", errors="replace")
-    return {"path": path, "size": len(content), "content": content[:50000]}
+    return {"path": str(target), "size": len(content), "content": content[:50000]}
 
 
 def _write_file(path: str, payload: dict[str, Any]) -> dict[str, Any]:
-    """Write content to a file in the workspace."""
+    """Write content to a file in the workspace (sandboxed)."""
     content = payload.get("content", "")
-    target = Path(path)
+    target = _sandbox_path(path)
     target.parent.mkdir(parents=True, exist_ok=True)
     target.write_text(content, encoding="utf-8")
-    return {"path": path, "bytes_written": len(content)}
+    return {"path": str(target), "bytes_written": len(content)}
 
 
 async def _git_log(path: str, payload: dict[str, Any]) -> dict[str, Any]:
@@ -307,16 +359,22 @@ async def _grep_search(path: str, payload: dict[str, Any]) -> dict[str, Any]:
 
 
 async def _execute_shell(payload: dict[str, Any]) -> dict[str, Any]:
-    """Execute a shell command (Tier 3 — requires Arbiter approval)."""
+    """Execute a shell command (Tier 3 — requires Arbiter approval).
+
+    Commands are parsed with shlex and validated against an allowlist
+    of permitted binaries. Uses exec (not shell) to prevent injection.
+    """
     import asyncio
 
     command = payload.get("command", "")
     if not command:
         raise HTTPException(status_code=400, detail="command required in payload")
 
-    proc = await asyncio.create_subprocess_shell(
-        command,
-        cwd=os.environ.get("WORKSPACE_DIR", "/workspace"),
+    parts = _validate_shell_command(command)
+
+    proc = await asyncio.create_subprocess_exec(
+        *parts,
+        cwd=str(WORKSPACE_ROOT),
         stdout=asyncio.subprocess.PIPE,
         stderr=asyncio.subprocess.PIPE,
     )
