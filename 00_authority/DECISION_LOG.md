@@ -363,3 +363,14 @@ One entry per decision. Keep it short. Link out to supporting docs.
   `01_truth/processes/2026-04_job-wrapup_and_escalation-note_sop_v1.md` (v14),
   `AGENTS.md`, `03_shadow/job-wrapups/README.md`.
 - **Status**: active
+
+---
+
+## Changelog
+
+### v14 — 2026-05-02
+
+- Added entry: "2026-05-02 — Marketing Engine Phase 0 parked pending customer signal." Records park decision for `Amplified-Partners/marketing-engine` PR #1 under `00_authority/USE_IT_OR_CUT_IT.md`. Reversal condition documented inline.
+- Establishes the changelog section on this file (previously absent). Per `AGENTS.md` § "PR reviewers — what to flag" rule 3, every `00_authority/*` edit must bump version + append a changelog entry. Entries v1–v13 of this file (the date-stamped decision entries above) implicitly tracked version-equivalent state without a dedicated changelog block. Going forward, the version field bumps and changelog entries co-exist, matching the pattern in `MANIFEST.md` and `SIGNATURES.md`.
+
+Signed-by: Devon | 2026-05-02 | devin-5da3bd275191469c8400142fd0ae1d69
