@@ -2,7 +2,7 @@
 # Model: DeepSeek V4
 # Role: Hands-on work — writes code in worktrees, runs tests, builds.
 
-name: charlie
+name: Charlie
 display_name: "Charlie"
 role: PLUMBER
 model: "deepseek/deepseek-chat"

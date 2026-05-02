@@ -2,7 +2,7 @@
 # Model: Kimi K2 (Moonshot AI)
 # Role: Routes tasks, coordinates the fleet, triggers Tier 3 ops with Arbiter sign-off.
 
-name: kimmy
+name: Kimmy
 display_name: "Kimmy"
 role: ORCHESTRATOR
 model: "openai/moonshot-v1-auto"

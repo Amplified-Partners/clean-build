@@ -1,7 +1,7 @@
 ---
 title: Decision log
 date: 2026-05-01
-version: 13
+version: 14
 status: draft
 ---
 
@@ -12,6 +12,14 @@ status: draft
 One entry per decision. Keep it short. Link out to supporting docs.
 
 ## Entries
+
+### 2026-05-02 — OpenClaw Sovereign Fleet created as candidate infrastructure
+
+- **Decision**: Create `02_build/sovereign-fleet/` — a three-entity IBAC-governed agent fleet with Cedar policy enforcement. Three entities: Kimmy (Orchestrator/Kimi K2), Alpha (Arbiter/Claude Sonnet 4), Charlie (Plumber/DeepSeek V4). Four-tier Cedar access control: Tier 1 auto-allow reads, Tier 2 analyst-approved writes, Tier 3 arbiter+intent-token destructive ops, absolute deny on policy/env files. Indexed in MANIFEST.md v45 as `[LOGIC TO BE CONFIRMED]`.
+- **Why**: Architect directed ("no we need to make it real"). Provided Docker Compose and Cedar policy text specifying the three entities, their model assignments, and the IBAC tier rules. Fleet implements the access model as a runnable Docker stack with FastAPI agent runtime, LiteLLM model routing, Traefik ingress, and Tailscale VPN mesh.
+- **Where encoded**: `02_build/sovereign-fleet/README.md` v1, `02_build/sovereign-fleet/policies/prod.cedar`, `02_build/sovereign-fleet/docker-compose.yml`, `00_authority/MANIFEST.md` v45 § Candidate authority.
+- **Status**: candidate (pending Ewan review)
+- **Signed-by**: Devon | 2026-05-02 | devin-701075c43e444229aa32f993bf60b36a
 
 ### 2026-05-01 — Systems and API Register created as candidate authority
 

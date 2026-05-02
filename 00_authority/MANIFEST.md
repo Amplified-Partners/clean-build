@@ -1,7 +1,7 @@
 ---
 title: Governed workspace manifest (authoritative inventory)
 date: 2026-05-01
-version: 44
+version: 45
 status: draft
 ---
 
@@ -110,6 +110,9 @@ not the GitHub slug. Do not guess another pattern under this org for this lane.
   - `01_truth/interfaces/README.md` `[LOGIC TO BE CONFIRMED]` (folder purpose stub)
 - `01_truth/SYSTEMS-AND-API-REGISTER.md` `[LOGIC TO BE CONFIRMED]` (single register of all APIs, MCP servers, telephony systems, code modules, and their locations across all Amplified Partners repos)
 - `02_build/README.md` `[LOGIC TO BE CONFIRMED]` (runnable artefacts routing stub)
+- `02_build/sovereign-fleet/README.md` `[LOGIC TO BE CONFIRMED]` (OpenClaw Sovereign Fleet — three IBAC-governed agent entities with Cedar policy enforcement; Docker Compose + FastAPI + Traefik + Tailscale)
+- `02_build/sovereign-fleet/policies/prod.cedar` `[LOGIC TO BE CONFIRMED]` (production Cedar IBAC policies — 4-tier access control for fleet agents)
+- `02_build/sovereign-fleet/docker-compose.yml` `[LOGIC TO BE CONFIRMED]` (fleet orchestration stack — Traefik, Tailscale, Kimmy, Alpha, Charlie)
 - `03_shadow/README.md` `[LOGIC TO BE CONFIRMED]` (experiment routing stub)
 - `03_shadow/job-wrapups/README.md` `[NON-AUTHORITATIVE]` (wrap-ups/escalation notes location; learning only)
 

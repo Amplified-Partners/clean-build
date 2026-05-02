@@ -1,8 +1,8 @@
 # Entity: Alpha — Arbiter
-# Model: Claude Opus (Anthropic)
+# Model: Claude Sonnet 4 (Anthropic) — config key: claude_opus (legacy name)
 # Role: Approves destructive ops, validates intent tokens, reviews before merge/deploy.
 
-name: alpha
+name: Alpha
 display_name: "Alpha"
 role: ARBITER
 model: "anthropic/claude-sonnet-4-20250514"

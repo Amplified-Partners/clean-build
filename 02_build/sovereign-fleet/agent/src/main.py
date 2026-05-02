@@ -316,28 +316,30 @@ def _write_file(path: str, payload: dict[str, Any]) -> dict[str, Any]:
 
 
 async def _git_log(path: str, payload: dict[str, Any]) -> dict[str, Any]:
-    """Run git log in the workspace."""
+    """Run git log in the workspace (sandboxed)."""
     import asyncio
 
+    target = _sandbox_path(path)
     limit = payload.get("limit", 20)
     proc = await asyncio.create_subprocess_exec(
         "git", "log", "--oneline", f"-{limit}",
-        cwd=path,
+        cwd=str(target),
         stdout=asyncio.subprocess.PIPE,
         stderr=asyncio.subprocess.PIPE,
     )
     stdout, stderr = await proc.communicate()
     return {
-        "path": path,
+        "path": str(target),
         "log": stdout.decode(errors="replace"),
         "returncode": proc.returncode,
     }
 
 
 async def _grep_search(path: str, payload: dict[str, Any]) -> dict[str, Any]:
-    """Run ripgrep/grep search in the workspace."""
+    """Run ripgrep/grep search in the workspace (sandboxed)."""
     import asyncio
 
+    target = _sandbox_path(path)
     pattern = payload.get("pattern", "")
     if not pattern:
         raise HTTPException(status_code=400, detail="pattern required in payload")
@@ -345,14 +347,14 @@ async def _grep_search(path: str, payload: dict[str, Any]) -> dict[str, Any]:
     proc = await asyncio.create_subprocess_exec(
         "grep", "-rn", "--include=*.py", "--include=*.md", "--include=*.yaml",
         "--include=*.yml", "--include=*.json", "--include=*.toml",
-        pattern, path,
+        pattern, str(target),
         stdout=asyncio.subprocess.PIPE,
         stderr=asyncio.subprocess.PIPE,
     )
     stdout, stderr = await proc.communicate()
     return {
         "pattern": pattern,
-        "path": path,
+        "path": str(target),
         "matches": stdout.decode(errors="replace")[:50000],
         "returncode": proc.returncode,
     }

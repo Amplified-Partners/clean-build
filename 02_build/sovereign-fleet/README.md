@@ -15,7 +15,7 @@ Three IBAC-governed agent entities running as Docker containers with Cedar-based
 | Entity | Role | Model | What it does |
 |--------|------|-------|-------------|
 | **Kimmy** | Orchestrator | Kimi K2 (Moonshot) | Routes tasks, coordinates fleet, triggers Tier 3 ops |
-| **Alpha** | Arbiter | Claude Opus (Anthropic) | Approves destructive operations, validates intent tokens |
+| **Alpha** | Arbiter | Claude Sonnet 4 (Anthropic) | Approves destructive operations, validates intent tokens |
 | **Charlie** | Plumber | DeepSeek V4 | Hands-on coding in worktrees, needs analyst approval to write |
 
 ## IBAC Policy Tiers
