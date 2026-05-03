@@ -1,7 +1,7 @@
 ---
 title: Governed workspace manifest (authoritative inventory)
 date: 2026-05-03
-version: 46
+version: 47
 status: draft
 ---
 
@@ -115,6 +115,7 @@ not the GitHub slug. Do not guess another pattern under this org for this lane.
 - `02_build/README.md` `[LOGIC TO BE CONFIRMED]` (runnable artefacts routing stub)
 - `03_shadow/README.md` `[LOGIC TO BE CONFIRMED]` (experiment routing stub)
 - `03_shadow/job-wrapups/README.md` `[NON-AUTHORITATIVE]` (wrap-ups/escalation notes location; learning only)
+- `03_shadow/validators/README.md` `[NON-AUTHORITATIVE]` (shadow tier for public-data verdicts produced by `02_build/validators/`; non-authoritative pending review-promote)
 
 ## Reference only (sanitised; never authoritative by default)
 
@@ -165,6 +166,12 @@ not the GitHub slug. Do not guess another pattern under this org for this lane.
     - `P10-kill-switch-master-reference.md` `[NON-AUTHORITATIVE]` (510 lines — binary shutdown architecture)
 
 ## Changelog
+
+### v47 — 2026-05-03
+
+- Added `03_shadow/validators/README.md` to **Candidate authority**: shadow tier where public-data verdicts produced by `02_build/validators/` land before human-review promotion to `01_truth/research/validations/`. Same indexed class as `03_shadow/job-wrapups/README.md`.
+
+Signed-by: Devon-ab74 | 2026-05-03 | devin-ab740f2c78ee477a9c16ea3b6ed15293
 
 ### v46 — 2026-05-03
 

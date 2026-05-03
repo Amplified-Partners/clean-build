@@ -282,7 +282,10 @@ def run_INS_085() -> Verdict:
 
     Companies House director appointment / resignation filings are reachable
     via the bulk officer data product (no key). LinkedIn career-history is
-    private. ONS workforce ageing is open.
+    private. ONS workforce ageing is open but is **not fetched here** —
+    the existence test for INS-085 is on the Companies House officer leg;
+    ONS workforce ageing is referenced in the catalogue note but does not
+    contribute to this verdict's statistic.
     """
     bulk_body, bulk_evidence = companies_house.bulk_index()
     return Verdict(
@@ -292,15 +295,20 @@ def run_INS_085() -> Verdict:
         test_class=TestClass.EXISTENCE,
         method=(
             "Existence: Companies House director appointment/resignation "
-            "data is in the bulk product; LinkedIn career history is not "
-            "open public data; ONS workforce ageing is open."
+            "data is in the bulk product (the leg actually fetched); "
+            "LinkedIn career history is not open public data; ONS workforce "
+            "ageing is open but referenced as context only — not fetched."
         ),
         finding=(
             "Companies House officer-data product reachable. LinkedIn data "
             "would require Sales Navigator subscription or scraping — "
             "neither is open public data."
         ),
-        statistic={"public_legs_validated": 2, "public_legs_blocked": 1},
+        statistic={
+            "public_legs_validated": 1,
+            "public_legs_blocked": 1,
+            "public_legs_referenced_only": 1,
+        },
         evidence=EvidenceBundle(items=[bulk_evidence]),
         notes=[
             "Per-firm director-age inference is feasible via Companies House "
@@ -567,22 +575,34 @@ def run_INS_094() -> Verdict:
         "LinkedIn job-postings volume is not open public data; only "
         "available via Talent Insights subscription or scraping (ToS).",
     ]
-    bundle = EvidenceBundle(items=[bulk_evidence] + ([ashe_evidence] if ashe_evidence else []))
+    ashe_validated = ashe_evidence is not None
+    bundle = EvidenceBundle(
+        items=[bulk_evidence] + ([ashe_evidence] if ashe_validated else []),
+    )
     finding = (
         f"Companies House officer-data product reachable; Nomis ASHE "
         f"definition {ashe_status}. LinkedIn leg requires non-open data."
     )
+    if ashe_validated:
+        method = (
+            "Existence: Companies House officer data + Nomis ASHE both "
+            "reachable; LinkedIn hiring-volume data is private."
+        )
+        statistic = {"public_legs_validated": 2, "public_legs_blocked": 1}
+    else:
+        method = (
+            "Existence: Companies House officer data reachable; Nomis ASHE "
+            "unreachable in this run; LinkedIn hiring-volume data is private."
+        )
+        statistic = {"public_legs_validated": 1, "public_legs_blocked": 2}
     return Verdict(
         insight_id="INS-094",
         vertical=VERTICAL,
         band=VerdictBand.PLAUSIBLE,
         test_class=TestClass.EXISTENCE,
-        method=(
-            "Existence: Companies House officer data + Nomis ASHE both "
-            "reachable; LinkedIn hiring-volume data is private."
-        ),
+        method=method,
         finding=finding,
-        statistic={"public_legs_validated": 2, "public_legs_blocked": 1},
+        statistic=statistic,
         evidence=bundle,
         notes=notes,
     )

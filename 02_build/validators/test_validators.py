@@ -304,6 +304,50 @@ class RunnerCoverageTest(unittest.TestCase):
         self.assertEqual(set(RUNNERS), expected)
 
 
+class INS094ConditionalASHETest(unittest.TestCase):
+    """run_INS_094's statistic must reflect whether ASHE actually fetched."""
+
+    def test_statistic_reflects_ashe_blocked(self) -> None:
+        import urllib.error
+        from validators.sources import companies_house, ons
+        from validators.validations import profservices
+
+        with mock.patch.object(
+            companies_house,
+            "bulk_index",
+            return_value=(b"<html>company filings</html>", _evidence()),
+        ), mock.patch.object(
+            ons,
+            "nomis_dataset_definition",
+            side_effect=urllib.error.URLError("nomis offline"),
+        ):
+            verdict = profservices.run_INS_094()
+
+        self.assertEqual(verdict.statistic["public_legs_validated"], 1)
+        self.assertEqual(verdict.statistic["public_legs_blocked"], 2)
+        self.assertIn("Nomis ASHE", verdict.method)
+        self.assertIn("unreachable", verdict.method)
+
+    def test_statistic_reflects_ashe_reachable(self) -> None:
+        from validators.sources import companies_house, ons
+        from validators.validations import profservices
+
+        with mock.patch.object(
+            companies_house,
+            "bulk_index",
+            return_value=(b"<html>company filings</html>", _evidence()),
+        ), mock.patch.object(
+            ons,
+            "nomis_dataset_definition",
+            return_value=({"definition": "ok"}, _evidence()),
+        ):
+            verdict = profservices.run_INS_094()
+
+        self.assertEqual(verdict.statistic["public_legs_validated"], 2)
+        self.assertEqual(verdict.statistic["public_legs_blocked"], 1)
+        self.assertIn("both reachable", verdict.method)
+
+
 class SignedByDefaultTest(unittest.TestCase):
     def test_reads_from_env_when_set(self) -> None:
         with mock.patch.dict(os.environ, {"AMP_SIGNED_BY": "Tester | 2099-01-01"}):
