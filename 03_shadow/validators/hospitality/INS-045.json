@@ -7,8 +7,8 @@
   "rationale": "Google Business Profile Insights are owner-only \u2014 not validatable against open public data. Recipe is sound conditional on client granting GBP Insights access.",
   "evidence": [],
   "metrics": {},
-  "run_at": "2026-05-03T21:15:51.837458+00:00",
-  "code_sha": "82abcf0",
+  "run_at": "2026-05-03T21:41:31.620265+00:00",
+  "code_sha": "5441b71",
   "agent": "Devon-4234",
   "notes": "Validation requires per-client OAuth grant; out-of-scope for public-data sweep."
 }

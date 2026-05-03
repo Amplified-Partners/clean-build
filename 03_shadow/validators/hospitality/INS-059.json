@@ -9,18 +9,18 @@
     {
       "source": "gov_uk.insolvency",
       "url": "https://www.gov.uk/government/collections/insolvency-service-official-statistics",
-      "accessed_at": "2026-05-03T21:15:44.629073+00:00",
+      "accessed_at": "2026-05-03T21:41:22.236874+00:00",
       "http_status": 200,
-      "response_sha256": "c8b933a8a84898eb9135c6f1265eedf9f0c8f1ef96aee88f152f14173c2e7caa",
+      "response_sha256": "93dbe62889e8b1df13e1aa694a99eaf75c2eeccae37a86d6892df8105d078f53",
       "query_params": {},
       "summary": "Stats landing"
     },
     {
       "source": "gazette.insolvency",
       "url": "https://www.thegazette.co.uk/all-notices/notice?categorycode=24",
-      "accessed_at": "2026-05-03T21:16:02.096111+00:00",
+      "accessed_at": "2026-05-03T21:42:04.003601+00:00",
       "http_status": 403,
-      "response_sha256": "0c08a6663163b4b2b3909ffd4d5029c857ee7f40eaff22b2cdf8d348f03a5641",
+      "response_sha256": "a806385464448146afa47cafd63b574e10dc1dd2a9ec611890447de9f6b7eede",
       "query_params": {},
       "summary": "Gazette index"
     }
@@ -29,8 +29,8 @@
     "probes_total": 2,
     "probes_passed": 1
   },
-  "run_at": "2026-05-03T21:16:02.096514+00:00",
-  "code_sha": "82abcf0",
+  "run_at": "2026-05-03T21:42:04.004059+00:00",
+  "code_sha": "5441b71",
   "agent": "Devon-4234",
   "notes": ""
 }

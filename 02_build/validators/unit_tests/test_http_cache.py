@@ -84,3 +84,26 @@ def test_no_cache_forces_refetch(tmp_path: Path) -> None:
         assert fake.calls == 2
     finally:
         fresh.close()
+
+
+def test_auth_params_never_persisted(tmp_path: Path) -> None:
+    """auth_params must not appear in the stored CachedResponse.url, the
+    on-disk meta JSON, or the cache key — only in the wire request."""
+    fake = _FakeHttpx(b"ok")
+    secret = "SUPER-SECRET-METO-KEY"
+    client = HttpClient(cache_dir=tmp_path, _httpx_client=fake)
+    try:
+        resp = client.get(
+            "https://datapoint.metoffice.gov.uk/public/data/val/probe",
+            params={"res": "daily"},
+            auth_params={"key": secret},
+        )
+        # Returned URL must contain the request param but NOT the secret.
+        assert "res=daily" in resp.url
+        assert secret not in resp.url
+        # Meta JSON on disk must not contain the secret either.
+        meta_files = list(tmp_path.glob("*.meta.json"))
+        assert len(meta_files) == 1
+        assert secret not in meta_files[0].read_text(encoding="utf-8")
+    finally:
+        client.close()

@@ -171,12 +171,17 @@ class HttpClient:
         sha = hashlib.sha256(content).hexdigest()
         accessed_at = datetime.now(timezone.utc).isoformat()
 
-        request_url = str(getattr(resp, "url", url))
-        if hasattr(resp, "request") and getattr(resp.request, "url", None) is not None:
-            request_url = str(resp.request.url)
+        # Reconstruct a *clean* URL from the original `url` plus the
+        # non-auth ``params`` only. Using ``resp.url`` here would leak
+        # ``auth_params`` (e.g. the Met Office ``key=`` query string) into
+        # the on-disk meta file and into ``CachedResponse.url`` — and from
+        # there into the committed ``03_shadow/validators/<INS>.json``
+        # evidence URL via ``hospitality._ev``. The clean URL is what we
+        # show as evidence; the wire URL with credentials never persists.
+        clean_url = str(httpx.URL(url).copy_merge_params(params or {}))
         meta = {
             "method": method,
-            "url": request_url,
+            "url": clean_url,
             "status_code": resp.status_code,
             "headers": dict(resp.headers),
             "accessed_at": accessed_at,
@@ -189,7 +194,7 @@ class HttpClient:
         meta_path.write_text(json.dumps(meta, indent=2), encoding="utf-8")
 
         return CachedResponse(
-            url=request_url,
+            url=clean_url,
             method=method,
             status_code=resp.status_code,
             headers=dict(resp.headers),

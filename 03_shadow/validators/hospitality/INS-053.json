@@ -9,9 +9,9 @@
     {
       "source": "gov_uk.tipping_code",
       "url": "https://www.gov.uk/government/publications/distributing-tips-fairly-statutory-code-of-practice",
-      "accessed_at": "2026-05-03T21:16:00.405629+00:00",
+      "accessed_at": "2026-05-03T21:42:02.339403+00:00",
       "http_status": 200,
-      "response_sha256": "ba856d84cecaab21a5daaf0784476d9c704fe6b8c9bb860d74bd11a1693bed7d",
+      "response_sha256": "d16ec89ed28c88414549d62de92e3fc9e0ac3b392c9f482311d69ac8c691a2c5",
       "query_params": {},
       "summary": "Statutory code"
     }
@@ -19,8 +19,8 @@
   "metrics": {
     "http_status": 200
   },
-  "run_at": "2026-05-03T21:16:00.406190+00:00",
-  "code_sha": "82abcf0",
+  "run_at": "2026-05-03T21:42:02.340052+00:00",
+  "code_sha": "5441b71",
   "agent": "Devon-4234",
   "notes": ""
 }

@@ -39,3 +39,13 @@ def test_base_rate_unmeasurable_is_plausible() -> None:
     band, msg, _, _ = base_rate.run(measured=None, claimed=0.20)
     assert band == VerdictBand.PLAUSIBLE
     assert "not measurable" in msg.lower() or "unmeasurable" in msg.lower()
+
+
+def test_base_rate_handles_negative_claimed() -> None:
+    """A negative claimed rate (e.g. a percentage drop measured with sign)
+    must still produce the correct band — the deviation formula divides by
+    abs(claimed), so the sign of `claimed` does not flip the comparison."""
+    far = base_rate.run(measured=-0.10, claimed=-0.50, direction="approx", tolerance=0.20)
+    assert far[0] == VerdictBand.DISPROVEN
+    near = base_rate.run(measured=-0.45, claimed=-0.50, direction="approx", tolerance=0.20)
+    assert near[0] == VerdictBand.PROVEN

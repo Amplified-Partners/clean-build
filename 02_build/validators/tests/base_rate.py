@@ -91,7 +91,7 @@ def run(
             evidence,
         )
 
-    deviation = abs(measured - claimed) / claimed
+    deviation = abs(measured - claimed) / abs(claimed)
     metrics["deviation"] = deviation
     if deviation <= tolerance:
         return (
