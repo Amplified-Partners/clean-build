@@ -345,3 +345,11 @@ One entry per decision. Keep it short. Link out to supporting docs.
   `01_truth/processes/2026-04_job-wrapup_and_escalation-note_sop_v1.md` (v14),
   `AGENTS.md`, `03_shadow/job-wrapups/README.md`.
 - **Status**: active
+
+## Changelog
+
+### v14 — 2026-05-03
+
+- Added 2026-05-03 entry: Branch protection + Linear-linked PR workflow for active repos (AMP-70). Records the decision to adopt a uniform PR workflow across `clean-build`, `ground-truth`, `crm`, `beast-code-export`: branch protection on `main`, required Linear ticket reference, branch-name prefix convention, CODEOWNERS-gated review, and PR↔Linear status sync. Encoded at `00_authority/PR_WORKFLOW.md` v1, `00_authority/MANIFEST.md` v49, `01_truth/processes/2026-05_pr-workflow_branch-protection_sop_v1.md` v1.
+
+Signed-by: Devon-4330 | 2026-05-03 | session devin-4330c661a80b4770aa8f62980c21366a
