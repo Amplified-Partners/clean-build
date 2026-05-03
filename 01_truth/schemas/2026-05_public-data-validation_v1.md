@@ -10,7 +10,7 @@ related:
 signed-by: Devon-4234 | 2026-05-03 | session devin-4234e1c8afbe42f2aff84a29ce139809
 changelog:
   - 2026-05-03 — Devon-4234: initial draft (AMP-65 hospitality sweep).
-  - 2026-05-03 — Devon-4234: cache-key clarified — SHA-256 over non-auth sorted params; auth params stripped (key/apikey/token/etc.) since they are credentials, not request parameters.
+  - 2026-05-03 — Devon-4234: cache-key clarified — SHA-256 over sorted ``params``; credentials travel separately as ``auth_params`` and never enter the cache key, the meta file, or log lines.
 ---
 
 # Public-Data Validation — Schema (v1)
@@ -127,15 +127,18 @@ catalogue rendering and recipe routing.
 
 - Every HTTP fetch that produces evidence is cached on disk under
   `02_build/validators/.cache/`.
-- The cache key is `sha256(method | url | sorted non_auth_query_params)` —
-  a hex digest used purely as an opaque, deterministic filename for the
-  on-disk cache (never for password storage). Auth params (`key`, `apikey`,
-  `api_key`, `token`, `access_token`, `secret`, `secret_key`, `password`,
-  `auth`) are stripped before hashing because they are credentials, not
-  request parameters: rotating a valid Met Office DataPoint key returns the
-  same response payload, so cache entries are correctly shared across key
-  rotations. Stripping also keeps secret values out of any hash function
-  (`py/weak-sensitive-data-hashing`).
+- The cache key is `sha256(method | url | sorted_params)` — a hex digest
+  used purely as an opaque, deterministic filename for the on-disk cache
+  (never for password storage).
+- The `HttpClient` distinguishes two argument groups: `params` (request
+  parameters that influence the response, included in the cache key and
+  in the on-disk meta file) and `auth_params` (credentials such as Met
+  Office DataPoint's `key=` query string, sent on the wire but never
+  written to the cache key, the meta file, or any log line). Sources that
+  need URL-embedded auth use `auth_params`; everything else uses `params`.
+  This keeps secrets out of the on-disk audit trail and makes cache
+  entries correctly shared across credential rotations (rotating a valid
+  Met Office key returns the same response payload).
 - Cached entries store: response status, headers, body bytes, original UTC
   fetch time, and a `from_cache` flag in the deserialised `CachedResponse`.
 - Re-runs use the cache by default. `--no-cache` forces re-fetch.

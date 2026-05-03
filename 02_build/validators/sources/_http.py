@@ -57,44 +57,15 @@ class CachedResponse:
         return json.loads(self.text())
 
 
-# Some public-data APIs (Met Office DataPoint, future EPC, etc.) require an
-# API key as a query parameter rather than an Authorization header. We strip
-# those param names from the cache-key digest so that (a) the secret value
-# never enters a hash function — keeping CodeQL's
-# ``py/weak-sensitive-data-hashing`` rule satisfied and avoiding any
-# accidental disk-trail of the credential — and (b) cache entries are shared
-# across rotations of the same credential, which is the correct semantic
-# (rotating a valid Met Office key returns the same response payload; the
-# key is auth, not a request parameter).
-_AUTH_PARAM_NAMES = (
-    "key",
-    "apikey",
-    "api_key",
-    "token",
-    "access_token",
-    "secret",
-    "secret_key",
-    "password",
-    "auth",
-)
-
-
-def _strip_auth(params: dict[str, Any] | None) -> dict[str, Any]:
-    if not params:
-        return {}
-    return {k: v for k, v in params.items() if k.lower() not in _AUTH_PARAM_NAMES}
-
-
 def _key(method: str, url: str, params: dict[str, Any] | None) -> str:
     """Content-addressed cache key — *not* security-sensitive.
 
-    The hash is an opaque, deterministic filename for the on-disk cache; it
-    is never used for password storage. Auth params are stripped first (see
-    ``_AUTH_PARAM_NAMES``); the resulting digest covers method + URL + the
-    *non-auth* sorted params only.
+    Only ``params`` (request parameters) reach this function; credentials
+    travel separately as ``auth_params`` and never enter the digest. The
+    digest is therefore an opaque, deterministic filename for the on-disk
+    cache and is not used for password storage.
     """
-    safe_params = _strip_auth(params)
-    payload = method.upper() + "|" + url + "|" + json.dumps(safe_params, sort_keys=True)
+    payload = method.upper() + "|" + url + "|" + json.dumps(params or {}, sort_keys=True)
     return hashlib.sha256(payload.encode("utf-8")).hexdigest()  # noqa: S324  (not for password hashing)
 
 
@@ -140,8 +111,11 @@ class HttpClient:
         url: str,
         params: dict[str, Any] | None = None,
         headers: dict[str, str] | None = None,
+        auth_params: dict[str, Any] | None = None,
     ) -> CachedResponse:
-        return self._request("GET", url, params=params, headers=headers)
+        return self._request(
+            "GET", url, params=params, headers=headers, auth_params=auth_params
+        )
 
     def _request(
         self,
@@ -149,7 +123,14 @@ class HttpClient:
         url: str,
         params: dict[str, Any] | None = None,
         headers: dict[str, str] | None = None,
+        auth_params: dict[str, Any] | None = None,
     ) -> CachedResponse:
+        # ``params`` are request parameters that influence the response and
+        # therefore the cache key. ``auth_params`` are credentials (e.g. Met
+        # Office DataPoint ``key=``) — they are sent on the wire but never
+        # enter the cache key, the on-disk meta file, or any log line. This
+        # keeps secrets out of the on-disk audit trail and out of the
+        # ``py/weak-sensitive-data-hashing`` flow CodeQL tracks.
         key = _key(method, url, params)
         body_path = self.cache_dir / f"{key}.bin"
         meta_path = self.cache_dir / f"{key}.meta.json"
@@ -179,12 +160,13 @@ class HttpClient:
         # avoids leaking caller data into log lines and breaks the taint flow
         # CodeQL tracks from caller-supplied dicts into log records.
         logger.info("HTTP %s %s n_params=%d", method, url, len(params or {}))
+        wire_params = {**(params or {}), **(auth_params or {})} if auth_params else params
         if hasattr(self._client, "request"):
-            resp = self._client.request(method, url, params=params, headers=headers)
+            resp = self._client.request(method, url, params=wire_params, headers=headers)
         else:
             # Fake/mock clients used in unit tests expose ``get`` only.
             assert method.upper() == "GET", "fake client only supports GET"
-            resp = self._client.get(url, params=params, headers=headers)
+            resp = self._client.get(url, params=wire_params, headers=headers)
         content = resp.content
         sha = hashlib.sha256(content).hexdigest()
         accessed_at = datetime.now(timezone.utc).isoformat()

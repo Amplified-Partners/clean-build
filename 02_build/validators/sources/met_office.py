@@ -34,5 +34,6 @@ def fetch_capabilities(client: HttpClient) -> CachedResponse:
     api_key = os.getenv(ENV_KEY_NAME, "")
     return client.get(
         f"{DATAPOINT_BASE}/val/wxfcs/all/json/capabilities",
-        params={"res": "daily", "key": api_key},
+        params={"res": "daily"},
+        auth_params={"key": api_key},
     )
