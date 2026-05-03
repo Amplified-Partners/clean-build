@@ -209,6 +209,7 @@ co_signed_by: "Devon-6264, 2026-05-03, devin-6264b0ba42c6453b86b166bebc3d868a (a
 **SOURCE DOC:** 04
 **STATUS:** HYPOTHESIS
 **VALIDATION:** PLAUSIBLE | test_class=distribution | metric="mean=82.0000, sd=29.6912, claim_threshold=12.0000, sigma_distance=+2.36, n=23, direction=>=; total_residential_sales=1886; window=2024-05-03_to_2026-05-03; postcode_areas=NE1,NE2,NE3" | evidence=03_shadow/validators/INS-006/ | run=2026-05-03
+
 ---
 
 **ID:** INS-007
@@ -228,6 +229,7 @@ co_signed_by: "Devon-6264, 2026-05-03, devin-6264b0ba42c6453b86b166bebc3d868a (a
 **SOURCE DOC:** 04
 **STATUS:** HYPOTHESIS
 **VALIDATION:** PLAUSIBLE | test_class=existence | metric="rows=1, granularity=match, license=open; dataset_present=True; sample_rows=0" | evidence=03_shadow/validators/INS-007/ | run=2026-05-03
+
 ---
 
 **ID:** INS-008
@@ -513,6 +515,7 @@ co_signed_by: "Devon-6264, 2026-05-03, devin-6264b0ba42c6453b86b166bebc3d868a (a
 **SOURCE DOC:** 04
 **STATUS:** HYPOTHESIS
 **VALIDATION:** PLAUSIBLE | test_class=existence | metric="rows=1, granularity=match, license=open; voa_present=True; ch_present=False" | evidence=03_shadow/validators/INS-022/ | run=2026-05-03
+
 ---
 
 ### Trades Death Spiral Indicators (INS-023 to INS-027)

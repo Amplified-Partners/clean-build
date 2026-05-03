@@ -65,3 +65,16 @@ def test_idempotent_when_unchanged(_patch_catalogue):
         "**ID:** INS-006\n**STATUS:** HYPOTHESIS\n**VALIDATION:** SAME\n---\n",
     )
     assert core.upsert_validation_line("INS-006", "**VALIDATION:** SAME") is False
+
+
+def test_preserves_blank_line_separator(_patch_catalogue):
+    """Catalogue entries follow ``...STATUS: ...\\n\\n---``. Upserts must not
+    eat the blank line between the entry and its ``---`` separator.
+    """
+    body = "**ID:** INS-006\n**STATUS:** HYPOTHESIS\n\n---\n**ID:** INS-007\n"
+    _seed(_patch_catalogue, body)
+    core.upsert_validation_line("INS-006", "**VALIDATION:** OK")
+    out = _patch_catalogue.read_text()
+    # The blank line between the (new) VALIDATION line and the --- separator
+    # must survive the rewrite.
+    assert "**VALIDATION:** OK\n\n---" in out

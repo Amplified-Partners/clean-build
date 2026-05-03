@@ -59,8 +59,8 @@ Most catalogue entries are A–B–C bridges where **C is client data** (job rec
 
 Convention:
 
-- `PLAUSIBLE` is the default verdict when the public leg validates and the client-side claim has published research support listed in `FRAMEWORK LINEAGE`.
-- `PROVEN` is reserved for recipes that are **fully testable from public data** — e.g. INS-006 (Land Registry transaction count), INS-018 (EPC boiler distribution), INS-022 / INS-011 (Companies House death-spiral on named competitors).
+- `PLAUSIBLE` is the default verdict when the public leg validates and the client-side claim has published research support listed in `FRAMEWORK LINEAGE`. **Most catalogue entries land here**, including INS-006 (Land Registry sale counts → conversion-to-refurb is client-side), INS-018 (EPC stock → boiler-replacement uptake is client-side), and INS-022 (VOA + Companies House universe → outreach conversion is client-side). The runner caps these at `PLAUSIBLE` even when the public-leg test passes by a wide margin.
+- `PROVEN` is reserved for recipes that are **fully testable from public data with no client-side leg** — e.g. INS-011 (Companies House death-spiral signals on a named competitor list, where every input field — accounts filed late, charges, director churn — is publicly observable). No insight in the present trades pilot meets this bar; the pipeline supports the band so future fully-public recipes can land there.
 
 This is documented per insight in the `VALIDATION:` field's `notes:` line.
 

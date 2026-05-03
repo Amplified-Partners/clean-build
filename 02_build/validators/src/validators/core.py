@@ -231,10 +231,15 @@ def upsert_validation_line(insight_id: str, line: str) -> bool:
     if not inserted:
         logger.warning("No STATUS: anchor in %s — appending VALIDATION at block end", insight_id)
         out_lines.append(new_validation)
-    new_block = "\n".join(out_lines)
-    if new_block == block:
+    # Preserve the original block's trailing newline run. ``splitlines()`` /
+    # ``"\n".join()`` drops trailing newlines, so we re-attach them — this
+    # both keeps the blank-line separator before ``\n---`` and makes the
+    # below equality check apples-to-apples (so re-runs short-circuit).
+    trailing = block[len(block.rstrip("\n")) :]
+    new_block_with_trailing = "\n".join(out_lines) + trailing
+    if new_block_with_trailing == block:
         return False
-    new_text = text[:idx] + new_block + text[block_end:]
+    new_text = text[:idx] + new_block_with_trailing + text[block_end:]
     CATALOGUE_PATH.write_text(new_text)
     return True
 
