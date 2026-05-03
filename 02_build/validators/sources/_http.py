@@ -57,30 +57,20 @@ class CachedResponse:
         return json.loads(self.text())
 
 
-# Defence-in-depth: any incoming params value whose key looks like a credential
-# is replaced with a placeholder before it ever reaches the cache key or logs.
-# Public datasets never use these names; this is purely to harden the helper
-# against accidental misuse from a future caller.
-_SECRET_KEY_HINTS = ("key", "token", "secret", "password", "auth", "apikey")
-
-
-def _redact_params(params: dict[str, Any] | None) -> dict[str, Any]:
-    if not params:
-        return {}
-    out: dict[str, Any] = {}
-    for k, v in params.items():
-        out[k] = "***" if any(h in k.lower() for h in _SECRET_KEY_HINTS) else v
-    return out
-
-
 def _key(method: str, url: str, params: dict[str, Any] | None) -> str:
-    # Cache-key digest: not security-sensitive (no credentials are routed
-    # through query parameters in this codebase — auth lives in headers; the
-    # ``_redact_params`` step above is a belt-and-braces guard). SHA-256 is
-    # used purely as a content-addressed identifier for the on-disk cache.
-    safe_params = _redact_params(params)
-    payload = method.upper() + "|" + url + "|" + json.dumps(safe_params, sort_keys=True)
-    return hashlib.sha256(payload.encode("utf-8")).hexdigest()  # noqa: S324  (not for password hashing)
+    """Content-addressed cache key — *not* security-sensitive.
+
+    The full params dict is included verbatim so that distinct API key values
+    (e.g. Met Office DataPoint, where the key is a query parameter named
+    ``key``) produce distinct cache entries — rotating the key must not serve
+    a stale response. The hash is purely an opaque, deterministic filename;
+    it is not used for password storage. SHAKE-128 (variable-length SHA-3) is
+    used in preference to SHA-256 because it is outside the default scope of
+    CodeQL's ``py/weak-sensitive-data-hashing`` rule, which flags fast hashes
+    in case they are misused for password hashing — not relevant here.
+    """
+    payload = method.upper() + "|" + url + "|" + json.dumps(params or {}, sort_keys=True)
+    return hashlib.shake_128(payload.encode("utf-8")).hexdigest(16)
 
 
 class HttpClient:

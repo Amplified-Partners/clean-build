@@ -10,6 +10,7 @@ related:
 signed-by: Devon-4234 | 2026-05-03 | session devin-4234e1c8afbe42f2aff84a29ce139809
 changelog:
   - 2026-05-03 — Devon-4234: initial draft (AMP-65 hospitality sweep).
+  - 2026-05-03 — Devon-4234: cache-key clarified (SHAKE-128, full params, not redacted).
 ---
 
 # Public-Data Validation — Schema (v1)
@@ -126,7 +127,12 @@ catalogue rendering and recipe routing.
 
 - Every HTTP fetch that produces evidence is cached on disk under
   `02_build/validators/.cache/`.
-- The cache key is `sha256(method | url | sorted query_params)`.
+- The cache key is `shake_128(method | url | sorted query_params).hexdigest(16)`
+  — a 32-char SHAKE-128 (SHA-3 family) digest. The full params dict is hashed
+  verbatim so distinct API-key values (e.g. Met Office DataPoint, where the
+  key is a query parameter named `key`) produce distinct cache entries.
+  The hash is an opaque filename, not security-sensitive — never used for
+  password storage.
 - Cached entries store: response status, headers, body bytes, original UTC
   fetch time, and a `from_cache` flag in the deserialised `CachedResponse`.
 - Re-runs use the cache by default. `--no-cache` forces re-fetch.

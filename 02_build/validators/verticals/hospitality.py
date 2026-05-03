@@ -615,7 +615,9 @@ def validate_INS_050(client: HttpClient) -> Verdict:
 
     def probe_current() -> tuple[bool, str, EvidenceItem]:
         resp = defra_air.fetch_current_levels(client)
-        passed = resp.status_code == 200 and b"DAQI" in resp.content or b"index" in resp.content
+        passed = resp.status_code == 200 and (
+            b"DAQI" in resp.content or b"index" in resp.content
+        )
         return (
             passed,
             f"DEFRA UK-AIR currentlevels reachable (status {resp.status_code}).",

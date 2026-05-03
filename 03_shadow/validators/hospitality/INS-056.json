@@ -9,9 +9,9 @@
     {
       "source": "nomis",
       "url": "https://www.nomisweb.co.uk/api/v01/dataset/def.sdmx.json",
-      "accessed_at": "2026-05-03T20:57:07.358438+00:00",
+      "accessed_at": "2026-05-03T21:15:42.527068+00:00",
       "http_status": 200,
-      "response_sha256": "c429ebde799e5ff96263e209000beb0fb7d32840feb280ffb4d051dd2574d603",
+      "response_sha256": "e836de15e6f6ea4a8bbf5acd5a29b4f147e10f906350d3ca41b654375196227e",
       "query_params": {},
       "summary": "Dataset catalogue"
     }
@@ -19,8 +19,8 @@
   "metrics": {
     "http_status": 200
   },
-  "run_at": "2026-05-03T20:57:27.862631+00:00",
-  "code_sha": "e495cee",
+  "run_at": "2026-05-03T21:16:00.409693+00:00",
+  "code_sha": "82abcf0",
   "agent": "Devon-4234",
   "notes": ""
 }

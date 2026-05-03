@@ -9,18 +9,18 @@
     {
       "source": "ons.bics",
       "url": "https://www.ons.gov.uk/businessindustryandtrade/business/businessservices/bulletins/businessinsightsandimpactontheukeconomy/latest",
-      "accessed_at": "2026-05-03T20:56:58.302499+00:00",
+      "accessed_at": "2026-05-03T21:15:33.752466+00:00",
       "http_status": 200,
-      "response_sha256": "8dfde9b8df2f284b5aae103d121340185f651d3aa07d0c239775e7534d870406",
+      "response_sha256": "ef49f3e6dee91afc13ca86134b0495841c823dc1bcedd970477adbae8bee3eaa",
       "query_params": {},
       "summary": "BICS landing"
     },
     {
       "source": "nomis",
       "url": "https://www.nomisweb.co.uk/api/v01/dataset/def.sdmx.json",
-      "accessed_at": "2026-05-03T20:57:07.358438+00:00",
+      "accessed_at": "2026-05-03T21:15:42.527068+00:00",
       "http_status": 200,
-      "response_sha256": "c429ebde799e5ff96263e209000beb0fb7d32840feb280ffb4d051dd2574d603",
+      "response_sha256": "e836de15e6f6ea4a8bbf5acd5a29b4f147e10f906350d3ca41b654375196227e",
       "query_params": {},
       "summary": "Dataset catalogue"
     }
@@ -29,8 +29,8 @@
     "probes_total": 2,
     "probes_passed": 2
   },
-  "run_at": "2026-05-03T20:57:07.364293+00:00",
-  "code_sha": "e495cee",
+  "run_at": "2026-05-03T21:15:42.532494+00:00",
+  "code_sha": "82abcf0",
   "agent": "Devon-4234",
   "notes": ""
 }

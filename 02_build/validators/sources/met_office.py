@@ -22,7 +22,7 @@ import os
 from ._http import CachedResponse, HttpClient
 
 ENV_KEY_NAME = "MET_OFFICE_API_KEY"
-DATAPOINT_BASE = "http://datapoint.metoffice.gov.uk/public/data"
+DATAPOINT_BASE = "https://datapoint.metoffice.gov.uk/public/data"
 
 
 def key_available() -> bool:
