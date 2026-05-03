@@ -53,7 +53,7 @@
           "source": "ons_beta",
           "url": "https://api.beta.ons.gov.uk/v1/datasets/cpi01/editions",
           "params": {},
-          "accessed_utc": "2026-05-03T22:57:41Z",
+          "accessed_utc": "2026-05-03T23:27:53Z",
           "status": 404,
           "sha256": "",
           "cached": false,
@@ -71,8 +71,8 @@
     "Client leg = own historical prices needs internal data; recipe is PLAUSIBLE end-to-end at deploy."
   ],
   "confidence": 90,
-  "run_at_utc": "2026-05-03T22:57:41Z",
-  "git_sha": "0db308ab54ad19848c5c9996461a5ed6140855cf",
+  "run_at_utc": "2026-05-03T23:27:53Z",
+  "git_sha": "27950820182ed876967ea6c99d3de863c3d1506f",
   "session_id": "devin-9a6bd256bd7c4a90a083a471fa94a810",
-  "signed_by": "Devon-9a6b"
+  "signed_by": "Devon-9a6b | 2026-05-03 | devin-9a6bd256bd7c4a90a083a471fa94a810"
 }

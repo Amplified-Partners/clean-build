@@ -30,8 +30,10 @@ def run() -> Verdict:
         ],
         notes=[
             "Per AGENTS.md / OPINION_CONFIDENCE: deployment is medium-to-irreversible; needs Ewan + legal review.",
-            "Recipe value claim is supported by general SEO/Google Shopping relevance literature — but ",
-            "this specific implementation must not run from a Devin session against live retailer sites.",
+            (
+                "Recipe value claim is supported by general SEO/Google Shopping relevance literature — but "
+                "this specific implementation must not run from a Devin session against live retailer sites."
+            ),
         ],
         confidence=75,
     )
