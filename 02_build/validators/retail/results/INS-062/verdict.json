@@ -2,9 +2,9 @@
   "insight_id": "INS-062",
   "title": "Price Elasticity from ONS CPI \u00d7 Sector CPI \u00d7 Own Historical Prices (Retail)",
   "vertical": "Retail",
-  "verdict": "PROVEN",
+  "verdict": "PLAUSIBLE",
   "test_class": "existence",
-  "summary": "ONS CPIH/CPI item-level sub-indices reachable with time-series granularity",
+  "summary": "CPI dataset reachable but partial granularity: 1 source(s) failed \u2014 partial validation",
   "evidence": [
     {
       "test": "existence",
@@ -53,7 +53,7 @@
           "source": "ons_beta",
           "url": "https://api.beta.ons.gov.uk/v1/datasets/cpi01/editions",
           "params": {},
-          "accessed_utc": "2026-05-03T23:27:53Z",
+          "accessed_utc": "2026-05-03T23:45:40Z",
           "status": 404,
           "sha256": "",
           "cached": false,
@@ -63,16 +63,16 @@
           "dataset": "cpi01"
         }
       ],
-      "reason": "all 1 sources reachable; data shape consistent with claim"
+      "reason": "1 source(s) failed \u2014 partial validation"
     }
   ],
   "notes": [
     "Public leg = ONS CPI sub-indices, PROVEN reachable with monthly time-series granularity.",
     "Client leg = own historical prices needs internal data; recipe is PLAUSIBLE end-to-end at deploy."
   ],
-  "confidence": 90,
-  "run_at_utc": "2026-05-03T23:27:53Z",
-  "git_sha": "27950820182ed876967ea6c99d3de863c3d1506f",
+  "confidence": 70,
+  "run_at_utc": "2026-05-03T23:45:40Z",
+  "git_sha": "b3ae4081167af430b103b8d2957dbae518fe0816",
   "session_id": "devin-9a6bd256bd7c4a90a083a471fa94a810",
   "signed_by": "Devon-9a6b | 2026-05-03 | devin-9a6bd256bd7c4a90a083a471fa94a810"
 }

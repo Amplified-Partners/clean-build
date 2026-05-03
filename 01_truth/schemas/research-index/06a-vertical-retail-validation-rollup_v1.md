@@ -1,7 +1,7 @@
 ---
 title: "Vertical Retail — public-data validation rollup (AMP-66)"
 id: "vertical-retail-validation-rollup-v1"
-version: 4
+version: 5
 created: 2026-05-03
 last_validated: 2026-05-03
 type: document
@@ -28,8 +28,8 @@ profile — unchanged), `2026-05_public-data-validation_v1.md` (verdict scheme),
 
 | Verdict     | Count | Notes                                                                  |
 |-------------|-------|------------------------------------------------------------------------|
-| `PROVEN`    | 9     | Public data fully reachable at claimed granularity                      |
-| `PLAUSIBLE` | 9     | Underpowered, key-gated, or internal-only-with-research-support         |
+| `PROVEN`    | 8     | Public data fully reachable at claimed granularity                      |
+| `PLAUSIBLE` | 10    | Underpowered, key-gated, partially-reachable, or research-backed        |
 | `DISPROVEN` | 0     |                                                                        |
 | `DEFERRED`  | 1     | INS-077 — ToS-bound competitor scraping; held outside automated runs    |
 | **Total**   | **19**|                                                                        |
@@ -45,7 +45,7 @@ source response.
 |-----------|-----------------------------------------------------------------------------------------------------|-------------|---------------------------|------------|
 | INS-060   | Footfall Forecasting × Met Office × Local Events × Transport Disruption                             | PLAUSIBLE   | existence                 | 70         |
 | INS-061   | Stock-Out Risk × Shipping Port Dwell × HMRC Trade Data × FX                                         | PROVEN      | existence                 | 80         |
-| INS-062   | Price Elasticity from ONS CPI × Sector CPI × Own Historical Prices                                  | PROVEN      | existence                 | 90         |
+| INS-062   | Price Elasticity from ONS CPI × Sector CPI × Own Historical Prices                                  | PLAUSIBLE   | existence                 | 70         |
 | INS-063   | Land Registry Commercial Voids as Neighbourhood Demand Signal                                       | PLAUSIBLE   | existence                 | 65         |
 | INS-064   | Competitor Death-Spiral Detection via Companies House + Gazette                                     | PLAUSIBLE   | existence                 | 65         |
 | INS-065   | Shopify Cohort × ONS Wages × Local IMD → LTV Segmentation                                           | PROVEN      | existence                 | 88         |
@@ -132,6 +132,10 @@ commit.
 - v4 (2026-05-03, Devon-9a6b) — Devin Review fix:
   - INS-067: Police.uk anchor list silently included Glasgow (G1) and Edinburgh (EH1). Police.uk only covers the 43 territorial forces in England + Wales — Police Scotland is a separate organisation that does not publish to data.police.uk, so those two anchors always returned `[]`. The two structural zeros pulled the distribution mean from 184.2 down to 153.5 and inflated stdev, dropping z below the 1.0 threshold and producing a spurious PLAUSIBLE. Split `RETAIL_AREAS` into a canonical master list (still includes Scotland for use with non-Police.uk sources) and a `RETAIL_AREAS_POLICE_UK` England+Wales subset; INS-067 now uses the latter. New result: n=10, mean=184.2, σ=158.2, z=1.13 ≥ 1.0 → PROVEN (conf 88). Manchester returns 0 in March 2026 (Greater Manchester Police data lag, not a coverage gap) and is kept — it's real signal, not noise.
   - Headline counts updated: 9 PROVEN / 9 PLAUSIBLE / 1 DEFERRED.
+- v5 (2026-05-03, Devon-9a6b) — Devin Review framework fix:
+  - `existence_check` was silently accepting partial coverage as PROVEN when `require_all=False` (the default). The function computed `n_failed` and put it in the bundle but never used it to gate the verdict, so a runner that queried two sources and got back one 200 + one 404 would land at PROVEN with the misleading reason "all 1 sources reachable". Added a `len(failed) > 0` PLAUSIBLE branch with reason `"{N} source(s) failed — partial validation"`; added five unit tests in `02_build/validators/retail/tests/test_existence.py` covering all branches.
+  - Cascading effect: INS-062 was the only insight that exhibited the symptom (cpih01 200, cpi01 404). It now correctly downgrades to PLAUSIBLE (conf 70). The runner queried both `cpih01` (the canonical CPIH dataset, which IS reachable) and `cpi01` (which is not currently published on the ONS Beta v1 API) — the cpih01 leg alone supports the recipe, but the runner did not encode that knowledge, so the framework correctly reports partial coverage. Cleaning up the runner to query only `cpih01` is left for a follow-up so this commit is purely the framework fix + the honest downgrade.
+  - Headline counts updated: 8 PROVEN / 10 PLAUSIBLE / 1 DEFERRED.
 
 ---
 

@@ -1,7 +1,7 @@
 ---
 title: Governed workspace manifest (authoritative inventory)
 date: 2026-05-03
-version: 50
+version: 51
 status: draft
 ---
 
@@ -107,7 +107,7 @@ not the GitHub slug. Do not guess another pattern under this org for this lane.
 - `01_truth/schemas/` `[LOGIC TO BE CONFIRMED]` (schema contracts to be populated)
   - `01_truth/schemas/README.md` `[LOGIC TO BE CONFIRMED]` (folder purpose stub)
   - `01_truth/schemas/2026-05_public-data-validation_v1.md` `[LOGIC TO BE CONFIRMED]` (public-data verdict schema: PROVEN / PLAUSIBLE / DISPROVEN core bands + BLOCKED gap-marker + DEFERRED policy band; four reusable test classes; additive `VALIDATION:` field on catalogue; reference impls at `02_build/validators/` shared and `02_build/validators/retail/` self-contained; AMP-67 + AMP-66 joint)
-  - `01_truth/schemas/research-index/06a-vertical-retail-validation-rollup_v1.md` `[LOGIC TO BE CONFIRMED]` (retail vertical validation rollup: 9 PROVEN / 9 PLAUSIBLE / 1 DEFERRED across 19 retail insights against real UK public data; companion to `06-vertical-retail-profservices_v1.md` and to validators in `02_build/validators/retail/`; AMP-66)
+  - `01_truth/schemas/research-index/06a-vertical-retail-validation-rollup_v1.md` `[LOGIC TO BE CONFIRMED]` (retail vertical validation rollup: 8 PROVEN / 10 PLAUSIBLE / 1 DEFERRED across 19 retail insights against real UK public data; companion to `06-vertical-retail-profservices_v1.md` and to validators in `02_build/validators/retail/`; AMP-66)
 - `01_truth/interfaces/` `[LOGIC TO BE CONFIRMED]` (API contracts to be populated)
   - `01_truth/interfaces/README.md` `[LOGIC TO BE CONFIRMED]` (folder purpose stub)
 - `01_truth/research/` `[LOGIC TO BE CONFIRMED]` (truth-tier research evidence; promotion target for shadow research)
@@ -168,6 +168,17 @@ not the GitHub slug. Do not guess another pattern under this org for this lane.
     - `P10-kill-switch-master-reference.md` `[NON-AUTHORITATIVE]` (510 lines — binary shutdown architecture)
 
 ## Changelog
+
+### v51 — 2026-05-03
+
+- Headline rollup count for `06a-vertical-retail-validation-rollup_v1.md` updated to **8 PROVEN / 10 PLAUSIBLE / 1 DEFERRED** (was 9 / 9 / 1 in v50).
+- Reason: Devin Review found a framework-level bug in `02_build/validators/retail/tests/existence.py::existence_check` — when `require_all=False` (the default), the function silently accepted partial coverage as PROVEN. The `n_failed` count was computed and stored in the bundle but never gated the verdict, so a runner with one 200 + one 404 source landed at PROVEN with reason "all 1 sources reachable". Added a `len(failed) > 0 → PLAUSIBLE` branch with reason "{N} source(s) failed — partial validation"; added five unit tests in `tests/test_existence.py` covering all branches (all-reachable, all-failed, mixed-skipped, mixed-failed, require_all-with-failures).
+- Cascading effect: INS-062 (Price Elasticity from ONS CPI × Sector CPI × Own Historical Prices) was the only insight exhibiting the symptom — it queries cpih01 (200) + cpi01 (404) and was falsely PROVEN at conf 90. Now correctly PLAUSIBLE at conf 70. cpih01 alone supports the recipe; cleaning the runner to query only cpih01 is left for a follow-up so this commit is purely the framework fix + the honest downgrade.
+- Also addressed two earlier Devin Review findings on commit b3ae408: `02_build/validators/retail/verdict.py` no longer hardcodes `SESSION_ID` and `AGENT` — both now read from `AMP_SIGNED_BY` / `AMP_SESSION_ID` env vars via `_default_signed_by()` / `_default_session_id()` factory functions matching the shared `02_build/validators/core.py` pattern, so re-runs by other agents (Beast cron, a different Devin session, OpenClaw, …) attribute their verdicts correctly. Fixed an implicit-string-concatenation pitfall in `INS-077` notes that had split one sentence across two `notes[]` entries.
+- Earlier Devin Review fix on commit 2795082 (broad-exception retry loops): changed `except Exception` in `fetch_json` and `fetch_text` to `except _TRANSIENT` (`ConnectionError`, `Timeout`, `ChunkedEncodingError`) so deterministic 4xx errors fail fast instead of burning DEFAULT_RETRIES backoff seconds. Two regression tests in `tests/test_redaction.py` lock in the behaviour.
+- No new files added or removed; new test file `02_build/validators/retail/tests/test_existence.py` is internal to the retail validator package.
+
+Signed-by: Devon-9a6b | 2026-05-03 | devin-9a6bd256bd7c4a90a083a471fa94a810
 
 ### v50 — 2026-05-03
 

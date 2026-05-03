@@ -32,12 +32,18 @@ def _verdict_for(ins_id: str) -> dict | None:
 
 
 def _format_validation_line(v: dict) -> str:
+    # signed_by is a full SIGNATURES.md signature ("<agent> | <date> | <session>")
+    # when AMP_SIGNED_BY is set (the conventional shape). The catalogue line
+    # already carries `run=<date>` so the date+session would just duplicate; show
+    # the leading agent token only here. Full sig still lives in verdict.json.
+    raw_signed_by = v.get("signed_by", "unknown")
+    agent = raw_signed_by.split("|", 1)[0].strip()
     bits = [
         f"verdict={v['verdict']}",
         f"test={v['test_class']}",
         f"conf={v.get('confidence', 0)}",
         f"run={v.get('run_at_utc', '?')[:10]}",
-        f"signed_by={v.get('signed_by', 'unknown')}",
+        f"signed_by={agent}",
     ]
     return f"**VALIDATION (AMP-66):** {' | '.join(bits)} — {v['summary']}"
 

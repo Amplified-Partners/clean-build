@@ -1293,7 +1293,7 @@ signed_by: "Devon, 2026-04-25, devin-992682c244cf444f91e0a516498afbfd"
 **PUDDING BRIDGE:** The ONS CPI is the only independently collected, nationally representative price series for UK retail categories. Knowing that your category's CPI has risen 8% while your prices have risen 3% is the empirical basis for a price increase — not a hunch
 **SOURCE DOC:** 06
 **STATUS:** HYPOTHESIS
-**VALIDATION (AMP-66):** verdict=PROVEN | test=existence | conf=90 | run=2026-05-03 | signed_by=Devon-9a6b — ONS CPIH/CPI item-level sub-indices reachable with time-series granularity
+**VALIDATION (AMP-66):** verdict=PLAUSIBLE | test=existence | conf=70 | run=2026-05-03 | signed_by=Devon-9a6b — CPI dataset reachable but partial granularity: 1 source(s) failed — partial validation
 
 ---
 

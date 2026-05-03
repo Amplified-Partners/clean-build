@@ -57,5 +57,14 @@ def existence_check(
         bundle["reason"] = f"{n_skipped} source(s) need a key — partial validation"
         return "PLAUSIBLE", bundle
 
+    # Sources failed (4xx/5xx/transport error) but at least one succeeded.
+    # Without this branch, runners that pass require_all=False (the default)
+    # silently accept partial coverage as PROVEN — the n_failed field would
+    # be in the bundle but never gate the verdict. Spotted by Devin Review
+    # on b3ae408 against INS-062 (cpih01 200, cpi01 404 -> falsely PROVEN).
+    if len(failed) > 0:
+        bundle["reason"] = f"{len(failed)} source(s) failed — partial validation"
+        return "PLAUSIBLE", bundle
+
     bundle["reason"] = f"all {n_reachable} sources reachable; data shape consistent with claim"
     return "PROVEN", bundle
