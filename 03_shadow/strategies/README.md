@@ -60,7 +60,7 @@ Until then: read these as working drafts, not as decisions.
 
 ## Cross-references
 
-- Sovereign Fleet runtime (currently spec'd at v1): `02_build/sovereign-fleet/` — these strategies effectively spec a v2.
+- Sovereign Fleet runtime (currently spec'd at v1, lives on the unmerged [`clean-build` PR #27](https://github.com/Amplified-Partners/clean-build/pull/27) branch — `02_build/sovereign-fleet/` does not yet exist on `main` `[SOURCE REQUIRED]`) — these strategies effectively spec a v2 of that runtime.
 - Beast / Hetzner infrastructure: `02_build/INFRASTRUCTURE.md` (authoritative).
 - Sovereign Fleet PR currently held pending L5 + IBAC: [`Amplified-Partners/clean-build` #27](https://github.com/Amplified-Partners/clean-build/pull/27).
 - Authority index: `00_authority/MANIFEST.md`.
