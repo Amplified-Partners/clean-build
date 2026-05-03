@@ -1,7 +1,7 @@
 ---
 title: Decision log
-date: 2026-05-01
-version: 13
+date: 2026-05-03
+version: 14
 status: draft
 ---
 
@@ -12,6 +12,14 @@ status: draft
 One entry per decision. Keep it short. Link out to supporting docs.
 
 ## Entries
+
+### 2026-05-03 — Branch protection + Linear-linked PR workflow for active repos (AMP-70)
+
+- **Decision**: Adopt a uniform PR workflow across the four active Amplified-Partners repos (`clean-build`, `ground-truth`, `crm`, `beast-code-export`): branch protection on `main`, required Linear ticket reference (`AMP-XXX`) in PR title or body, branch-name prefix convention (`cove/`, `devin/`, `devon/`, `clawd/`, `cassian/`, `antigravity/`, `openclaw/`, `dependabot/`, plus conventional types), CODEOWNERS-gated review, and PR↔Linear status sync. Antigravity holds the Arbiter (merge) role; until it has a GitHub identity, the Architect (`@ewan-dot`) holds the role operationally — flagged `[SOURCE REQUIRED]` in CODEOWNERS.
+- **Why**: AMP-70 (Clawd → Devon). Direct commits to `main` are currently possible across all four repos; PRs are not required to link to Linear; review authority is implicit, not enforced; Linear ticket state does not reflect PR state. The policy makes the existing implicit norm enforceable.
+- **Where encoded**: `00_authority/PR_WORKFLOW.md` v1 (canonical policy); `00_authority/MANIFEST.md` v45 § Authoritative now; `01_truth/processes/2026-05_pr-workflow_branch-protection_sop_v1.md` v1 (operating SOP); `02_build/scripts/apply_branch_protection.py` (idempotent ops script); `.github/CODEOWNERS`; `.github/workflows/pr-validation.yml`; `.github/workflows/linear-sync.yml`; `.github/pull_request_template.md`. Mirror PRs in the other three repos: `Amplified-Partners/crm` PR #25, `Amplified-Partners/ground-truth` PR #8, `Amplified-Partners/beast-code-export` PR #2.
+- **Status**: active (policy committed; branch-protection API call applied separately by the Architect's PAT).
+- **Signed-by**: Devon-4330 | 2026-05-03 | session devin-4330c661a80b4770aa8f62980c21366a
 
 ### 2026-05-01 — Systems and API Register created as candidate authority
 
