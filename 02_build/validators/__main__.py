@@ -1,0 +1,6 @@
+"""Entrypoint so ``python -m validators ...`` resolves the CLI."""
+
+from .cli import main
+
+if __name__ == "__main__":  # pragma: no cover
+    raise SystemExit(main())

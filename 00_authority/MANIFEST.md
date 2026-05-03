@@ -1,7 +1,7 @@
 ---
 title: Governed workspace manifest (authoritative inventory)
 date: 2026-05-01
-version: 44
+version: 45
 status: draft
 ---
 
@@ -106,6 +106,7 @@ not the GitHub slug. Do not guess another pattern under this org for this lane.
   - `01_truth/processes/2026-04_stateless-handover_neutrality-clause_v1.md` `[LOGIC TO BE CONFIRMED]` (candidate addendum to the job-wrapup SOP; neutrality rule for stateless handovers; authoritative `00_authority/OPINION_CONFIDENCE.md` references this file)
 - `01_truth/schemas/` `[LOGIC TO BE CONFIRMED]` (schema contracts to be populated)
   - `01_truth/schemas/README.md` `[LOGIC TO BE CONFIRMED]` (folder purpose stub)
+  - `01_truth/schemas/2026-05_public-data-validation_v1.md` `[LOGIC TO BE CONFIRMED]` (public-data verdict schema: 3-band PROVEN/PLAUSIBLE/DISPROVEN + BLOCKED gap-marker; additive `VALIDATION:` field on catalogue; reference impl at `02_build/validators/`)
 - `01_truth/interfaces/` `[LOGIC TO BE CONFIRMED]` (API contracts to be populated)
   - `01_truth/interfaces/README.md` `[LOGIC TO BE CONFIRMED]` (folder purpose stub)
 - `01_truth/SYSTEMS-AND-API-REGISTER.md` `[LOGIC TO BE CONFIRMED]` (single register of all APIs, MCP servers, telephony systems, code modules, and their locations across all Amplified Partners repos)
@@ -162,6 +163,12 @@ not the GitHub slug. Do not guess another pattern under this org for this lane.
     - `P10-kill-switch-master-reference.md` `[NON-AUTHORITATIVE]` (510 lines — binary shutdown architecture)
 
 ## Changelog
+
+### v45 — 2026-05-03
+
+- Added `01_truth/schemas/2026-05_public-data-validation_v1.md` to **Candidate authority**: defines the 3-band PROVEN/PLAUSIBLE/DISPROVEN public-data verdict scheme + BLOCKED gap-marker, additive `VALIDATION:` field on the insight catalogue, and the shadow-then-promote storage path. Reference implementation lives at `02_build/validators/`. Linked to AMP-67 (ProfServices vertical, 16 entries INS-079..INS-094).
+
+Signed-by: Devon-ab74 | 2026-05-03 | devin-ab740f2c78ee477a9c16ea3b6ed15293
 
 ### v44 — 2026-05-01
 
