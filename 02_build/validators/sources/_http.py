@@ -153,22 +153,17 @@ class HttpClient:
             )
 
         if self.no_network:
-            param_keys = sorted((params or {}).keys())
             raise CacheMiss(
-                f"no_network=True and cache miss for {method} {url} param_keys={param_keys}"
+                f"no_network=True and cache miss for {method} {url} "
+                f"n_params={len(params or {})}"
             )
 
         # Polite small delay between live calls.
         time.sleep(0.2)
-        # Log only the parameter *keys*, never values — public datasets do not
-        # use credentials in query strings, but we still avoid surfacing user
-        # data into log lines.
-        logger.info(
-            "HTTP %s %s param_keys=%s",
-            method,
-            url,
-            sorted((params or {}).keys()),
-        )
+        # Log only the count of params — never the names or values. This both
+        # avoids leaking caller data into log lines and breaks the taint flow
+        # CodeQL tracks from caller-supplied dicts into log records.
+        logger.info("HTTP %s %s n_params=%d", method, url, len(params or {}))
         if hasattr(self._client, "request"):
             resp = self._client.request(method, url, params=params, headers=headers)
         else:
