@@ -43,11 +43,20 @@ def _run(insight_ids: list[str] | None) -> int:
         try:
             v = INSIGHTS[ins]()
         except Exception as e:
+            # Runtime crash. NOT a DEFERRED (which is reserved for explicit
+            # policy refusal — ToS-bound scraping, legal review pending —
+            # and would otherwise contaminate the headline DEFERRED count
+            # that should only ever reflect deliberate refusals like
+            # INS-077). Per the schema doc 2026-05_public-data-validation_v1
+            # § "Three bands", BLOCKED = "validation cannot be attempted in
+            # the current environment" — a runtime exception (network down,
+            # source returned malformed payload, missing dependency) is
+            # exactly that.
             v = Verdict(
                 insight_id=ins,
                 title="(error)",
                 vertical="Retail",
-                verdict="DEFERRED",
+                verdict="BLOCKED",
                 test_class="error",
                 summary=f"runner raised {type(e).__name__}: {e}",
                 evidence=[{"test": "error", "exception": repr(e)}],
@@ -61,7 +70,7 @@ def _run(insight_ids: list[str] | None) -> int:
 
     counts = Counter(v.verdict for v in out)
     print("\nsummary:")
-    for band in ("PROVEN", "PLAUSIBLE", "DISPROVEN", "DEFERRED"):
+    for band in ("PROVEN", "PLAUSIBLE", "DISPROVEN", "DEFERRED", "BLOCKED"):
         if counts.get(band):
             print(f"  {band:<9}  {counts[band]:>3}")
     print(f"  total      {len(out):>3}")
@@ -83,7 +92,7 @@ def _summary() -> int:
         print(f"{r['insight_id']:<8} {r['verdict']:<9} {r.get('confidence', 0):<5} {r['title'][:80]}")
     counts = Counter(r["verdict"] for r in rows)
     print()
-    for band in ("PROVEN", "PLAUSIBLE", "DISPROVEN", "DEFERRED"):
+    for band in ("PROVEN", "PLAUSIBLE", "DISPROVEN", "DEFERRED", "BLOCKED"):
         if counts.get(band):
             print(f"  {band:<9}  {counts[band]:>3}")
     print(f"  total      {len(rows):>3}")
@@ -105,17 +114,31 @@ def _ticket_comment() -> int:
     plausible = [r for r in rows if r["verdict"] == "PLAUSIBLE"]
     disproven = [r for r in rows if r["verdict"] == "DISPROVEN"]
     deferred = [r for r in rows if r["verdict"] == "DEFERRED"]
+    blocked = [r for r in rows if r["verdict"] == "BLOCKED"]
+
+    headline = (
+        f"verdicts: PROVEN={counts.get('PROVEN', 0)} / "
+        f"PLAUSIBLE={counts.get('PLAUSIBLE', 0)} / "
+        f"DISPROVEN={counts.get('DISPROVEN', 0)} / "
+        f"DEFERRED={counts.get('DEFERRED', 0)}"
+    )
+    if counts.get("BLOCKED"):
+        headline += f" / BLOCKED={counts['BLOCKED']}"
+    headline += f" (total {len(rows)})"
 
     out = [
         "**AMP-66 — retail vertical validation**",
         "",
-        f"verdicts: PROVEN={counts.get('PROVEN', 0)} / "
-        f"PLAUSIBLE={counts.get('PLAUSIBLE', 0)} / "
-        f"DISPROVEN={counts.get('DISPROVEN', 0)} / "
-        f"DEFERRED={counts.get('DEFERRED', 0)} (total {len(rows)})",
+        headline,
         "",
     ]
-    for label, group in [("PROVEN", proven), ("PLAUSIBLE", plausible), ("DISPROVEN", disproven), ("DEFERRED", deferred)]:
+    for label, group in [
+        ("PROVEN", proven),
+        ("PLAUSIBLE", plausible),
+        ("DISPROVEN", disproven),
+        ("DEFERRED", deferred),
+        ("BLOCKED", blocked),
+    ]:
         if not group:
             continue
         out.append(f"**{label}**")
