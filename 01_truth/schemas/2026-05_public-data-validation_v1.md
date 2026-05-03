@@ -12,6 +12,7 @@ changelog:
   - 2026-05-03 — Devon-4234: initial draft (AMP-65 hospitality sweep).
   - 2026-05-03 — Devon-4234: cache-key clarified — SHA-256 over sorted ``params``; credentials travel separately as ``auth_params`` and never enter the cache key, the meta file, or log lines.
   - 2026-05-03 — Devon-4234: §1 fold corrected to reference the actual v2 band names (`{PROVEN, PARTIALLY_SUPPORTED, REFUTED, INCONCLUSIVE}`); §3 `evidence[i].url` clarified as the original request URL with non-auth params merged (auth stripped, redirects followed but pre-redirect URL recorded); §2 correlation row updated to document the Fisher-z p-value gate the code now enforces.
+  - 2026-05-03 — Devon-4234: §3 `vertical` enum extended to include `universal` (catalogue carries 42 `**VERTICAL:** Universal` entries; AMP-68 is the planned `validators/verticals/universal/` mapping).
 ---
 
 # Public-Data Validation — Schema (v1)
@@ -101,7 +102,7 @@ insight at `03_shadow/validators/<vertical>/<INS-NNN>.json`):
 |-------|------|----------|-------|
 | `insight_id` | string | yes | `INS-NNN` |
 | `title` | string | yes | Catalogue title (no truncation). |
-| `vertical` | string | yes | One of `hospitality`, `trades`, `retail`, `prof_services`. |
+| `vertical` | string | yes | One of `hospitality`, `trades`, `retail`, `prof_services`, `universal`. The `universal` slug is reserved for catalogue entries marked `**VERTICAL:** Universal` (cross-vertical insights — see AMP-68). |
 | `band` | enum | yes | One of the four bands in §1. |
 | `test_class` | enum | yes | One of `existence`, `base_rate`, `correlation`, `distribution`. |
 | `rationale` | string | yes | Plain English. State which leg (public / client) is being validated and what the verdict means. |
