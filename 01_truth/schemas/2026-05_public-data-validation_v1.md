@@ -85,14 +85,14 @@ Evidence bundles (raw API responses, derived series, plots) live in `03_shadow/v
 Additive after `STATUS:`. One line, machine-greppable:
 
 ```
-**VALIDATION:** PROVEN | test_class=distribution | metric="32 NE1-NE3 sales last 90 days, 60-70% claim plausible vs LR baseline" | evidence=03_shadow/validators/INS-006/ | run=2026-05-03
+**VALIDATION:** PLAUSIBLE | test_class=distribution | metric="mean=82.0, sd=29.7, claim_threshold=12.0, sigma_distance=+2.36, n=23, direction=>=; total_residential_sales=1886; window=2024-05-03_to_2026-05-03; postcode_areas=NE1,NE2,NE3" | evidence=03_shadow/validators/INS-006/ | run=2026-05-03
 ```
 
 For unvalidated entries: leave the line absent. A missing `VALIDATION:` line means "not yet tested" — distinct from `DISPROVEN`.
 
 ## What stays out
 
-- Any data crossing the GDPR boundary defined in the data-protection architecture note.
+- Any data crossing the GDPR boundary defined in the data-protection architecture note `[SOURCE REQUIRED]`.
 - Client data of any kind. This pipeline is open-data only.
 - API keys committed to the repo. All keys live in env vars; missing keys cause graceful skip with `verdict: SKIPPED, reason: AUTH_REQUIRED`.
 

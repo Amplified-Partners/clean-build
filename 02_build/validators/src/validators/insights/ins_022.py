@@ -84,8 +84,10 @@ def run() -> Verdict:
         notes = (
             "Both public legs validated: VOA rateable-values list reachable; "
             "Companies House search returned company records. "
-            "Recipe is fully testable from public data → PROVEN bar reachable."
+            "ABC bridge: outreach conversion is client-side → capped at PLAUSIBLE."
         )
+        if verdict_band == VerdictBand.PROVEN:
+            verdict_band = VerdictBand.PLAUSIBLE
     elif voa_present:
         notes = (
             "VOA leg PROVEN; Companies House leg SKIPPED (set COMPANIES_HOUSE_API_KEY). "
