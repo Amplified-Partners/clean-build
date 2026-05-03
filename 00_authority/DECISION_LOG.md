@@ -1,7 +1,7 @@
 ---
 title: Decision log
 date: 2026-05-03
-version: 14
+version: 15
 status: draft
 ---
 
@@ -13,16 +13,25 @@ One entry per decision. Keep it short. Link out to supporting docs.
 
 ## Entries
 
-### 2026-05-03 — Public-data validation: three-band scheme + retail vertical reference implementation (AMP-66)
+### 2026-05-03 — Public-data validation framework + ProfServices pilot (AMP-67)
 
-- **Decision**: Adopt a **three-band verdict scheme** (`PROVEN` / `PLAUSIBLE` / `DISPROVEN`, with a separate `DEFERRED` policy band for ToS/legal-gated work) for validating insight-recipe claims against real public data. First applied to the Retail vertical (19 insights, INS-060–078) against UK public sources (Police.uk, ONS Beta API, Nomis, Land Registry CCOD, Insolvency Service stats, GOV.UK content API, Bank of England, etc.). Headline outcome at this commit: 8 PROVEN / 10 PLAUSIBLE / 1 DEFERRED.
-- **Why**: AMP-66 (sister to AMP-59) requires that retail insights be backed by reachable public data at the granularity claimed, not just plausible narrative. The three-band scheme avoids the dishonesty of a binary pass/fail when the public leg is reachable but the recipe also depends on internal data we cannot test from outside; it forces us to name what is actually proven vs what is research-supported but unmeasurable from public sources.
+- **Decision**: Create `01_truth/schemas/2026-05_public-data-validation_v1.md` defining the 3-band PROVEN / PLAUSIBLE / DISPROVEN public-data verdict scheme + BLOCKED gap-marker, and an additive `VALIDATION:` field on the insight catalogue (literature `STATUS:` field unchanged). Build the reference implementation at `02_build/validators/` (vertical-agnostic; fetchers in `sources/`, reusable test classes in `tests/`, CLI orchestrator). Land verdicts in `03_shadow/validators/<vertical>/<INS-NNN>/verdict.json` first; promote to `01_truth/research/validations/` after human review. Run the framework against the 16 ProfServices catalogue entries (INS-079 .. INS-094) as the first vertical. All 16 came back PROVEN or PLAUSIBLE; zero DISPROVEN.
+- **Why**: AMP-67 (under parent AMP-59) directed real-public-data validation of the ProfServices vertical, with the framework reusable across the four other verticals (AMP-64/65/66/68). The shadow-then-promote path keeps verdicts non-authoritative until reviewed; the schema is the contract every vertical follows.
+- **Where encoded**: `01_truth/schemas/2026-05_public-data-validation_v1.md` v1, `02_build/validators/` (framework + ProfServices runners), `03_shadow/validators/profservices/` (16 verdict JSONs + `rollup.json`), `01_truth/schemas/research-index/00-insight-catalogue_v1.md` (16 `VALIDATION:` lines added), `01_truth/research/validations/README.md` (truth-tier promotion stub), `00_authority/MANIFEST.md` v45–v48 changelog entries.
+- **Status**: candidate (pending Ewan review of the PR + verdicts)
+- **Signed-by**: Devon-ab74 | 2026-05-03 | devin-ab740f2c78ee477a9c16ea3b6ed15293
+
+### 2026-05-03 — Retail vertical reference implementation + DEFERRED policy band (AMP-66)
+
+- **Decision**: Sister to the AMP-67 entry above. Build a self-contained retail validator package at `02_build/validators/retail/` (fetchers, runners, results, CLI) covering all 19 retail catalogue entries (INS-060..INS-078) against UK public sources (Police.uk, ONS Beta API, Nomis, Land Registry CCOD, Insolvency Service stats, GOV.UK content API, Bank of England, etc.). Extend the verdict scheme with a **DEFERRED** policy band (distinct from BLOCKED: BLOCKED = waiting on creds, DEFERRED = refusing to run on ToS/legal grounds) and apply it to INS-077 (competitor pricing scraping). Headline outcome: 8 PROVEN / 10 PLAUSIBLE / 1 DEFERRED.
+- **Why**: AMP-66 (sister to AMP-67 under parent AMP-59) requires that retail insights be backed by reachable public data at the granularity claimed, not just plausible narrative. The DEFERRED band closes a gap in the AMP-67 scheme: BLOCKED handles "we'd run if we could" but not "we refuse to run on policy grounds". The retail package was built self-contained because AMP-66 and AMP-67 ran in parallel sessions; lifting the retail fetchers + test classes into the shared `02_build/validators/sources/` + `tests/` layer is deferred to a follow-up once all five sibling verticals (AMP-64/65/66/67/68) have landed.
 - **Where encoded**:
-  - Schema: `01_truth/schemas/2026-05_public-data-validation_v1.md` (verdict scheme + four reusable test classes: existence, base_rate, correlation, distribution).
-  - Retail rollup: `01_truth/schemas/research-index/06a-vertical-retail-validation-rollup_v1.md` (per-insight verdict table, public sources reached, key-gated downgrades, reproducibility).
-  - Implementation: `02_build/validators/retail/` (fetchers, runners, results, CLI). Self-contained; no shared top-level scaffold yet — left for AMP-64 (trades) to lift.
+  - Schema: `01_truth/schemas/2026-05_public-data-validation_v1.md` extended with the DEFERRED band (the schema's v1 changelog records the AMP-67 + AMP-66 joint authorship).
+  - Retail rollup: `01_truth/schemas/research-index/06a-vertical-retail-validation-rollup_v1.md` v3 (per-insight verdict table, public sources reached, key-gated downgrades, reproducibility).
+  - Implementation: `02_build/validators/retail/` (self-contained fetchers, runners, results, CLI).
+  - Verdict JSONs: `02_build/validators/retail/results/INS-NNN/verdict.json` (will lift to `03_shadow/validators/retail/` when retail joins the shared layer).
   - Catalogue: `01_truth/schemas/research-index/00-insight-catalogue_v1.md` updated additively with `**VALIDATION (AMP-66):**` lines on each retail entry.
-  - Manifest: `00_authority/MANIFEST.md` v45 § Candidate authority indexes the two new schema files.
+  - Manifest: `00_authority/MANIFEST.md` v49 § Candidate authority indexes the rollup file (the schema doc was already indexed by AMP-67 v45).
 - **Status**: candidate (pending Ewan review). Verdicts re-runnable from cache; verdict JSONs include `git_sha`, `run_at_utc`, `signed_by`, and SHA-256 hashes of every source response.
 - **Signed-by**: Devon-9a6b | 2026-05-03 | devin-9a6bd256bd7c4a90a083a471fa94a810
 

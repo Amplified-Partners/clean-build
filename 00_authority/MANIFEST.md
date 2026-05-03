@@ -1,7 +1,7 @@
 ---
 title: Governed workspace manifest (authoritative inventory)
 date: 2026-05-03
-version: 45
+version: 49
 status: draft
 ---
 
@@ -106,14 +106,18 @@ not the GitHub slug. Do not guess another pattern under this org for this lane.
   - `01_truth/processes/2026-04_stateless-handover_neutrality-clause_v1.md` `[LOGIC TO BE CONFIRMED]` (candidate addendum to the job-wrapup SOP; neutrality rule for stateless handovers; authoritative `00_authority/OPINION_CONFIDENCE.md` references this file)
 - `01_truth/schemas/` `[LOGIC TO BE CONFIRMED]` (schema contracts to be populated)
   - `01_truth/schemas/README.md` `[LOGIC TO BE CONFIRMED]` (folder purpose stub)
-  - `01_truth/schemas/2026-05_public-data-validation_v1.md` `[LOGIC TO BE CONFIRMED]` (three-band verdict scheme: PROVEN / PLAUSIBLE / DISPROVEN; DEFERRED policy band; four reusable test classes; AMP-66 sister to AMP-59)
-  - `01_truth/schemas/research-index/06a-vertical-retail-validation-rollup_v1.md` `[LOGIC TO BE CONFIRMED]` (retail vertical validation rollup: 7 PROVEN / 11 PLAUSIBLE / 1 DEFERRED across 19 retail insights against real UK public data; companion to `06-vertical-retail-profservices_v1.md` and to validators in `02_build/validators/retail/`; AMP-66)
+  - `01_truth/schemas/2026-05_public-data-validation_v1.md` `[LOGIC TO BE CONFIRMED]` (public-data verdict schema: PROVEN / PLAUSIBLE / DISPROVEN core bands + BLOCKED gap-marker + DEFERRED policy band; four reusable test classes; additive `VALIDATION:` field on catalogue; reference impls at `02_build/validators/` shared and `02_build/validators/retail/` self-contained; AMP-67 + AMP-66 joint)
+  - `01_truth/schemas/research-index/06a-vertical-retail-validation-rollup_v1.md` `[LOGIC TO BE CONFIRMED]` (retail vertical validation rollup: 8 PROVEN / 10 PLAUSIBLE / 1 DEFERRED across 19 retail insights against real UK public data; companion to `06-vertical-retail-profservices_v1.md` and to validators in `02_build/validators/retail/`; AMP-66)
 - `01_truth/interfaces/` `[LOGIC TO BE CONFIRMED]` (API contracts to be populated)
   - `01_truth/interfaces/README.md` `[LOGIC TO BE CONFIRMED]` (folder purpose stub)
+- `01_truth/research/` `[LOGIC TO BE CONFIRMED]` (truth-tier research evidence; promotion target for shadow research)
+  - `01_truth/research/validations/README.md` `[LOGIC TO BE CONFIRMED]` (promotion target for `03_shadow/validators/` verdicts once human-reviewed)
 - `01_truth/SYSTEMS-AND-API-REGISTER.md` `[LOGIC TO BE CONFIRMED]` (single register of all APIs, MCP servers, telephony systems, code modules, and their locations across all Amplified Partners repos)
 - `02_build/README.md` `[LOGIC TO BE CONFIRMED]` (runnable artefacts routing stub)
+- `02_build/validators/README.md` `[LOGIC TO BE CONFIRMED]` (public-data validation framework; reference impl of `01_truth/schemas/2026-05_public-data-validation_v1.md`; ProfServices pilot at AMP-67)
 - `03_shadow/README.md` `[LOGIC TO BE CONFIRMED]` (experiment routing stub)
 - `03_shadow/job-wrapups/README.md` `[NON-AUTHORITATIVE]` (wrap-ups/escalation notes location; learning only)
+- `03_shadow/validators/README.md` `[NON-AUTHORITATIVE]` (shadow tier for public-data verdicts produced by `02_build/validators/`; non-authoritative pending review-promote)
 
 ## Reference only (sanitised; never authoritative by default)
 
@@ -165,17 +169,40 @@ not the GitHub slug. Do not guess another pattern under this org for this lane.
 
 ## Changelog
 
-### v45 — 2026-05-03
+### v49 — 2026-05-03
 
-- Added two new files under **Candidate authority** in `01_truth/schemas/`:
-  - `01_truth/schemas/2026-05_public-data-validation_v1.md` (AMP-66 verdict scheme).
-  - `01_truth/schemas/research-index/06a-vertical-retail-validation-rollup_v1.md` (retail vertical rollup).
-  - Implementation lives at `02_build/validators/retail/`. Catalogue
-    `01_truth/schemas/research-index/00-insight-catalogue_v1.md` was updated additively with `**VALIDATION (AMP-66):**` lines on each retail entry.
-  - Per the `AGENTS.md` § "PR reviewers — what to flag" rule 7 (new file in indexed class must appear in MANIFEST).
-- Frontmatter `date` advanced to 2026-05-03 to reflect this edit (per the v34 / v36 convention; same fix applied to `00_authority/DECISION_LOG.md` v14 in the same commit).
+- Added under **Candidate authority** (AMP-66 sister of AMP-67 v45):
+  - `01_truth/schemas/research-index/06a-vertical-retail-validation-rollup_v1.md` — retail vertical validation rollup, headline 8 PROVEN / 10 PLAUSIBLE / 1 DEFERRED across 19 retail insights (INS-060..INS-078).
+- Extended the schema doc `01_truth/schemas/2026-05_public-data-validation_v1.md` (introduced in v45 by AMP-67) with the **DEFERRED** policy band, distinct from BLOCKED: BLOCKED = "we'd run if creds existed", DEFERRED = "we refuse to run on ToS/legal grounds". First DEFERRED entry is INS-077 (retail competitor pricing scraping). Added the AMP-66 retail self-contained reference implementation at `02_build/validators/retail/` and documented the secret-redaction discipline (CodeQL `py/clear-text-storage-sensitive-data` clean) introduced by the AMP-66 cache layer. No removal of AMP-67 content.
+- Catalogue `01_truth/schemas/research-index/00-insight-catalogue_v1.md` updated additively with `**VALIDATION (AMP-66):**` lines on each retail entry.
+- Per `AGENTS.md` § "PR reviewers — what to flag" rule 7 (new file in indexed class must appear in MANIFEST).
+- Merged with `origin/main` after AMP-67 (#35) landed; took v49 to advance past the v45–v48 entries AMP-67 already wrote (v45 schema doc, v46 research/validations stub, v47 shadow validators README, v48 build validators README — all preserved verbatim above).
 
 Signed-by: Devon-9a6b | 2026-05-03 | devin-9a6bd256bd7c4a90a083a471fa94a810
+
+### v48 — 2026-05-03
+
+- Added `02_build/validators/README.md` to **Candidate authority** for symmetry with the now-indexed `03_shadow/validators/README.md` (build-tier reference impl + shadow-tier landing zone). The schema doc — `01_truth/schemas/2026-05_public-data-validation_v1.md` — already pointed at the build-tier README; this closes the index gap.
+
+Signed-by: Devon-ab74 | 2026-05-03 | devin-ab740f2c78ee477a9c16ea3b6ed15293
+
+### v47 — 2026-05-03
+
+- Added `03_shadow/validators/README.md` to **Candidate authority**: shadow tier where public-data verdicts produced by `02_build/validators/` land before human-review promotion to `01_truth/research/validations/`. Same indexed class as `03_shadow/job-wrapups/README.md`.
+
+Signed-by: Devon-ab74 | 2026-05-03 | devin-ab740f2c78ee477a9c16ea3b6ed15293
+
+### v46 — 2026-05-03
+
+- Added `01_truth/research/` and `01_truth/research/validations/README.md` to **Candidate authority**: stub for the truth-tier promotion target where `03_shadow/validators/` verdicts land after human review. Frontmatter `date` advanced to 2026-05-03 to match this entry.
+
+Signed-by: Devon-ab74 | 2026-05-03 | devin-ab740f2c78ee477a9c16ea3b6ed15293
+
+### v45 — 2026-05-03
+
+- Added `01_truth/schemas/2026-05_public-data-validation_v1.md` to **Candidate authority**: defines the 3-band PROVEN/PLAUSIBLE/DISPROVEN public-data verdict scheme + BLOCKED gap-marker, additive `VALIDATION:` field on the insight catalogue, and the shadow-then-promote storage path. Reference implementation lives at `02_build/validators/`. Linked to AMP-67 (ProfServices vertical, 16 entries INS-079..INS-094).
+
+Signed-by: Devon-ab74 | 2026-05-03 | devin-ab740f2c78ee477a9c16ea3b6ed15293
 
 ### v44 — 2026-05-01
 

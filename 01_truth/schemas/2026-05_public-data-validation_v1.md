@@ -1,202 +1,179 @@
 ---
-title: "Public-data validation — three-band verdict scheme"
+title: "Public-Data Validation v1"
 id: "public-data-validation-v1"
 version: 1
 created: 2026-05-03
 last_validated: 2026-05-03
 type: document
-topic_type: schema
+topic_type: reference
 status: candidate
-ticket: AMP-66
-parent_ticket: AMP-59
-signed_by: "Devon-9a6b, 2026-05-03, devin-9a6bd256bd7c4a90a083a471fa94a810"
+signed_by: "Devon-ab74, 2026-05-03, devin-ab740f2c78ee477a9c16ea3b6ed15293; Devon-9a6b, 2026-05-03, devin-9a6bd256bd7c4a90a083a471fa94a810"
+parent: AMP-59
+ticket: AMP-67
+sister_ticket: AMP-66
 ---
 
-<!-- markdownlint-disable-file MD013 -->
+# Public-Data Validation v1
 
-# Public-data validation — three-band verdict scheme
+## What this is
 
-**Date:** 2026-05-03
-**Author:** Devon-9a6b (session `devin-9a6bd256bd7c4a90a083a471fa94a810`)
-**Ticket:** AMP-66 (parent AMP-59)
-**Companion to:** `2026-03_validation-methodology_v2.md` (PUDDING 2026 label-validity gate; not replaced).
+The data-backed companion to the literature-class `STATUS:` field on every
+catalogue entry in `01_truth/schemas/research-index/00-insight-catalogue_v1.md`.
 
-## 0. What this is
+Insights start their life HYPOTHESIS / CONFIRMED-EXTERNAL / PROVEN against
+the academic literature. That tells us the *idea* survived peer review. It
+does not tell us whether the *implementation* actually works on UK public
+data — whether a Companies House query returns the right SIC code at the
+right granularity, whether ONS Business Demography publishes births and
+deaths on the cadence the recipe assumes, whether the Self Assessment
+deadline is still 31 January.
 
-A pragmatic verdict scheme for "is this insight backed by real public data
-that we can fetch right now?" — applied per-insight on top of the existing
-PUDDING 2026 STATUS field.
+The `VALIDATION:` field answers that second question. It is **additive** —
+the literature `STATUS:` is preserved verbatim.
 
-This document describes:
+## Three bands
 
-- the three-band verdict scheme;
-- the four reusable test classes;
-- the per-class evidence rules;
-- how this composes with the PUDDING 2026 label-validity gate (it does not
-  replace it; it sits one layer below it).
+| Band | Meaning |
+|------|---------|
+| **PROVEN** | Public data quantitatively confirms the claim at the granularity the recipe needs. Reserved for fully-public-data recipes (e.g. HMRC tax calendar dates, ONS sector births/deaths, Gazette insolvency feed, EPC band distribution). |
+| **PLAUSIBLE** | Either (a) the public leg of an A-B-C bridge validates and the client-side leg has published research support, (b) the recipe is internal-only and public data is not the right validator, or (c) the data is consistent with the claim but underpowered. |
+| **DISPROVEN** | Public data contradicts the claim — the published figure is outside the claimed range, or a required source no longer publishes the breakdown. |
 
-The first reference implementation lives in
-`02_build/validators/retail/` (AMP-66). Sibling tickets AMP-64/65/67/68
-build the equivalent for trades, hospitality, professional services, and
-universal verticals.
+Two additional bands exist for situations the three bands above don't cover:
 
-## 1. The three bands
+- **BLOCKED** — validation cannot be attempted in the current environment
+  because a required credential isn't yet provisioned (e.g. the live
+  Companies House REST API key). BLOCKED is not a verdict on the insight;
+  it's a gap in our access layer that we surface so it gets fixed rather
+  than hidden. Resolves to PROVEN/PLAUSIBLE/DISPROVEN once the credential
+  lands.
+- **DEFERRED** — validation **must not** be attempted from an automated
+  session for policy reasons (ToS-bound scraping, legal review pending,
+  PII risk). Distinct from BLOCKED: BLOCKED means "we'd run this if we
+  could"; DEFERRED means "we're refusing to run this here at all". Used
+  by AMP-66 INS-077 (competitor pricing scraping). Resolves to a verdict
+  only after Ewan signs off on the legal/policy posture.
 
-| Verdict      | Condition                                                                                              |
-|--------------|---------------------------------------------------------------------------------------------------------|
-| `PROVEN`     | Public data quantitatively confirms the claim at the granularity claimed. Specific test-class thresholds in §3. |
-| `PLAUSIBLE`  | Data consistent with claim but underpowered, OR one leg of the recipe needs client data to fully validate, OR the recipe is purely-internal and has published research support. |
-| `DISPROVEN`  | Public data contradicts the claim (signal absent; correlation null; distribution does not match).        |
-
-`DEFERRED` is a fourth band reserved for recipes that **must not** be run
-from an automated session (ToS-bound scraping, legal review pending, PII risk).
-`DEFERRED` ≠ `PLAUSIBLE`: we are not estimating support, we are saying "do not
-run this here at all".
-
-`INCONCLUSIVE` from `2026-03_validation-methodology_v2.md` folds into
-`PLAUSIBLE`. `REFUTED` equals `DISPROVEN`. The three-band scheme is
+The `INCONCLUSIVE` band from `2026-03_validation-methodology_v2.md` folds
+into `PLAUSIBLE`. `REFUTED` equals `DISPROVEN`. The five-band scheme is
 deliberately coarser than the methodology v2 RAEI/PRS/AMPS rubrics — it
 answers a different question (data presence) and runs cheaper.
 
-## 2. The four test classes
+## Four reusable test classes
 
-| Test class    | Question answered                                                                          | Evidence shape                                                                  |
-|---------------|--------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------|
-| existence     | "Is the claimed data available at the claimed granularity?"                                | source URLs + status codes + sample rows; `n_reachable / n_sources`              |
-| base_rate     | "Is the population proportion within the claimed range?"                                   | Wilson-CI 95% binomial proportion + claim-range overlap                          |
-| correlation   | "Are the two series correlated as claimed?"                                                | Pearson + Spearman r, p-value, n, sign-match                                     |
-| distribution  | "Does the observed distribution exceed the claim's threshold?"                             | mean, σ, z-score relative to threshold                                           |
+Implemented in `02_build/validators/tests/` (shared) and in
+`02_build/validators/retail/tests/` (AMP-66 self-contained variant
+pending lift to the shared layer):
 
-A runner may compose multiple test classes (e.g. `existence + distribution`
-in INS-067). The combined verdict takes the **lowest** band of the
-constituent verdicts unless explicitly overridden in the runner with
-documented reasoning.
+1. **existence** — does the source publish the data the recipe needs at the
+   granularity claimed? Cheapest test, runs first.
+2. **base_rate** — does a published headline figure match the catalogue's
+   numeric claim within tolerance? (e.g. "20% WIP write-off rate", "average
+   £748 recovered per £1,000 billed".)
+3. **correlation** — do two series move together at the strength claimed?
+   Pearson r with an n ≥ 8 power floor.
+4. **distribution** — does the empirical distribution exceed the claimed
+   threshold at the claimed share? (e.g. "60% of EPC band E or worse";
+   `z_min = 1.0` standard-deviation floor by default).
 
-## 3. Per-class verdict thresholds (defaults)
+A validator is free to compose multiple test classes in a single Verdict.
+The four classes cover ~95% of the catalogue's recipes; new classes get
+added when an insight needs one.
 
-### 3.1 Existence
+## How a verdict is recorded
 
-- `PROVEN` — every required source returns 2xx with non-empty payload at the claimed granularity.
-- `PLAUSIBLE` — at least one source reachable; one source skipped because key is required.
-- `DISPROVEN` — no required source returns a non-empty payload.
+Every verdict is a JSON object. Two storage conventions coexist while the
+shared layer matures:
 
-### 3.2 Base rate
+- **Shared (AMP-67 onward):** `03_shadow/validators/<vertical>/<INS-NNN>/verdict.json`.
+- **Self-contained (AMP-66 retail):** `02_build/validators/retail/results/<INS-NNN>/verdict.json`.
+  Will be lifted to the shared shadow tier when the retail validators
+  promote to the shared `sources/` + `tests/` layer.
 
-- `PROVEN` — observed proportion within `[claim_lower, claim_upper]` AND Wilson 95% CI lies inside `[claim_lower − tol, claim_upper + tol]`.
-- `PLAUSIBLE` — observed in range but CI wider than tolerance band (underpowered).
-- `DISPROVEN` — observed outside `[claim_lower, claim_upper]`.
+Required fields:
 
-Default tolerance band: 0; runners may relax for low-n claims.
+- `insight_id`, `vertical`, `band` / `verdict`, `test_class`, `method`, `finding`
+- `statistic` — the numbers the verdict turns on
+- `evidence` — list of `{source, url, accessed_at, content_sha256, summary}`
+- `run_at` / `run_at_utc`, `signed_by`, `git_sha`, `session_id` — reproducibility metadata
 
-### 3.3 Correlation
+Every fetcher routes through a hashing cache (`02_build/validators/cache.py`
+shared; `02_build/validators/retail/fetchers/common.py` retail), which
+sha256s the response body and caches it on disk. The sha256 is captured in
+the evidence bundle so re-runs are reproducible even if the upstream source
+changes. Secret-bearing query params (`key`, `api_key`, `token`,
+`authorization`, etc.) are redacted before persistence and never derived
+into cache filenames in clear text (CodeQL `py/clear-text-storage-sensitive-data`
+clean — see `02_build/validators/retail/tests/test_redaction.py`).
 
-- `PROVEN` — `|r| ≥ r_min` AND `p ≤ p_max` AND `n ≥ n_min` AND sign matches expected.
-- `PLAUSIBLE` — `|r| ≥ r_min/2` AND sign matches; underpowered.
-- `DISPROVEN` — `|r| < r_min/2` OR sign mismatch.
+A one-line summary is written to the catalogue:
 
-Defaults: `r_min = 0.6`, `p_max = 0.01`, `n_min = 12`, `expected_sign = +1`.
-
-### 3.4 Distribution
-
-- `PROVEN` — observed mean exceeds threshold by ≥ `z_min` standard deviations in the claimed direction.
-- `PLAUSIBLE` — exceeds threshold but by less than `z_min` σ.
-- `DISPROVEN` — does not exceed threshold OR direction wrong.
-
-Default: `z_min = 1.0`.
-
-## 4. Evidence bundle shape
-
-Every verdict file is `02_build/validators/<vertical>/results/<INS-NNN>/verdict.json` and
-contains:
-
-```json
-{
-  "insight_id": "INS-067",
-  "title": "...",
-  "vertical": "Retail",
-  "verdict": "PROVEN",
-  "test_class": "existence+distribution",
-  "summary": "<1-line>",
-  "evidence": [
-    {
-      "test": "existence",
-      "claim": "...",
-      "n_sources": 12,
-      "n_reachable": 12,
-      "n_skipped_keyless": 0,
-      "n_failed": 0,
-      "sources": [{"source": "...", "url": "...", "status": 200, "sha256": "...", "sample": [...]}]
-    },
-    {"test": "distribution", "mean": 153.5, "stdev": 159.9, "threshold": 5.0, "z": 0.93, ...}
-  ],
-  "notes": [...],
-  "confidence": 88,
-  "run_at_utc": "2026-05-03T20:48:55Z",
-  "git_sha": "<sha>",
-  "session_id": "devin-...",
-  "signed_by": "Devon-9a6b"
-}
+```text
+**VALIDATION (AMP-67):** PROVEN | existence | accessed 2026-05-03 | evidence: 03_shadow/validators/profservices/INS-079/verdict.json
+**VALIDATION (AMP-66):** verdict=PROVEN | test=existence | conf=88 | run=2026-05-03 | signed_by=Devon-9a6b — <one-sentence summary>
 ```
 
-Each `sources[]` item carries the SHA-256 of the raw response so a verdict
-is reproducible: re-run, hash, compare.
+The literature `STATUS:` line above it is unchanged.
 
-## 5. Where the scheme is used
+## Promotion path
 
-- **Catalogue**: each retail entry in `01_truth/schemas/research-index/00-insight-catalogue_v1.md`
-  has a `**VALIDATION (AMP-66):**` line appended after `**STATUS:**`, recording verdict + test
-  class + confidence + run date + signer. Existing fields are not modified.
-- **APDS routing**: the existing `02_build/routing/score_to_graph.py` already accepts a
-  verdict-band field for FalkorDB Recipe nodes. Promotion path is documented in the AMP-59
-  master plan; this PR does not yet write into FalkorDB.
-- **Master report**: vertical-level rollups can read `results/INS-NNN/verdict.json` files and
-  produce a deterministic table.
+1. **03_shadow/validators/** (or vertical-self-contained `02_build/validators/<vertical>/results/`)
+   — every verdict lands here first. Shadow tier means non-authoritative;
+   promotion happens after human review (by the ticket reviewer or a
+   follow-up `!validate` ticket).
+2. **01_truth/** — when a verdict has been reviewed and we want it to be
+   authoritative truth, the relevant evidence summary moves into
+   `01_truth/research/validations/` and the catalogue line is updated to
+   point at the truth-tier file.
 
-## 6. Relationship to PUDDING 2026 validation methodology v2
+This is the same shadow-then-promote dance as everything else in
+`02_build/` and is intentional — public-data verdicts can age out (a CSV
+gets republished, a source moves) and we want the literature `STATUS:` to
+remain stable while the validation can be re-run on a fresh fetch.
 
-| Layer                                   | Question                                                                | Source of truth                                  |
-|-----------------------------------------|-------------------------------------------------------------------------|--------------------------------------------------|
-| PUDDING label validity (methodology v2) | Is the label structurally correct + inter-rater-reliable?               | `2026-03_validation-methodology_v2.md`           |
-| Public-data validation (this doc)        | Is the claim backed by data we can fetch right now?                     | this document                                    |
-| RAEI / PRS / AMPS / MASHUP rubrics       | Is the recipe production-ready and worth shipping to a client?          | methodology v2                                    |
-| Catalogue STATUS field                   | High-level lifecycle stage (CONFIRMED-EXTERNAL / HYPOTHESIS / PROVEN)   | `00-insight-catalogue_v1.md`                     |
+## Relation to existing methodology docs
 
-The four layers are not redundant — each answers a different question. The
-public-data verdict is **additive** to STATUS, not a replacement.
+- `2026-03_validation-methodology_v2.md` — defines the four-band literature
+  validation taxonomy (PROVEN / PARTIALLY_SUPPORTED / REFUTED /
+  INCONCLUSIVE). That methodology applies to the `STATUS:` field. This
+  doc applies to the new `VALIDATION:` field.
+- The two are deliberately decoupled. An insight can be CONFIRMED-EXTERNAL
+  on literature and PLAUSIBLE on public data, or HYPOTHESIS on literature
+  and PROVEN on public data. Both records are kept.
 
-## 7. Operational notes
+## Escalation
 
-- Public sources used in the retail reference implementation (no key
-  required): Police.uk, ONS Beta API, Nomis, GOV.UK content API, Land
-  Registry CCOD service page, BoE statistical database, DfT port stats,
-  DESNZ sub-national energy.
-- Public sources behind a free key: Companies House, Met Office DataPoint,
-  EPC. Validators read the key from env (`COMPANIES_HOUSE_API_KEY` etc.)
-  and downgrade to `PLAUSIBLE` when absent. Verdicts upgrade automatically
-  on the next run after the key is added.
-- ToS-bound or legal-review-pending sources (e.g. competitor-listing
-  scraping for INS-077) are **DEFERRED** and skipped by the automated
-  pipeline.
+When public-data validation contradicts the literature claim
+(STATUS=PROVEN but VALIDATION=DISPROVEN, or similar), the catalogue entry
+is flagged and the conflict is logged to `00_authority/DECISION_LOG.md`
+for Ewan's review. The literature is not silently overwritten by a fetch.
 
-## 8. Known limitations
+## Reference implementations
 
-1. The scheme treats public-data presence as a sufficient condition for
-   `PROVEN`. For a stricter scheme that also requires positive client-side
-   replication, see methodology v2 §3.
-2. Verdict bands are coarser than methodology v2 rubric scores. Use both:
-   verdict for routing/triage, rubrics for ship/no-ship.
-3. `DEFERRED` is operational, not informational. A `DEFERRED` recipe may
-   later become `PROVEN`/`PLAUSIBLE`/`DISPROVEN` once the operational gate
-   clears (legal review, client consent, etc.).
+- `02_build/validators/` — shared fetchers, test classes, CLI orchestrator
+  (AMP-67).
+- `02_build/validators/validations/profservices.py` — runners for the
+  16 ProfServices entries (INS-079..INS-094) per AMP-67.
+  `03_shadow/validators/profservices/rollup.json` — verdict summary.
+- `02_build/validators/retail/` — self-contained retail validator package
+  (AMP-66) for the 19 retail entries (INS-060..INS-078). Self-contained
+  while the shared scaffold matures; will lift its fetchers and test
+  classes to the shared layer.
+  `01_truth/schemas/research-index/06a-vertical-retail-validation-rollup_v1.md`
+  — verdict rollup table.
+- AMP-64 / AMP-65 / AMP-68 use the same machinery for trades, hospitality,
+  universal.
 
-## 9. Changelog
+## Changelog
 
-- v1 (2026-05-03, Devon-9a6b) — initial schema, retail vertical reference implementation.
-
----
-
-Signed,
-
-**Devon-9a6b**
-Devin session `9a6bd256bd7c4a90a083a471fa94a810`
-2026-05-03
+- 2026-05-03 — v1 (Devon-ab74, AMP-67) — initial schema. Three-band
+  PROVEN/PLAUSIBLE/DISPROVEN scheme + BLOCKED gap-marker; four reusable
+  test classes; shadow-tier storage with promotion path.
+- 2026-05-03 — v1 merge (Devon-9a6b, AMP-66) — added DEFERRED policy band
+  (distinct from BLOCKED: BLOCKED = waiting on creds, DEFERRED = refusing
+  on ToS/legal grounds; first DEFERRED entry is INS-077 retail competitor
+  scraping); added the AMP-66 retail self-contained reference
+  implementation; documented the secret-redaction discipline (CodeQL
+  `py/clear-text-storage-sensitive-data` clean) introduced by the AMP-66
+  cache layer; documented the dual storage convention while the shared
+  layer matures. No removal of AMP-67 content.

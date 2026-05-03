@@ -1,15 +1,35 @@
-# Authored by Devon-9a6b, 2026-05-03 (session devin-9a6bd256bd7c4a90a083a471fa94a810)
-"""Vertical-scoped public-data validators for the AMP-59 master plan.
+"""Public-data validators for the Amplified Partners insight catalogue.
 
-Verticals (each lands as its own self-contained sub-package):
-  retail      AMP-66  (this PR)
+Tests insights from `01_truth/schemas/research-index/00-insight-catalogue_v1.md`
+against UK public datasets and emits one of:
+
+- PROVEN     — public data quantitatively confirms the claim at the granularity
+               required.
+- PLAUSIBLE  — data is consistent with the claim but underpowered, or one leg
+               of the recipe is open-data confirmable while the other requires
+               client data with published research support.
+- DISPROVEN  — public data contradicts the claim.
+- BLOCKED    — required source is unreachable in this environment (e.g. needs
+               an API key not yet provisioned). Recorded so the gap is visible.
+
+Per AMP-67 / AMP-59. Vertical-agnostic by design so AMP-64/65/66/68 reuse the
+same machinery.
+
+Vertical sub-packages (each self-contained until the shared layer matures):
+  retail      AMP-66  (this PR — `validators/retail/`)
+  prof_svcs   AMP-67  (`validators/validations/profservices.py`, shared scaffold)
   trades      AMP-64  (sibling)
   hospitality AMP-65  (sibling)
-  prof_svcs   AMP-67  (sibling)
   universal   AMP-68  (sibling)
 
-Once all five land, shared fetchers + tests will be promoted out of the
-vertical sub-packages into a top-level sources/ + tests/ layer per the
-AMP-59 plan.
+Once all five land, the AMP-66 retail self-contained subpackage will lift its
+fetchers + test classes into the shared `sources/` + `tests/` layer to match
+the AMP-67 convention.
+
+Signed-by: Devon-ab74 (devin-ab740f2c78ee477a9c16ea3b6ed15293) - 2026-05-03
+Signed-by: Devon-9a6b | 2026-05-03 | devin-9a6bd256bd7c4a90a083a471fa94a810 (merge)
 """
-__all__ = []
+
+from .core import EvidenceBundle, Verdict, VerdictBand, write_verdict
+
+__all__ = ["EvidenceBundle", "Verdict", "VerdictBand", "write_verdict"]
