@@ -1,0 +1,362 @@
+{
+  "insight_id": "INS-065",
+  "title": "Shopify Cohort \u00d7 ONS Wages \u00d7 Local IMD \u2192 LTV Segmentation (Retail)",
+  "vertical": "Retail",
+  "verdict": "PLAUSIBLE",
+  "test_class": "existence",
+  "summary": "Nomis reachable, ASHE detection partial: all 2 sources reachable; data shape consistent with claim",
+  "evidence": [
+    {
+      "test": "existence",
+      "claim": "Nomis ASHE workplace-analysis (NM_99_1) reachable",
+      "n_sources": 2,
+      "n_reachable": 2,
+      "n_skipped_keyless": 0,
+      "n_failed": 0,
+      "sources": [
+        {
+          "source": "nomis",
+          "url": "https://www.nomisweb.co.uk/api/v01/dataset/def.sdmx.json",
+          "params": {
+            "search": "ashe"
+          },
+          "accessed_utc": "2026-05-03T20:48:53Z",
+          "status": 200,
+          "sha256": "2fd6729ebc03270528fcbe7734521b819b6f57b0f4d853f3e55e6b6743efea15",
+          "cached": true,
+          "sample": {
+            "structure": {
+              "header": {
+                "id": "none",
+                "prepared": "2026-05-03T21:48:51Z",
+                "sender": {
+                  "contact": {
+                    "email": "support@nomisweb.co.uk",
+                    "name": "Nomis",
+                    "uri": "https://www.nomisweb.co.uk"
+                  },
+                  "id": "NOMIS"
+                },
+                "test": "false"
+              },
+              "keyfamilies": {
+                "keyfamily": [
+                  {
+                    "agencyid": "NOMIS",
+                    "annotations": {
+                      "annotation": [
+                        {
+                          "annotationtext": "Current (being actively updated)",
+                          "annotationtitle": "Status"
+                        },
+                        {
+                          "annotationtext": "Earnings,Hours worked,Pay,Workplace",
+                          "annotationtitle": "Keywords"
+                        },
+                        {
+                          "annotationtext": "GB pounds,GB pounds per week,Hours per week",
+                          "annotationtitle": "Units"
+                        },
+                        {
+                          "annotationtext": "ashe",
+                          "annotationtitle": "contenttype/sources"
+                        },
+                        {
+                          "annotationtext": "previously unavailable",
+                          "annotationtitle": "SubDescription"
+                        },
+                        {
+                          "annotationtext": "ashe",
+                          "annotationtitle": "Mnemonic"
+                        },
+                        {
+                          "annotationtext": "2005-11-17 09:30:00",
+                          "annotationtitle": "FirstReleased"
+                        },
+                        {
+                          "annotationtext": "2025-11-03 17:30:00",
+                          "annotationtitle": "LastUpdated"
+                        },
+                        {
+                          "annotationtext": "2025-11-03 17:30:00",
+                          "annotationtitle": "LastRevised"
+                        }
+                      ]
+                    },
+                    "id": "NM_99_1",
+                    "components": {
+                      "attribute": [
+                        {
+                          "assignmentstatus": "Mandatory",
+                          "attachmentlevel": "Observation",
+                          "codelist": "CL_OBS_STATUS",
+                          "conceptref": "OBS_STATUS"
+                        },
+                        {
+                          "assignmentstatus": "Conditional",
+                          "attachmentlevel": "Observation",
+                          "codelist": "CL_OBS_CONF",
+                          "conceptref": "OBS_CONF"
+                        },
+                        {
+                          "assignmentstatus": "Conditional",
+                          "attachmentlevel": "Observation",
+                          "codelist": "CL_OBS_ROUND",
+                          "conceptref": "OBS_ROUND"
+                        },
+                        {
+                          "assignmentstatus": "Conditional",
+                          "attachmentlevel": "Series",
+                          "codelist": "CL_UNIT_MULT",
+                          "conceptref": "UNIT_MULTIPLIER"
+                        },
+                        {
+                          "assignmentstatus": "Mandatory",
+                          "attachmentlevel": "Series",
+                          "codelist": "CL_TIME_FORMAT",
+                          "conceptref": "TIME_FORMAT"
+                        },
+                        {
+                          "assignmentstatus": "Mandatory",
+                          "attachmentlevel": "Series",
+                          "codelist": "CL_UNIT",
+                          "conceptref": "UNIT"
+                        },
+                        {
+                          "assignmentstatus": "Mandatory",
+                          "attachmentlevel": "Series",
+                          "conceptref": "TITLE_COMPL"
+                        }
+                      ],
+                      "dimension": [
+                        {
+                          "codelist": "CL_99_1_GEOGRAPHY",
+                          "conceptref": "GEOGRAPHY"
+                        },
+                        {
+                          "codelist": "CL_99_1_SEX",
+                          "conceptref": "SEX"
+                        },
+                        {
+                          "codelist": "CL_99_1_ITEM",
+                          "conceptref": "ITEM"
+                        },
+                        {
+                          "codelist": "CL_99_1_PAY",
+                          "conceptref": "PAY"
+                        },
+                        {
+                          "codelist": "CL_99_1_MEASURES",
+                          "conceptref": "MEASURES"
+                        },
+                        {
+                          "codelist": "CL_99_1_FREQ",
+                          "conceptref": "FREQ",
+                          "isfrequencydimension": "true"
+                        }
+                      ],
+                      "primarymeasure": {
+                        "conceptref": "OBS_VALUE"
+                      },
+                      "timedimension": {
+                        "codelist": "CL_99_1_TIME",
+                        "conceptref": "TIME"
+                      }
+                    },
+                    "name": {
+                      "value": "annual survey of hours and earnings - workplace analysis",
+                      "lang": "en"
+                    },
+                    "uri": "Nm-99d1",
+                    "version": 1.0
+                  }
+                ]
+              },
+              "xmlns": "http://www.SDMX.org/resources/SDMXML/schemas/v2_0/message",
+              "common": "http://www.SDMX.org/resources/SDMXML/schemas/v2_0/common",
+              "structure": "http://www.SDMX.org/resources/SDMXML/schemas/v2_0/structure",
+              "xsi": "http://www.w3.org/2001/XMLSchema-instance",
+              "schemalocation": "http://sdmx.org/docs/2_0/SDMXMessage.xsd"
+            }
+          },
+          "search": "ashe"
+        },
+        {
+          "source": "nomis",
+          "url": "https://www.nomisweb.co.uk/api/v01/dataset/NM_99_1.def.sdmx.json",
+          "params": {},
+          "accessed_utc": "2026-05-03T20:48:53Z",
+          "status": 200,
+          "sha256": "2248c21ae980387c464f8514c4ce8938996b14fba6ddfcdd41984ac97c3fa164",
+          "cached": true,
+          "sample": {
+            "structure": {
+              "header": {
+                "id": "NM_99_1",
+                "prepared": "2026-05-03T21:48:54Z",
+                "sender": {
+                  "contact": {
+                    "email": "earnings@ons.gov.uk",
+                    "name": "Earnings Helpline",
+                    "telephone": "+44(0) 1633 456120"
+                  },
+                  "id": "NOMIS"
+                },
+                "test": "false"
+              },
+              "keyfamilies": {
+                "keyfamily": [
+                  {
+                    "agencyid": "NOMIS",
+                    "annotations": {
+                      "annotation": [
+                        {
+                          "annotationtext": "Current (being actively updated)",
+                          "annotationtitle": "Status"
+                        },
+                        {
+                          "annotationtext": "Earnings,Hours worked,Pay,Workplace",
+                          "annotationtitle": "Keywords"
+                        },
+                        {
+                          "annotationtext": "GB pounds,GB pounds per week,Hours per week",
+                          "annotationtitle": "Units"
+                        },
+                        {
+                          "annotationtext": "ashe",
+                          "annotationtitle": "contenttype/sources"
+                        },
+                        {
+                          "annotationtext": "previously unavailable",
+                          "annotationtitle": "SubDescription"
+                        },
+                        {
+                          "annotationtext": "ashe",
+                          "annotationtitle": "Mnemonic"
+                        },
+                        {
+                          "annotationtext": "2005-11-17 09:30:00",
+                          "annotationtitle": "FirstReleased"
+                        },
+                        {
+                          "annotationtext": "2025-11-03 17:30:00",
+                          "annotationtitle": "LastUpdated"
+                        },
+                        {
+                          "annotationtext": "2025-11-03 17:30:00",
+                          "annotationtitle": "LastRevised"
+                        }
+                      ]
+                    },
+                    "id": "NM_99_1",
+                    "components": {
+                      "attribute": [
+                        {
+                          "assignmentstatus": "Mandatory",
+                          "attachmentlevel": "Observation",
+                          "codelist": "CL_OBS_STATUS",
+                          "conceptref": "OBS_STATUS"
+                        },
+                        {
+                          "assignmentstatus": "Conditional",
+                          "attachmentlevel": "Observation",
+                          "codelist": "CL_OBS_CONF",
+                          "conceptref": "OBS_CONF"
+                        },
+                        {
+                          "assignmentstatus": "Conditional",
+                          "attachmentlevel": "Observation",
+                          "codelist": "CL_OBS_ROUND",
+                          "conceptref": "OBS_ROUND"
+                        },
+                        {
+                          "assignmentstatus": "Conditional",
+                          "attachmentlevel": "Series",
+                          "codelist": "CL_UNIT_MULT",
+                          "conceptref": "UNIT_MULTIPLIER"
+                        },
+                        {
+                          "assignmentstatus": "Mandatory",
+                          "attachmentlevel": "Series",
+                          "codelist": "CL_TIME_FORMAT",
+                          "conceptref": "TIME_FORMAT"
+                        },
+                        {
+                          "assignmentstatus": "Mandatory",
+                          "attachmentlevel": "Series",
+                          "codelist": "CL_UNIT",
+                          "conceptref": "UNIT"
+                        },
+                        {
+                          "assignmentstatus": "Mandatory",
+                          "attachmentlevel": "Series",
+                          "conceptref": "TITLE_COMPL"
+                        }
+                      ],
+                      "dimension": [
+                        {
+                          "codelist": "CL_99_1_GEOGRAPHY",
+                          "conceptref": "GEOGRAPHY"
+                        },
+                        {
+                          "codelist": "CL_99_1_SEX",
+                          "conceptref": "SEX"
+                        },
+                        {
+                          "codelist": "CL_99_1_ITEM",
+                          "conceptref": "ITEM"
+                        },
+                        {
+                          "codelist": "CL_99_1_PAY",
+                          "conceptref": "PAY"
+                        },
+                        {
+                          "codelist": "CL_99_1_MEASURES",
+                          "conceptref": "MEASURES"
+                        },
+                        {
+                          "codelist": "CL_99_1_FREQ",
+                          "conceptref": "FREQ",
+                          "isfrequencydimension": "true"
+                        }
+                      ],
+                      "primarymeasure": {
+                        "conceptref": "OBS_VALUE"
+                      },
+                      "timedimension": {
+                        "codelist": "CL_99_1_TIME",
+                        "conceptref": "TIME"
+                      }
+                    },
+                    "name": {
+                      "value": "annual survey of hours and earnings - workplace analysis",
+                      "lang": "en"
+                    },
+                    "uri": "Nm-99d1",
+                    "version": 1.0
+                  }
+                ]
+              },
+              "xmlns": "http://www.SDMX.org/resources/SDMXML/schemas/v2_0/message",
+              "common": "http://www.SDMX.org/resources/SDMXML/schemas/v2_0/common",
+              "structure": "http://www.SDMX.org/resources/SDMXML/schemas/v2_0/structure",
+              "xsi": "http://www.w3.org/2001/XMLSchema-instance",
+              "schemalocation": "http://sdmx.org/docs/2_0/SDMXMessage.xsd"
+            }
+          },
+          "dataset": "NM_99_1"
+        }
+      ],
+      "reason": "all 2 sources reachable; data shape consistent with claim"
+    }
+  ],
+  "notes": [
+    "Public leg = Nomis ASHE earnings + (separately) DLUHC IMD by LSOA. PROVEN here.",
+    "Client leg = Shopify cohort LTV per postcode is internal data; recipe is PLAUSIBLE end-to-end."
+  ],
+  "confidence": 70,
+  "run_at_utc": "2026-05-03T20:53:31Z",
+  "git_sha": "c8863e80f7c626376a3b804a5405bb2e9c9d5f7a",
+  "session_id": "devin-9a6bd256bd7c4a90a083a471fa94a810",
+  "signed_by": "Devon-9a6b"
+}
