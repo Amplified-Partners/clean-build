@@ -13,6 +13,7 @@ changelog:
   - 2026-05-03 — Devon-4234: cache-key clarified — SHA-256 over sorted ``params``; credentials travel separately as ``auth_params`` and never enter the cache key, the meta file, or log lines.
   - 2026-05-03 — Devon-4234: §1 fold corrected to reference the actual v2 band names (`{PROVEN, PARTIALLY_SUPPORTED, REFUTED, INCONCLUSIVE}`); §3 `evidence[i].url` clarified as the original request URL with non-auth params merged (auth stripped, redirects followed but pre-redirect URL recorded); §2 correlation row updated to document the Fisher-z p-value gate the code now enforces.
   - 2026-05-03 — Devon-4234: §3 `vertical` enum extended to include `universal` (catalogue carries 42 `**VERTICAL:** Universal` entries; AMP-68 is the planned `validators/verticals/universal/` mapping).
+  - 2026-05-03 — Devon-4234: §6 promotion rule corrected — bundles overwrite in place; provenance lives in git history rather than parallel files. The earlier "alongside" wording described an unimplemented design; the actual `Verdict.write()` writes a fixed `<INS-NNN>.json` path so catalogue references remain stable and `03_shadow/` does not grow without bound.
 ---
 
 # Public-Data Validation — Schema (v1)
@@ -185,8 +186,15 @@ Verdict bundles live in `03_shadow/validators/<vertical>/` until reviewed.
   - Disputes — the bundle stays in `03_shadow/`, a follow-up validator is
     scheduled with a tighter probe, and the catalogue VALIDATION line either
     stays unchanged or is reverted.
-- Bundles are never deleted. Disputes append to `notes`; reruns produce a new
-  bundle alongside the old one with a new `run_at` and `code_sha`.
+- The on-disk path always reflects the latest verdict for a fast catalogue
+  lookup: a rerun overwrites `03_shadow/validators/<vertical>/<INS-NNN>.json`
+  in place. Provenance lives in **git history** — every overwrite is a signed
+  commit (per `00_authority/SIGNATURES.md`), so previous bundles are recovered
+  with `git log -p 03_shadow/validators/<vertical>/<INS-NNN>.json`. Disputes
+  append to the `notes` field of the current bundle rather than creating a
+  parallel file. This trades file-system "alongside" visibility for
+  catalogue-reference stability and avoids unbounded growth of
+  `03_shadow/validators/<vertical>/` over time.
 
 ## 7. Reproducibility
 

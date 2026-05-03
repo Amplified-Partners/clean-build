@@ -91,7 +91,11 @@ def run(
             path = verdict.write(out_root)
             band_counts[verdict.band.value] = band_counts.get(verdict.band.value, 0) + 1
             rows.append((ins_id, verdict.band.value, verdict.title))
-            print(f"{ins_id:8s} {verdict.band.value:18s} -> {path.relative_to(REPO_ROOT)}")
+            try:
+                rel = path.relative_to(REPO_ROOT)
+            except ValueError:
+                rel = path
+            print(f"{ins_id:8s} {verdict.band.value:18s} -> {rel}")
 
     print()
     print("Verdict summary:")
