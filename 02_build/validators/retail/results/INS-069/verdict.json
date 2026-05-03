@@ -21,7 +21,7 @@
             "limit": 20,
             "search": "family-spending"
           },
-          "accessed_utc": "2026-05-03T20:58:19Z",
+          "accessed_utc": "2026-05-03T21:02:00Z",
           "status": 200,
           "sha256": "312641511d78aa04e419075e39196f560a72d4047e53189ca7b0451cf8dc2af3",
           "cached": false,
@@ -911,8 +911,8 @@
     "Co-purchase graph leg = client transactional data; recipe is PLAUSIBLE end-to-end at deploy."
   ],
   "confidence": 80,
-  "run_at_utc": "2026-05-03T20:58:19Z",
-  "git_sha": "51e0047fc3200ddb5c63902e3c14234d10372072",
+  "run_at_utc": "2026-05-03T21:02:00Z",
+  "git_sha": "eb48563b8e7430685d2f50b6857c3177374de638",
   "session_id": "devin-9a6bd256bd7c4a90a083a471fa94a810",
   "signed_by": "Devon-9a6b"
 }

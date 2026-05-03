@@ -43,21 +43,28 @@ def _cache_paths(source: str, key: str) -> tuple[Path, Path]:
     return base / f"{key}.json", base / f"{key}.meta"
 
 
-def _key(url: str, params: dict | None) -> str:
-    raw = url + "?" + urlencode(sorted((params or {}).items()), doseq=True)
-    return hashlib.sha256(raw.encode("utf-8")).hexdigest()[:16]
-
-
 def _redact(params: dict[str, Any] | None) -> dict[str, Any]:
     """Return a copy of params with secret-bearing values replaced by '[REDACTED]'.
 
     Used before any disk-persistence or evidence-bundle emission so secrets in
     query strings (e.g. Met Office DataPoint ?key=) never land in committed
-    artefacts. The cache key is still derived from the unredacted params.
+    artefacts. Also fed into _cache_slot() so secrets never flow into
+    filesystem paths either (CodeQL trusts redacted strings).
     """
     if not params:
         return {}
     return {k: ("[REDACTED]" if k.lower() in SECRET_PARAM_NAMES else v) for k, v in params.items()}
+
+
+def _cache_slot(url: str, redacted_params: dict[str, Any]) -> str:
+    """Deterministic 16-hex cache slot derived from redacted params only.
+
+    For our read-only public-data APIs, two requests with different secret-key
+    values but identical URL + non-secret params return identical responses, so
+    sharing a cache slot is semantically correct.
+    """
+    raw = url + "?" + urlencode(sorted(redacted_params.items()), doseq=True)
+    return hashlib.sha256(raw.encode("utf-8")).hexdigest()[:16]
 
 
 @dataclass
@@ -111,8 +118,9 @@ def fetch_json(
     responses return a Fetched with status set + body={"_error": ...} so
     runners can downgrade rather than crash.
     """
-    key = _key(url, params)
-    body_path, meta_path = _cache_paths(source, key)
+    redacted = _redact(params)
+    slot = _cache_slot(url, redacted)
+    body_path, meta_path = _cache_paths(source, slot)
 
     if use_cache and body_path.exists() and meta_path.exists():
         meta = json.loads(meta_path.read_text())
@@ -120,11 +128,11 @@ def fetch_json(
         return Fetched(
             source=source,
             url=url,
-            params=_redact(params),
+            params=redacted,
             accessed_utc=meta["accessed_utc"],
             status=meta["status"],
             sha256=meta["sha256"],
-            cache_key=key,
+            cache_key=slot,
             body=body,
             headers=meta.get("headers", {}),
             cached=True,
@@ -146,11 +154,11 @@ def fetch_json(
                 return Fetched(
                     source=source,
                     url=url,
-                    params=_redact(params),
+                    params=redacted,
                     accessed_utc=accessed,
                     status=resp.status_code,
                     sha256="",
-                    cache_key=key,
+                    cache_key=slot,
                     body={"_error": f"HTTP {resp.status_code}", "text": resp.text[:500]},
                     headers={},
                     cached=False,
@@ -164,14 +172,13 @@ def fetch_json(
                 body = {"_raw_text": body_text[:5000]}
 
             accessed = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
-            redacted = _redact(params)
             meta = {
                 "url": url,
                 "params": redacted,
                 "accessed_utc": accessed,
                 "status": resp.status_code,
                 "sha256": sha,
-                "headers": {k: v for k, v in resp.headers.items() if k.lower() in {"content-type", "etag", "last-modified"}},
+                "headers": {hk: hv for hk, hv in resp.headers.items() if hk.lower() in {"content-type", "etag", "last-modified"}},
             }
             body_path.write_text(json.dumps(body, indent=2, default=str))
             meta_path.write_text(json.dumps(meta, indent=2))
@@ -182,7 +189,7 @@ def fetch_json(
                 accessed_utc=accessed,
                 status=resp.status_code,
                 sha256=sha,
-                cache_key=key,
+                cache_key=slot,
                 body=body,
                 headers=meta["headers"],
                 cached=False,
@@ -206,8 +213,9 @@ def fetch_text(
     use_cache: bool = True,
 ) -> Fetched:
     """GET a non-JSON endpoint. Body is the response text."""
-    key = _key(url, params)
-    body_path, meta_path = _cache_paths(source, key + ".txt")
+    redacted = _redact(params)
+    slot = _cache_slot(url, redacted)
+    body_path, meta_path = _cache_paths(source, slot + ".txt")
 
     if use_cache and body_path.exists() and meta_path.exists():
         meta = json.loads(meta_path.read_text())
@@ -215,11 +223,11 @@ def fetch_text(
         return Fetched(
             source=source,
             url=url,
-            params=_redact(params),
+            params=redacted,
             accessed_utc=meta["accessed_utc"],
             status=meta["status"],
             sha256=meta["sha256"],
-            cache_key=key,
+            cache_key=slot,
             body=body_text,
             headers=meta.get("headers", {}),
             cached=True,
@@ -240,14 +248,13 @@ def fetch_text(
             body_text = resp.text
             sha = hashlib.sha256(body_text.encode("utf-8")).hexdigest()
             accessed = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
-            redacted = _redact(params)
             meta = {
                 "url": url,
                 "params": redacted,
                 "accessed_utc": accessed,
                 "status": resp.status_code,
                 "sha256": sha,
-                "headers": {k: v for k, v in resp.headers.items() if k.lower() in {"content-type", "etag", "last-modified"}},
+                "headers": {hk: hv for hk, hv in resp.headers.items() if hk.lower() in {"content-type", "etag", "last-modified"}},
             }
             body_path.write_text(body_text)
             meta_path.write_text(json.dumps(meta, indent=2))
@@ -258,7 +265,7 @@ def fetch_text(
                 accessed_utc=accessed,
                 status=resp.status_code,
                 sha256=sha,
-                cache_key=key,
+                cache_key=slot,
                 body=body_text,
                 headers=meta["headers"],
                 cached=False,
