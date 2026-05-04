@@ -1,7 +1,7 @@
 ---
 title: Governed workspace manifest (authoritative inventory)
 date: 2026-05-03
-version: 50
+version: 51
 status: draft
 ---
 
@@ -115,6 +115,8 @@ not the GitHub slug. Do not guess another pattern under this org for this lane.
 - `01_truth/SYSTEMS-AND-API-REGISTER.md` `[LOGIC TO BE CONFIRMED]` (single register of all APIs, MCP servers, telephony systems, code modules, and their locations across all Amplified Partners repos)
 - `02_build/README.md` `[LOGIC TO BE CONFIRMED]` (runnable artefacts routing stub)
 - `02_build/validators/README.md` `[LOGIC TO BE CONFIRMED]` (public-data validation framework; reference impl of `01_truth/schemas/2026-05_public-data-validation_v1.md`; ProfServices pilot at AMP-67)
+- `02_build/compose/ollama/README.md` `[LOGIC TO BE CONFIRMED]` (Ollama compose mirror from Beast; AMP-46 host-loopback port-mapping fix; version control + recovery; Beast is source-of-truth)
+- `02_build/compose/ollama/docker-compose.yml` `[LOGIC TO BE CONFIRMED]` (mirror of `/opt/amplified/apps/ollama/docker-compose.yml` on Beast; verified end-to-end in `00_authority/DECISION_LOG.md` v16 entry)
 - `03_shadow/README.md` `[LOGIC TO BE CONFIRMED]` (experiment routing stub)
 - `03_shadow/job-wrapups/README.md` `[NON-AUTHORITATIVE]` (wrap-ups/escalation notes location; learning only)
 - `03_shadow/validators/README.md` `[NON-AUTHORITATIVE]` (shadow tier for public-data verdicts produced by `02_build/validators/`; non-authoritative pending review-promote)
@@ -168,6 +170,14 @@ not the GitHub slug. Do not guess another pattern under this org for this lane.
     - `P10-kill-switch-master-reference.md` `[NON-AUTHORITATIVE]` (510 lines — binary shutdown architecture)
 
 ## Changelog
+
+### v51 — 2026-05-03
+
+- Indexed two new files under **Candidate authority** for the AMP-46 Ollama port-mapping fix: `02_build/compose/ollama/README.md` and `02_build/compose/ollama/docker-compose.yml`. README follows the precedent set by `02_build/validators/README.md` (v48). The compose file is a mirror of `/opt/amplified/apps/ollama/docker-compose.yml` on Beast — Beast is source-of-truth; this is for version control, review, and recovery.
+- Bumped `02_build/INFRASTRUCTURE.md` to v3 (Ollama row updated with host-loopback bind, full model list, public Traefik route).
+- Added `00_authority/DECISION_LOG.md` v16 entry: `2026-05-03 — Ollama port-mapping fix on Beast (AMP-46)`. Linked to [AMP-46](https://linear.app/amplifiedpartners/issue/AMP-46/) and PR #32.
+
+Signed-by: Devon-a9a7 | 2026-05-03 | devin-a9a78d0c72d9491aa3a70b18cb741936
 
 ### v50 — 2026-05-03
 
