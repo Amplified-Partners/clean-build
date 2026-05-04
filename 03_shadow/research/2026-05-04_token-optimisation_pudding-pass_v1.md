@@ -118,25 +118,40 @@ The canonical methodology (per pudding-taxonomy-synthesis.md § 2 — "How to ap
 
 One identical match across the 10 techniques. Both are *process, tipping, singular, instant* — different upstream targets but **structurally equivalent routing decisions**. The "route to cheaper" logic is the same shape; only the cheap target differs (Haiku vs. Ollama). **The pudding is to stack them as a two-tier cascade with the cheap tier being free local inference.**
 
-### 4.2 3/4 matches (p < 0.01)
+### 4.2 3/4 exact matches (Jaccard 0.75, HIGH confidence per § 10 line 686)
 
-| Bridge | Techniques | Shared dims |
-|--------|-----------|:-----------:|
-| **B2** | Prompt caching `I.=.1.m` × MCP compression `I.-.4.p` | WHAT (I), TIME proximity (both persist across calls) |
-| **B3** | Schema-constrained output `C.=.1.i` × Chain of Draft `C.-.1.i` | WHAT (C), SCALE (1), TIME (i) — three of four |
+| Bridge | Techniques | Shared dims (exact) |
+|--------|-----------|:-------------------:|
+| **B3** | Schema-constrained output `C.=.1.i` × Chain of Draft `C.-.1.i` | WHAT (C), SCALE (1), TIME (i) |
 | **B4** | Server-side compaction `P.>.1.m` × Mid-session condensation `P.-.1.m` | WHAT (P), SCALE (1), TIME (m) |
 | **B5** | Cascading `P.>.1.i` × Server-side compaction `P.>.1.m` | WHAT (P), HOW (>), SCALE (1) |
-| **B6** | Cascading `P.>.1.i` × Batch API `P.=.5.l` | WHAT (P) only — but **complementary on TIME**: cascading decides which model in real time, Batch API defers eligible-for-Haiku calls to async at 50% off |
-| **B7** | Prompt caching `I.=.1.m` × Semantic caching `R.=.4.m` | HOW (=), TIME (m) — two stable cache layers at different granularity |
 
-### 4.3 What the bridges tell me
+### 4.3 2/4 exact matches (Jaccard 0.5, MEDIUM confidence)
 
-- **B1 is the highest-signal bridge** — only identical 4/4 in the set. Stack the routing tiers.
-- **B2 is the most under-exploited bridge** — caching multiplies in value when the cached content is small (compressed) and stable (compression is permanent). Both vendors support it natively.
-- **B6 is the highest-absolute-saving bridge** — cascading is *real-time* (`TIME=i`), Batch is *async* (`TIME=l`); the dimensions don't conflict, they compose. A Haiku-eligible *and* async-tolerant call gets routed to Haiku **and** batched, multiplying ~67% (Haiku vs Sonnet) × 50% (batch discount) = **~83% saving** on that call vs. real-time Sonnet.
-- **B3 expands the routable surface** — schema-constrained output makes Haiku reliable on tasks currently kept on Sonnet for output-shape reasons. CoD on the calls that genuinely need Sonnet cuts their output cost. Pure prompt-engineering pudding, no infrastructure.
-- **B4 is a substitution, not a synergy** — Anthropic's server-side compaction subsumes the client-side condensation use case for Anthropic traffic. Worth noting; not worth building both.
-- **B5 / B7 are weak** — different scales / different tiers, additive at best.
+| Bridge | Techniques | Shared dims (exact) |
+|--------|-----------|:-------------------:|
+| **B7** | Prompt caching `I.=.1.m` × Semantic caching `R.=.4.m` | HOW (=), TIME (m) |
+
+### 4.4 1/4 exact matches (Jaccard 0.25, LOW per canonical band — listed because the lens promotes them)
+
+Per `pudding-taxonomy-synthesis.md` § 10 (line 686), Jaccard < 0.5 = *"LOW confidence — Likely not pudding"* on label match alone. **These bridges are surfaced anyway because the lens ("save tokens without breaking quality") rewards complementarity on the dimensions where they *differ* — exactly the case the methodology calls out as needing rubric validation, not statistical filtering.**
+
+| Bridge | Techniques | Shared dims (exact) | Why surfaced despite low Jaccard |
+|--------|-----------|:-------------------:|----------------------------------|
+| **B2** | Prompt caching `I.=.1.m` × MCP compression `I.-.4.p` | WHAT (I) | Both ingredients shape the *same* information surface — the system prompt + tool list. Caching makes that surface cheap to read; compression makes it small to write. Lens-driven complementarity, not label match. |
+| **B6** | Cascading `P.>.1.i` × Batch API `P.=.5.l` | WHAT (P) | Differs on every other dim — but the **TIME-axis difference is the pudding**: real-time routing (`i`) of async-tolerant traffic (`l`) to Haiku × 50% batch discount = ~83% on the union. Without the TIME mismatch there would be no compounding. |
+
+### 4.5 What the bridges tell me
+
+- **B1 (4/4 PROVEN)** is the highest-signal bridge by label match — but its two ingredients are structurally identical, so the value is in *stacking* the cheap tier (free local inference) below the cloud cascade, not in surprise synthesis.
+- **B3 (3/4 HIGH)** expands the routable surface — schema-constrained output makes Haiku reliable on tasks currently kept on Sonnet for output-shape reasons. CoD on the calls that genuinely need Sonnet cuts their output cost. Pure prompt-engineering pudding, no infrastructure. Both ingredients are constraints (`C`); the bridge is that one constrains *shape*, the other constrains *length*.
+- **B4 (3/4 HIGH)** is a *substitution, not a synergy* — Anthropic's server-side compaction subsumes the client-side condensation use case for Anthropic traffic. Worth noting; not worth building both.
+- **B5 (3/4 HIGH)** is high on the label but additive on the value — cascading already exists, server-side compaction already exists; running them together doesn't compound.
+- **B7 (2/4 MEDIUM)** is two cache layers at different granularity. Useful as defence-in-depth but **already shipped** in this form (semantic cache in front of the proxy passthrough to native prompt cache).
+- **B2 (1/4 LOW on label, but lens-promoted)** — the most under-exploited bridge in the set. Caching multiplies in value when the cached content is small (compressed) and stable. Both vendors support it natively. The label says "unrelated"; the lens says "these are two halves of the same prefix-token problem."
+- **B6 (1/4 LOW on label, but lens-promoted)** — the highest *absolute* saving in the set, despite the LOW Jaccard band. Cascading is real-time (`TIME=i`), Batch is async (`TIME=l`); the dimensions don't conflict, they compose. A Haiku-eligible *and* async-tolerant call gets routed to Haiku **and** batched, multiplying ~67% (Haiku vs Sonnet) × 50% (batch discount) = **~83% saving** on that call vs. real-time Sonnet.
+
+**Methodology note (radical honesty):** The two recommendations the lens promotes hardest (B2, B6) are LOW Jaccard on the canonical band. This is **expected**, not a defect. The Pudding Technique's confidence bands (`pudding-taxonomy-synthesis.md` § 10) score statistical likelihood that two concepts are non-randomly related; they do not score *whether the relationship is useful for a specific lens*. With a strong lens ("save tokens without breaking quality"), low-Jaccard bridges where the ingredients differ on lens-relevant dimensions can produce more saving than high-Jaccard bridges where the ingredients are too similar to compound. Per the methodology: *"Without a lens you get noise; with the lens you get recipes."* B2 and B6 are recipes, not coincidences.
 
 ---
 
@@ -153,26 +168,28 @@ Same rubric, applied to the four meaningful puddings (B1, B2, B3, B6). The test 
 
 **Scoring math note + degeneracy finding** (per `pudding-taxonomy-synthesis.md` § 6 Formula 1 *`Recipe Score = (Shared Dimensions × 2) + Unique_A + Unique_B`*; algebraic equivalent `|intersection| + |union|` summarised in § 10 line 673):
 
-For any pair of **fixed 4-dimension PUDDING 2026 labels**, the simple Recipe Score is **constant**:
+For any pair of **fixed 4-dimension PUDDING 2026 labels**, Formula 1 is **constant**:
 
 `(2 × s) + (4 − s) + (4 − s) = 2s + 8 − 2s = 8` for every value of `s ∈ {0..4}`.
 
-This means the simple formula yields **score = 8** for every bridge in this set — including B1 (4/4 identical), B6 (1/4 shared), B2 (~2/4), B3 (3/4):
+Formula 1 yields **score = 8** for every bridge in this set, regardless of how many dimensions are exactly shared:
 
-- B1 — shared 4, unique 0+0 = **score 8**
-- B2 — shared 2 (WHAT + HOW-proximity), unique 2+2 = **score 8**
-- B3 — shared 3 (WHAT, SCALE, TIME), unique 1+1 = **score 8**
-- B6 — shared 1 (WHAT), unique 3+3 = **score 8**
+- B1 — exact-shared 4, unique 0+0 = **score 8**
+- B3 — exact-shared 3, unique 1+1 = **score 8**
+- B7 — exact-shared 2, unique 2+2 = **score 8**
+- B2 — exact-shared 1, unique 3+3 = **score 8**
+- B6 — exact-shared 1, unique 3+3 = **score 8**
 
 This is a **methodology finding, not a scoring bug**: Formula 1 (`|intersection| + |union|`) was originally defined for the **v1 multi-dimension semantic-dimensions schema** — 3–7 dimensions per document, drawn from the 24-dimension B-Term ontology in `pudding-taxonomy-synthesis.md` § 3 (line 153) — where `|intersection|` and `|union|` genuinely vary. The PUDDING 2026 fixed 4-character label collapses that variability. Caught by Devin Review on this PR; flagged here as a candidate update to the canonical taxonomy spec — either (a) drop Formula 1 from the PUDDING 2026 chapter and rely only on Jaccard / Formula 2, or (b) refine Formula 1 to weight the *positions* of shared dimensions (e.g., shared HOW counts more than shared TIME) so the score is no longer constant.
 
 **For this pudding pass, the differentiating signals are:**
 
-- **Jaccard slot match** (canonical confidence band per § 10): B1 = 1.0 (PROVEN); B3 = 0.75 (HIGH); B2 ≈ 0.5 (MEDIUM); B6 = 0.25 (LOW).
+- **Jaccard slot match** (canonical confidence band per § 10 line 686): B1 = **1.0 PROVEN**; B3 = **0.75 HIGH**; B7 = **0.5 MEDIUM**; B2 = **0.25 LOW**; B6 = **0.25 LOW**.
 - **Rubric net score** in the table above: B2 +6, B6 +4, B3 +4, B1 +1.
-- **"1+1=3?" qualitative test**: B2 YES, B6 YES, B3 PARTIAL, B1 CONDITIONAL.
+- **"1+1=3?" qualitative test through the lens**: B2 YES, B6 YES, B3 PARTIAL, B1 CONDITIONAL.
+- **Lens override**: B2 and B6 are LOW on the canonical statistical band but high on the lens-driven rubric. Per § 4.5 above, this is the methodology working as intended — recipes emerge from lens-relevant complementarity, not from label-match alone.
 
-The mathematical floor of "build immediately" per Formula 2 is **≥ 18** (`(domain_distance × pattern_alignment) + gap_complement + tension_bonus`). None of these clear that floor — but this is a **single-domain** prospecting pass (token economics on a hosted API), not the cross-domain LBD use case Formula 2 was tuned for. For single-domain prospecting, the **rubric net + Jaccard band + 1+1=3 test** are the load-bearing signals, not Formula 1.
+The mathematical floor of "build immediately" per Formula 2 is **≥ 18** (`(domain_distance × pattern_alignment) + gap_complement + tension_bonus`). None of these clear that floor — but this is a **single-domain** prospecting pass (token economics on a hosted API), not the cross-domain LBD use case Formula 2 was tuned for. For single-domain prospecting, the **rubric net + Jaccard band + lens-driven 1+1=3 test** are the load-bearing signals, not Formula 1 or Formula 2 in isolation.
 
 ---
 
