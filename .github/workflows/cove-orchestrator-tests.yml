@@ -10,6 +10,10 @@ on:
     paths:
       - "02_build/cove-orchestrator/**"
 
+# Least-privilege GITHUB_TOKEN: this workflow only reads code and runs tests.
+permissions:
+  contents: read
+
 jobs:
   lint-and-test:
     name: ruff + pytest
