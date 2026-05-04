@@ -308,6 +308,11 @@ Ready for production deployment on Hetzner "The Beast".
 
 ---
 
-**Built by**: Claude (Haiku 4.5)  
-**Date**: 2026-03-11  
-**Status**: ✅ Production Ready
+**Built by**: Claude (Haiku 4.5)
+**Date**: 2026-03-11
+**Status**: Production Ready (per source-repo claim 2026-03-11; see `02_build/enforcer/README.md` "Known Issue" section for behaviour caveats flagged on merge)
+
+---
+
+*Extracted from Beast `/opt/amplified/apps/enforcer/` into `Amplified-Partners/enforcer` by Devon | 2026-04-30 | session `aa4d863ad679468692e75a40b8825358`*
+*Merged into `clean-build/02_build/enforcer/` by Devon | 2026-05-04 | session `devin-1bdaf31798874921940598bed17ca9e3` | AMP-77 spine cleanup*

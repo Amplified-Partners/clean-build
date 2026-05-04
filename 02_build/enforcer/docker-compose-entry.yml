@@ -53,6 +53,12 @@ enforcer:
     
     # Security checks
     - FAIL2BAN_ENABLED=true
+
+    # Expected containers (comma-separated; must match actual Beast service names).
+    # Without this set, EnforcerConfig falls back to a 7-container default that
+    # omits openclaw-agents, litellm, searxng, ollama. Keep aligned with the
+    # canonical sibling docker-compose.yml:31.
+    - EXPECTED_CONTAINERS=traefik,falkordb,postgres,redis,qdrant,langfuse,portainer,openclaw-agents,litellm,searxng,ollama
   
   # Traefik routing (for enforcer.beast.amplifiedpartners.ai)
   labels:
