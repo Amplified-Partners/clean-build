@@ -226,7 +226,7 @@ LiteLLM row updated to reflect [AMP-71](https://linear.app/amplifiedpartners/iss
 - Made the existing public Traefik route (`litellm.beast.amplifiedpartners.ai`) explicit — was previously omitted.
 - Listed the full provider set the proxy fronts (Anthropic, OpenAI, Moonshot, DeepSeek, xAI in addition to Ollama) instead of just OpenAI/Anthropic.
 - Preserved the AMP-28 routing clarification (`simple-shuffle` with failover chains; does not classify by cost) on the same row.
-- LiteLLM compose **not** mirrored into the repo because the live file embeds plaintext API keys for six providers — see [AMP-72](https://linear.app/amplifiedpartners/issue/AMP-72/) for the secrets-hardening follow-up.
+- LiteLLM compose **not** mirrored into the repo because the live file embeds plaintext API keys for five providers plus the LiteLLM master key and a Postgres URL with embedded password — see [AMP-72](https://linear.app/amplifiedpartners/issue/AMP-72/) for the secrets-hardening follow-up.
 
 Verified end-to-end: host loopback, in-net Docker DNS, and Traefik public route all return 200 on `/health/liveliness`.
 
