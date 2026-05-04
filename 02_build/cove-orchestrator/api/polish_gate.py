@@ -16,9 +16,11 @@ Devon-29bf | 2026-05-04 | AMP-73 wire visual-polish-system into Cove
 
 from __future__ import annotations
 
+import hmac
 import os
 import uuid
-from typing import Optional
+from contextlib import asynccontextmanager
+from typing import AsyncIterator, Optional
 
 from fastapi import FastAPI, Header, HTTPException
 from pydantic import BaseModel, Field
@@ -44,7 +46,21 @@ DEFAULT_RULES = os.getenv(
 )
 DEFAULT_REFS = os.getenv("POLISH_GATE_REFERENCES_DIR", "")
 
-app = FastAPI(title="Cove Polish Gate", version="0.1.0")
+
+@asynccontextmanager
+async def _lifespan(app: FastAPI) -> AsyncIterator[None]:
+    # Open one Temporal client at startup and reuse it for every request —
+    # the gRPC channel is multiplexed, so a fresh connect per call would
+    # waste a full TCP + HTTP/2 handshake under sustained PR load.
+    app.state.temporal_client = await Client.connect(TEMPORAL_ADDRESS)
+    try:
+        yield
+    finally:
+        # temporalio.Client has no explicit close(); GC handles the channel.
+        app.state.temporal_client = None
+
+
+app = FastAPI(title="Cove Polish Gate", version="0.1.0", lifespan=_lifespan)
 
 
 class PolishGateRequest(BaseModel):
@@ -73,7 +89,10 @@ def _check_auth(token: Optional[str]) -> None:
     if not SHARED_SECRET:
         # In dev, no secret configured ⇒ allow all. In prod the env must set it.
         return
-    if token != SHARED_SECRET:
+    # Constant-time comparison — the API is internet-facing once Beast's
+    # firewall opens 8090, so naive `!=` would leak the secret one byte at a
+    # time under timing analysis. (Layer 0: Privacy and Security First.)
+    if token is None or not hmac.compare_digest(token, SHARED_SECRET):
         raise HTTPException(status_code=401, detail="invalid token")
 
 
@@ -89,7 +108,7 @@ async def trigger_polish_gate(
 ) -> PolishGateResponse:
     _check_auth(x_cove_token)
 
-    client = await Client.connect(TEMPORAL_ADDRESS)
+    client: Client = app.state.temporal_client
     workflow_id = f"polish-gate-{body.pr_id.replace('/', '_').replace('#', '-')}-{uuid.uuid4().hex[:8]}"
 
     handle = await client.start_workflow(
