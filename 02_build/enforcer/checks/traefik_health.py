@@ -72,9 +72,9 @@ async def check_traefik(traefik_host: str = "traefik") -> TraefikCheckResult:
 
     elapsed = (datetime.now(timezone.utc) - now).total_seconds() * 1000
     return TraefikCheckResult(
-        name="traefik_health", status="warn",
+        name="traefik_health", status="fail",
         message="Traefik API not reachable (ports checked: 80, 443, 8080)",
-        severity="warning",
+        severity="critical",
         timestamp=now.isoformat(),
         duration_ms=elapsed,
         details={"error": "All connection attempts failed"}
