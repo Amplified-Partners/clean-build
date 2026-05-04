@@ -1,7 +1,7 @@
 ---
 title: Decision log
 date: 2026-05-03
-version: 15
+version: 16
 status: draft
 ---
 
@@ -45,7 +45,7 @@ One entry per decision. Keep it short. Link out to supporting docs.
 - **Where encoded**:
   - Live config: `/opt/amplified/apps/ollama/docker-compose.yml` on Beast (signed leading comment).
   - Repo mirror: `02_build/compose/ollama/docker-compose.yml` + `02_build/compose/ollama/README.md`.
-  - Manifest: `02_build/INFRASTRUCTURE.md` v2 — Ollama row updated, changelog entry signed.
+  - Manifest: `02_build/INFRASTRUCTURE.md` v3 — Ollama row updated, changelog entry signed.
   - Workaround revert: `/opt/amplified/pudding_extractor.py` on Beast — bridge IP `172.18.0.3` swapped back to canonical `127.0.0.1`. Beast-side only, not in any repo.
 - **Verification**: `curl http://127.0.0.1:11434/api/tags` (host) → 200, 4 models. `curl http://ollama:11434/api/tags` from a container on `amplified-net` → 200 (no DNS regression). `curl https://ollama.beast.amplifiedpartners.ai/api/tags` → 200 (Traefik route still works).
 - **Status**: active
@@ -374,16 +374,22 @@ One entry per decision. Keep it short. Link out to supporting docs.
 
 ## Changelog
 
-This section was added in v15 to satisfy `AGENTS.md` rule #3 (authority files must record version bumps in a changelog). Earlier `version` bumps (v1 — v13) were made without a corresponding changelog entry; that history is preserved in git but not enumerated here. From v14 onward, every bump appends an entry below.
+This section was added in v16 to satisfy `AGENTS.md` rule #3 (authority files must record version bumps in a changelog). Earlier `version` bumps (v1 — v13) were made without a corresponding changelog entry; that history is preserved in git but not enumerated here. From v14 onward, every bump appends an entry below.
+
+### v16 — 2026-05-03
+
+Added the `2026-05-03 — Ollama port-mapping fix on Beast (AMP-46)` entry to `## Entries` (immediately below the AMP-67 entry already on main, above the AMP-28 entries). Decision is reversible. Linked to [AMP-46](https://linear.app/amplifiedpartners/issue/AMP-46/beast-ops-fix-ollama-container-port-mapping) and PR #32. Manifest pointer now references `02_build/INFRASTRUCTURE.md` v3 (rebased onto current main).
+
+Signed-by: Devon-a9a7 | 2026-05-03 | devin-a9a78d0c72d9491aa3a70b18cb741936
 
 ### v15 — 2026-05-03
 
-Added the `2026-05-03 — Ollama port-mapping fix on Beast (AMP-46)` entry to `## Entries` (immediately below the AMP-67 entry already on main). Decision is reversible. Linked to [AMP-46](https://linear.app/amplifiedpartners/issue/AMP-46/beast-ops-fix-ollama-container-port-mapping) and PR #32.
+Added two entries to `## Entries`: `2026-05-03 — cost-tools (token_proxy.py) deployed on Beast and indexed in spine` and `2026-05-03 — Agent routing rule established (AGENT_ROUTING.md)`. Recorded retroactively in v16 because the v15 bump shipped on `main` (PR #39, AMP-28) without a changelog entry — preserved here so the audit trail is complete.
 
 Signed-by: Devon-a9a7 | 2026-05-03 | devin-a9a78d0c72d9491aa3a70b18cb741936
 
 ### v14 — 2026-05-03
 
-Added the `2026-05-03 — Public-data validation framework + ProfServices pilot (AMP-67)` entry to `## Entries`. Recorded retroactively in v15 because the v14 bump shipped on `main` (PR #35) without a changelog entry — preserved here so the audit trail starts at the first observed bump.
+Added the `2026-05-03 — Public-data validation framework + ProfServices pilot (AMP-67)` entry to `## Entries`. Recorded retroactively in v16 because the v14 bump shipped on `main` (PR #35) without a changelog entry — preserved here so the audit trail starts at the first observed bump.
 
 Signed-by: Devon-a9a7 | 2026-05-03 | devin-a9a78d0c72d9491aa3a70b18cb741936
