@@ -1,7 +1,7 @@
 ---
 title: Governed workspace manifest (authoritative inventory)
-date: 2026-05-03
-version: 52
+date: 2026-05-04
+version: 53
 status: draft
 ---
 
@@ -117,6 +117,8 @@ not the GitHub slug. Do not guess another pattern under this org for this lane.
 - `02_build/validators/README.md` `[LOGIC TO BE CONFIRMED]` (public-data validation framework; reference impl of `01_truth/schemas/2026-05_public-data-validation_v1.md`; ProfServices pilot at AMP-67)
 - `02_build/compose/ollama/README.md` `[LOGIC TO BE CONFIRMED]` (Ollama compose mirror from Beast; AMP-46 host-loopback port-mapping fix; version control + recovery; Beast is source-of-truth)
 - `02_build/compose/ollama/docker-compose.yml` `[LOGIC TO BE CONFIRMED]` (mirror of `/opt/amplified/apps/ollama/docker-compose.yml` on Beast; verified end-to-end in `00_authority/DECISION_LOG.md` v16 entry)
+- `02_build/compose/litellm/README.md` `[LOGIC TO BE CONFIRMED]` (LiteLLM compose mirror from Beast; AMP-72 secrets-to-`.env` migration; version control + recovery; Beast is source-of-truth; `.env` is **not** mirrored)
+- `02_build/compose/litellm/docker-compose.yml` `[LOGIC TO BE CONFIRMED]` (mirror of `/opt/amplified/apps/litellm/docker-compose.yml` on Beast; secrets removed and now read via `env_file:`; verified end-to-end in `00_authority/DECISION_LOG.md` v18 entry)
 - `03_shadow/README.md` `[LOGIC TO BE CONFIRMED]` (experiment routing stub)
 - `03_shadow/job-wrapups/README.md` `[NON-AUTHORITATIVE]` (wrap-ups/escalation notes location; learning only)
 - `03_shadow/validators/README.md` `[NON-AUTHORITATIVE]` (shadow tier for public-data verdicts produced by `02_build/validators/`; non-authoritative pending review-promote)
@@ -170,6 +172,15 @@ not the GitHub slug. Do not guess another pattern under this org for this lane.
     - `P10-kill-switch-master-reference.md` `[NON-AUTHORITATIVE]` (510 lines — binary shutdown architecture)
 
 ## Changelog
+
+### v53 — 2026-05-04
+
+- Indexed two new files under **Candidate authority** for the AMP-72 LiteLLM secrets-hardening fix: `02_build/compose/litellm/README.md` and `02_build/compose/litellm/docker-compose.yml`. Follows the AMP-46 Ollama precedent (v51). The compose is a mirror of `/opt/amplified/apps/litellm/docker-compose.yml` on Beast — Beast is source-of-truth; this is for version control, review, and recovery. The mirror is now safe because plaintext secrets have been moved out of the compose into a sibling `.env` file (mode 600, root-owned, gitignored) which is **never** mirrored.
+- Bumped `02_build/INFRASTRUCTURE.md` to v5 (LiteLLM row updated with the AMP-72 secrets-to-`.env` migration; compose-file-locations table updated to point to the new mirror).
+- Added `00_authority/DECISION_LOG.md` v18 entry: `2026-05-04 — LiteLLM secrets moved to \`.env\` + compose mirrored (AMP-72)`. Linked to [AMP-72](https://linear.app/amplifiedpartners/issue/AMP-72/).
+- Out of scope (deliberate): key rotation. The original AMP-72 description called for it; rotation is deferred to the existing monthly `rotate-keys.sh` cadence (last ran 2026-05-01) once consumers are inventoried.
+
+Signed-by: Devon-a9a7 | 2026-05-04 | devin-a9a78d0c72d9491aa3a70b18cb741936
 
 ### v52 — 2026-05-03
 

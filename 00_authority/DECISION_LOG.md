@@ -1,7 +1,7 @@
 ---
 title: Decision log
-date: 2026-05-03
-version: 17
+date: 2026-05-04
+version: 18
 status: draft
 ---
 
@@ -12,6 +12,22 @@ status: draft
 One entry per decision. Keep it short. Link out to supporting docs.
 
 ## Entries
+
+### 2026-05-04 — LiteLLM secrets moved to `.env` + compose mirrored (AMP-72)
+
+- **Decision**: Move all seven secret values out of `/opt/amplified/apps/litellm/docker-compose.yml` (`LITELLM_MASTER_KEY`, `DATABASE_URL` with embedded Postgres password, `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, `MOONSHOT_API_KEY`, `DEEPSEEK_API_KEY`, `XAI_API_KEY_BEAST`) into a sibling `.env` file at `/opt/amplified/apps/litellm/.env` (mode 600, owner root, gitignored, never mirrored anywhere). Compose now references via `env_file: - .env`; non-secret connection metadata (`REDIS_HOST`, `REDIS_PORT`) stays inline. Mirror the cleaned compose into `02_build/compose/litellm/docker-compose.yml` with a README following the AMP-46 Ollama precedent. Update the existing rotation script at `/opt/amplified/secrets/rotation/rotate-keys.sh` to also write the new `.env` (it already updates `.env` files for the cove-orchestrator stack).
+- **Why**: Linear ticket [AMP-72](https://linear.app/amplifiedpartners/issue/AMP-72/) — surfaced during AMP-71 implementation. Plaintext secrets in source-of-truth files are a one-way ratchet: every backup, snapshot, accidental scp, or cross-agent fix attempt copies them. The compose was readable by anything with root on Beast and could not be mirrored into version control without committing secrets. Moving to an `env_file` reference is the standard 12-factor pattern, fully reversible until any subsequent rotation, and unblocks version-control mirroring of the compose itself.
+- **Where encoded**:
+  - Live config: `/opt/amplified/apps/litellm/docker-compose.yml` on Beast (no inline secrets remaining; signed leading comment).
+  - Live secrets: `/opt/amplified/apps/litellm/.env` on Beast (mode 600, root-owned, gitignored).
+  - Rotation: `/opt/amplified/secrets/rotation/rotate-keys.sh` updated with `LITELLM_ENV_FILE` variable + `update_litellm_env` function + backup hook (signed comments mark the AMP-72 additions).
+  - Repo mirror: `02_build/compose/litellm/docker-compose.yml` + `02_build/compose/litellm/README.md` (this PR).
+  - Manifest: `02_build/INFRASTRUCTURE.md` v5 — LiteLLM row updated, compose-file-locations table updated, changelog entry signed.
+- **Verification**: After `docker compose up -d --force-recreate litellm`, all 9 expected env vars (7 secrets + `REDIS_HOST` + `REDIS_PORT`) resolve inside the container. `curl http://127.0.0.1:4000/health/liveliness` (host loopback), in-net DNS via `http://litellm:4000/health/liveliness`, and `https://litellm.beast.amplifiedpartners.ai/health/liveliness` (Traefik public) all return 200. End-to-end provider smoke test against `/chat/completions`: 5 of 6 providers return PONG (Anthropic via `claude-haiku`, Moonshot via `kimi-k2.6`, DeepSeek via `deepseek-v4-flash`, xAI via `grok-fast`, local/Ollama via `local/llama3.1-8b`). OpenAI returns `AuthenticationError: Incorrect API key` — verified pre-existing (the same key value in `docker-compose.yml.bak.20260503-amp71` is byte-identical to the one now in `.env`, and the same key fails when called directly against `https://api.openai.com/v1/models`); AMP-72 migration did not change a byte. Tracked separately for Ewan; not blocking.
+- **Status**: active
+- **Reversible**: yes — backups at `/opt/amplified/apps/litellm/docker-compose.yml.bak.20260504-amp72` + `.env.bak.20260504-amp72`; restore is a `cp` of either backup over the live file followed by `docker compose up -d --force-recreate litellm`.
+- **Out of scope (deliberate)**: Key rotation. The original AMP-72 description called for rotating every key after the move. Rotation has non-trivial blast radius — the LiteLLM master key gates 3 virtual keys in the LiteLLM Postgres DB plus consumers across `agent-stack/cove-orchestrator/` and `agent-stack/vault-ingestion/` — and the existing monthly rotation script (`rotate-keys.sh`, last ran 2026-05-01) is the right channel for it. The `.env` migration alone delivers the structural fix (compose mirror unblocked, root-only file mode, gitignored). Rotation will follow on the next monthly cron or under a dedicated ticket once consumers are inventoried.
+- **Signed-by**: Devon-a9a7 | 2026-05-04 | devin-a9a78d0c72d9491aa3a70b18cb741936
 
 ### 2026-05-03 — LiteLLM host-loopback port mapping + pudding-testing env-driven base URLs (AMP-71)
 
@@ -388,6 +404,12 @@ One entry per decision. Keep it short. Link out to supporting docs.
 ## Changelog
 
 This section was added in v16 to satisfy `AGENTS.md` rule #3 (authority files must record version bumps in a changelog). Earlier `version` bumps (v1 — v13) were made without a corresponding changelog entry; that history is preserved in git but not enumerated here. From v14 onward, every bump appends an entry below.
+
+### v18 — 2026-05-04
+
+Added the `2026-05-04 — LiteLLM secrets moved to \`.env\` + compose mirrored (AMP-72)` entry to the top of `## Entries`. Decision is reversible (backups at `/opt/amplified/apps/litellm/docker-compose.yml.bak.20260504-amp72` + `.env.bak.20260504-amp72`). Linked to [AMP-72](https://linear.app/amplifiedpartners/issue/AMP-72/). Manifest pointer references `02_build/INFRASTRUCTURE.md` v5.
+
+Signed-by: Devon-a9a7 | 2026-05-04 | devin-a9a78d0c72d9491aa3a70b18cb741936
 
 ### v17 — 2026-05-03
 
