@@ -186,7 +186,7 @@ Signed-by: Devon-a9a7 | 2026-05-04 | devin-a9a78d0c72d9491aa3a70b18cb741936
 
 - Bumped `02_build/INFRASTRUCTURE.md` to v4 (LiteLLM row updated with host-loopback bind `127.0.0.1:4000`, full provider set, public Traefik route; AMP-28 `simple-shuffle` clarification preserved on the same row).
 - Added `00_authority/DECISION_LOG.md` v17 entry: `2026-05-03 — LiteLLM host-loopback port mapping + pudding-testing env-driven base URLs (AMP-71)`. Linked to [AMP-71](https://linear.app/amplifiedpartners/issue/AMP-71/) and PR #38.
-- LiteLLM compose **not** indexed in this manifest because it is **not** mirrored into the repo — the live file embeds plaintext API keys for six providers, gated on [AMP-72](https://linear.app/amplifiedpartners/issue/AMP-72/) (secrets-hardening).
+- LiteLLM compose **not** indexed in this manifest because it is **not** mirrored into the repo — the live file embeds plaintext API keys for five providers plus the LiteLLM master key and a Postgres URL with embedded password, gated on [AMP-72](https://linear.app/amplifiedpartners/issue/AMP-72/) (secrets-hardening).
 
 Signed-by: Devon-a9a7 | 2026-05-03 | devin-a9a78d0c72d9491aa3a70b18cb741936
 
