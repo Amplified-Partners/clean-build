@@ -1,9 +1,11 @@
 ---
 title: Infrastructure manifest — Amplified Partners Core Server
-date: 2026-04-30
-version: 1
+date: 2026-05-03
+version: 2
 status: authoritative now
-signed-by: Devon | 2026-04-30 | devin-66aa3ce48c7e407f8ad9bf066541b604
+signed-by:
+  - Devon | 2026-04-30 | devin-66aa3ce48c7e407f8ad9bf066541b604
+  - Devon-6ca5 | 2026-05-03 | devin-6ca57553eefe4806b613070325964703
 ---
 
 <!-- markdownlint-disable-file MD013 -->
@@ -60,8 +62,21 @@ These are shared infrastructure that other services depend on.
 | Container | Image | Status | Purpose |
 |-----------|-------|--------|---------|
 | **ollama** | `ollama/ollama:latest` | Running | Local LLM inference server. Hosts llama3.1-8b and other models. Internal port 11434. |
-| **litellm** | `ghcr.io/berriai/litellm:main-latest` | Running | LLM proxy — unified API for local (Ollama) and remote (OpenAI, Anthropic) models. Internal port 4000. |
+| **litellm** | `ghcr.io/berriai/litellm:main-latest` | Running | LLM proxy — unified API for local (Ollama) and remote (OpenAI, Anthropic) models. Internal port 4000. Routes by `simple-shuffle` with failover chains; **does not** classify by cost. |
+| **token-proxy** | `amplified/token-proxy:latest` (built locally from `Amplified-Partners/cost-tools`) | Running (healthy) | Anthropic-only reverse proxy. Sonnet→Haiku model-layer routing on extractive/classification prompts; prompt caching; semantic similarity cache (Qdrant `llm_cache`, 0.95, 24h TTL); native context compaction; daily $100 budget circuit-breaker; per-agent cost log. Container port 8088 (host-bound to `127.0.0.1:8088` for diagnostics; agents reach it via DNS name `token-proxy:8088` on `amplified-net`). Compose file: `/opt/amplified/apps/cost-tools/docker-compose.yml`. RUNBOOK: `cost-tools/RUNBOOK.md`. Linear: AMP-28. |
 | **langfuse** | `langfuse/langfuse:latest` | Running | LLM observability — traces, costs, prompt versioning. |
+
+**To wire an agent through the token-proxy:**
+```bash
+# inside the agent's container, on amplified-net:
+export ANTHROPIC_BASE_URL=http://token-proxy:8088
+```
+Reversal: unset the env var. 30 seconds, no restart of the proxy needed.
+
+**Self-heal layers for token-proxy:**
+1. Docker `restart: always` + `healthcheck: /proxy/stats` every 30s (handles ~90% of transient failures).
+2. Optional Temporal workflow checking `/proxy/stats` every 5 min and running `docker compose restart token-proxy` on 2 consecutive failures (pattern matches existing `cove-*` self-heal).
+3. RUNBOOK at `cost-tools/RUNBOOK.md` — 5 failure modes (F1–F5), per-failure 30-second fix, escalation rule (2 attempts → rollback → page Ewan via Telegram).
 
 ## Knowledge and search
 

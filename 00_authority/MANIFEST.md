@@ -1,7 +1,7 @@
 ---
 title: Governed workspace manifest (authoritative inventory)
-date: 2026-05-01
-version: 44
+date: 2026-05-03
+version: 45
 status: draft
 ---
 
@@ -74,6 +74,7 @@ not the GitHub slug. Do not guess another pattern under this org for this lane.
 - `00_authority/SIGNATURES.md` (every AI signs committed work; Radical Attribution applied mechanically; agent chooses format)
 - `00_authority/USE_IT_OR_CUT_IT.md` (sounds good + built + unused = cut; remediation rule for bloat; archive exempt)
 - `00_authority/OPINION_CONFIDENCE.md` (opinions labelled + confidence numbered; tiered thresholds 50% / 85% / 95% by reversibility)
+- `00_authority/AGENT_ROUTING.md` `[LOGIC TO BE CONFIRMED]` (agent-layer routing — which agent runs which task; stacks on top of `cost-tools/token_proxy.py` model-layer routing; eight rules; AMP-28)
 - `00_authority/PROMOTION_GATE.md`
 - `00_authority/BUILD_LOOP.md`
 - `00_authority/DECISION_LOG.md`
@@ -162,6 +163,14 @@ not the GitHub slug. Do not guess another pattern under this org for this lane.
     - `P10-kill-switch-master-reference.md` `[NON-AUTHORITATIVE]` (510 lines — binary shutdown architecture)
 
 ## Changelog
+
+### v45 — 2026-05-03
+
+- Added `00_authority/AGENT_ROUTING.md` to **Authoritative now** as `[LOGIC TO BE CONFIRMED]`: agent-layer routing rule (which agent runs which task). Stacks on top of, and explicitly references, the model-layer routing in `cost-tools/token_proxy.py` (which decides Sonnet vs Haiku per call). Companion to AMP-28.
+- Indexed cost-tools (`token_proxy.py`) into the spine via the existing register and manifest pointers — see `01_truth/SYSTEMS-AND-API-REGISTER.md` v2 (cost-tools / token-proxy section) and `02_build/INFRASTRUCTURE.md` v2 (token-proxy container row under AI / ML services). The proxy was on disk at `/opt/amplified/apps/real/token_proxy.py` since 2026-03-12 but was never deployed and never indexed; it is now deployed on Beast as the `token-proxy` container on `amplified-net` with healthcheck and `restart: always`.
+- Resurrection wrap-up filed at `03_shadow/job-wrapups/2026-05-03_cost-tools-resurrection_v1.md` documenting the discovery, verification (n=69, 100% routing accuracy on the labelled set, 30.7% saved on the test sample, 5× latency drop), deploy, and pattern for future dormant-code finds.
+
+Signed-by: Devon-6ca5 | Devin (Cognition AI) | 2026-05-03 | session `devin-6ca57553eefe4806b613070325964703`
 
 ### v44 — 2026-05-01
 

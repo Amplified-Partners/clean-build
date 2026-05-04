@@ -1,7 +1,7 @@
 ---
 title: Taxonomy — Amplified Partners entity definitions and agent roles
-date: 2026-04-29
-version: 1
+date: 2026-05-03
+version: 2
 status: draft
 ---
 
@@ -16,6 +16,10 @@ This file is the single canonical reference for:
 3. Terminology — locked definitions so agents do not confuse similarly-named things
 
 If a name is not in this file, treat it as `[SOURCE REQUIRED]`.
+
+## What this taxonomy is not
+
+This file defines **entities, agents, and locked terminology**. It does **not** assign **cost tiers** to agents (e.g. "Devon = always-Sonnet", "Cassian = always-Haiku"). Cost-tier classification is the job of `cost-tools/token_proxy.py`, which routes per-call based on prompt content (see `01_truth/SYSTEMS-AND-API-REGISTER.md` § 14 and `02_build/INFRASTRUCTURE.md` § AI / ML services). Agent-layer routing (which agent runs which task) lives in `00_authority/AGENT_ROUTING.md`. The two layers stack and are deliberately independent of this file.
 
 ---
 
@@ -101,3 +105,14 @@ The principle: one person does one thing. Clean boundaries. No stepping on each 
 ---
 
 *Written by: Devon (Devin) | 2026-04-29 | ground-truth session*
+
+---
+
+## Changelog
+
+### v2 — 2026-05-03
+
+- Added § "What this taxonomy is not": an explicit lock that cost-tier classification is the job of `cost-tools/token_proxy.py`, not this file. Agent-layer routing rules live in `00_authority/AGENT_ROUTING.md`. The two layers (model-layer routing in the proxy + agent-layer routing in `AGENT_ROUTING.md`) stack and are independent of this taxonomy.
+- No changes to the company structure or agent roster.
+
+Signed-by: Devon-6ca5 | Devin (Cognition AI) | 2026-05-03 | session `devin-6ca57553eefe4806b613070325964703`
