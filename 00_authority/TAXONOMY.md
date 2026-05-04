@@ -1,7 +1,7 @@
 ---
 title: Taxonomy — Amplified Partners entity definitions and agent roles
 date: 2026-05-03
-version: 2
+version: 3
 status: draft
 ---
 
@@ -52,7 +52,7 @@ The operating model: each agent is self-contained. Projects are independent. Coo
 | Agent | Name | Core responsibility | Access scope | Reports to |
 |-------|------|---------------------|--------------|------------|
 | **Devin** | Devon | Infrastructure & systems coordinator. The only agent who writes code to Amplified Core or any production system. Maintains GitHub. Keeps repos clean, cohesive, and canonical. Deploys updates. Sets schedules. Makes everyone else's work better by keeping the foundation solid. | Core (SSH), GitHub, Linear, Slack | OpenClaw (status updates) → Ewan (escalations) |
-| **OpenClaw** | Sam / Clawd | Partner and coordinator. Lives on Ewan's Mac. Reads vault, processes voice notes, talks to Ewan via Telegram/WhatsApp/Slack. Investigates process failures (not people failures). Maintains shared state. | Local filesystem, all channels, vault, all repos (read) | Ewan directly |
+| **OpenClaw** | Sam / Clawd / Cassian | Partner and coordinator. Lives on Ewan's Mac. Reads vault, processes voice notes, talks to Ewan via Telegram/WhatsApp/Slack. Investigates process failures (not people failures). Maintains shared state. | Local filesystem, all channels, vault, all repos (read) | Ewan directly |
 | **Cursor** | — | Builder. Produces code in clean-build workspace. Outputs to GitHub. Does not deploy directly — deployment goes through Devon. | clean-build workspace, GitHub (write to own branches) | Devon (for deployment), Ewan (for direction) |
 | **Antigravity / AG** | — | Business Arbiter and COO. Strategic decisions for the firm. Does not direct agent cognition — directs the business. | Strategic review | Ewan |
 | **Perplexity** | Comet (in browser) | Researcher. External research, synthesis, brainstorm inputs. | External web | Ewan / whoever runs the session |
@@ -92,7 +92,7 @@ The principle: one person does one thing. Clean boundaries. No stepping on each 
 | **Pudding** | The cross-client anonymised discovery technique | A specific tool or library. It is a methodology. |
 | **PicoClaw** | Beelink N150 mini PC placed physically on-site at Tier 3+ clients | The Core. Client-side hardware, not central infrastructure. |
 | **Devon** | Devin's name within the Amplified Partners ecosystem | Any other agent |
-| **Sam / Clawd** | OpenClaw's name within the ecosystem | Devon |
+| **Sam / Clawd / Cassian** | OpenClaw's names within the ecosystem (all three are aliases for the same agent; Ewan uses them interchangeably in chat and knowledge notes) | Devon |
 
 ---
 
@@ -109,6 +109,13 @@ The principle: one person does one thing. Clean boundaries. No stepping on each 
 ---
 
 ## Changelog
+
+### v3 — 2026-05-03
+
+- Added **Cassian** as a canonical alias for OpenClaw (alongside the existing **Sam / Clawd**) in both the agent-roster row and the locked-terminology table. Ewan uses "Cassian" interchangeably with "OpenClaw" / "Clawd" / "Sam" in chat and knowledge notes; this brings the locked terminology in line with established usage so `AGENT_ROUTING.md` and other authority files can use "Cassian" without violating bibliography integrity. **No changes to the company structure or agent roster** — same agent, additional canonical alias.
+- Frontmatter `version` bumped to v3.
+
+Signed-by: Devon-6ca5 | Devin (Cognition AI) | 2026-05-03 | session `devin-6ca57553eefe4806b613070325964703`
 
 ### v2 — 2026-05-03
 

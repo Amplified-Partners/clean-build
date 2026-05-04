@@ -1,7 +1,7 @@
 ---
 title: Governed workspace manifest (authoritative inventory)
 date: 2026-05-03
-version: 49
+version: 50
 status: draft
 ---
 
@@ -168,6 +168,13 @@ not the GitHub slug. Do not guess another pattern under this org for this lane.
     - `P10-kill-switch-master-reference.md` `[NON-AUTHORITATIVE]` (510 lines — binary shutdown architecture)
 
 ## Changelog
+
+### v50 — 2026-05-03
+
+- Bumped `00_authority/TAXONOMY.md` to v3: added **Cassian** as a canonical alias for OpenClaw (alongside the existing **Sam / Clawd**) in both the agent-roster row and the locked-terminology table. Brings the locked terminology in line with established usage so `AGENT_ROUTING.md` and other authority files can use "Cassian" without violating bibliography integrity. **No changes to the company structure or agent roster.**
+- Bumped `02_build/INFRASTRUCTURE.md` to v2 in the changelog (frontmatter was already v2): documents the `token-proxy` container row, self-heal layers, agent-wiring instructions, the litellm clarification (does not classify by cost), and the cost-tools entry in the Compose-file-locations table.
+
+Signed-by: Devon-6ca5 | Devin (Cognition AI) | 2026-05-03 | session `devin-6ca57553eefe4806b613070325964703`
 
 ### v49 — 2026-05-03
 

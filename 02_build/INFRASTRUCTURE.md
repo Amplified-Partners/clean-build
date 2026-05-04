@@ -196,11 +196,23 @@ Source: `/root/cove-repo/infrastructure/`
 | xAI Phone Agent | `/opt/xai-phone-agent/docker-compose.yml` | xai-phone-agent |
 | Nexus Dashboard | `/opt/nexus/dashboard/docker-compose.yml` | nexus-dashboard |
 | Base infra | `/opt/amplified/docker-compose.yml` | postgres, redis, falkordb, qdrant, clickhouse, minio, portainer, amplified-code-server |
+| Cost-tools (token-proxy) | `/opt/amplified/apps/cost-tools/docker-compose.yml` | token-proxy |
 | _(standalone)_ | `docker run` | watchtower |
 
 ---
 
 ## Changelog
+
+### v2 — 2026-05-03
+
+- Added **token-proxy** container row under § AI / ML services: Anthropic-only reverse proxy on `amplified-net`, Sonnet→Haiku model-layer routing on extractive/classification prompts, prompt caching, semantic similarity cache (Qdrant `llm_cache`, 0.95, 24h TTL), native context compaction, daily $100 budget circuit-breaker. Container reachable as `token-proxy:8088` on `amplified-net`; host-bound to `127.0.0.1:8088` for diagnostics. Compose file at `/opt/amplified/apps/cost-tools/docker-compose.yml`. RUNBOOK in the `cost-tools` repo.
+- Added the cost-tools stack to the **Compose file locations** table for symmetry with every other compose-managed container.
+- Clarified the **litellm** row: routes by `simple-shuffle` with failover chains; **does not** classify by cost. Cost-tier classification is the proxy's job (per `00_authority/TAXONOMY.md` v2/v3 lock).
+- Documented the **self-heal layers** for token-proxy (Docker `restart: always` + healthcheck on `/proxy/stats`; Temporal workflow check every 5 min; RUNBOOK escalation rule — 2 attempts → rollback → page Ewan via Telegram).
+- Added agent-wiring instructions: `ANTHROPIC_BASE_URL=http://token-proxy:8088` on agents that hit Anthropic directly; reversible in 30 sec by unsetting the env var.
+- No changes to existing rows; all edits are additive. Linear: AMP-28.
+
+Signed-by: Devon-6ca5 | Devin (Cognition AI) | 2026-05-03 | session `devin-6ca57553eefe4806b613070325964703`
 
 ### v1 — 2026-04-30
 
