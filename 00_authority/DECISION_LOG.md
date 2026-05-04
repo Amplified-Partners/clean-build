@@ -378,7 +378,7 @@ This section was added in v16 to satisfy `AGENTS.md` rule #3 (authority files mu
 
 ### v16 — 2026-05-03
 
-Added the `2026-05-03 — Ollama port-mapping fix on Beast (AMP-46)` entry to `## Entries` (immediately below the AMP-67 entry already on main, above the AMP-28 entries). Decision is reversible. Linked to [AMP-46](https://linear.app/amplifiedpartners/issue/AMP-46/beast-ops-fix-ollama-container-port-mapping) and PR #32. Manifest pointer now references `02_build/INFRASTRUCTURE.md` v3 (rebased onto current main).
+Added the `2026-05-03 — Ollama port-mapping fix on Beast (AMP-46)` entry to `## Entries` (immediately below the AMP-67 entry, below the AMP-28 entries added by PR #39). Decision is reversible. Linked to [AMP-46](https://linear.app/amplifiedpartners/issue/AMP-46/beast-ops-fix-ollama-container-port-mapping) and PR #32. Manifest pointer now references `02_build/INFRASTRUCTURE.md` v3 (rebased onto current main).
 
 Signed-by: Devon-a9a7 | 2026-05-03 | devin-a9a78d0c72d9491aa3a70b18cb741936
 
