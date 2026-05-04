@@ -1,7 +1,7 @@
 ---
 title: Decision log
 date: 2026-05-05
-version: 16
+version: 17
 status: draft
 ---
 
@@ -20,6 +20,17 @@ One entry per decision. Keep it short. Link out to supporting docs.
 - **Where encoded**: `.github/CODEOWNERS`; `00_authority/MANIFEST.md` v51; this entry.
 - **Status**: active (pending PR merge).
 - **Signed-by**: Devon-codeowners-daughter | 2026-05-05 | devin-487f10ace93b4cdfbcc49f9bb5c300b0
+
+### 2026-05-04 — Governance principles: Plan–Execution Mirror, Collaborative Discovery, Spine Refinement
+
+- **Decision**: Create three new authority-level rules codifying governance principles articulated by Ewan Bramley in conversation with Devon-77fb on 2026-05-04:
+  1. `00_authority/PLAN_EXECUTION_MIRROR.md` v1 — every non-trivial unit of work produces two receipts (plan before, execution log after). External accountability (others compare them) + self-reflection (agent compares them and adjusts its own spine). Born from a productive misunderstanding where Devon interpreted Ewan's external-accountability protocol as self-directed, accidentally creating a complementary mechanism.
+  2. `00_authority/COLLABORATIVE_DISCOVERY.md` v1 — three principles unified: disagreement is compounding (not friction), misunderstanding is signal (mine it, don't just fix it), ego is a working condition (make visible through the mirror, do not suppress). Full attribution chain preserved in the document.
+  3. `00_authority/SPINE_REFINEMENT.md` v1 — the spine is built through situations, not prescribed in advance. Domain-specific spines (planning, coding, research, communication, operations) follow the same refinement cycle as the governance spine. The governance spine is the factory that builds the factories.
+- **Why**: These principles emerged from a real-time conversation demonstrating all three in action. They close the loop on how multi-agent collaboration becomes trustworthy: not by removing flaws, but by making them visible and self-correcting. They are the structural fix for the AI deference problem (training optimises for agreement) and the meta-mechanism that makes compound engineering work at the agent level, not just the code level.
+- **Where encoded**: `00_authority/PLAN_EXECUTION_MIRROR.md` v1, `00_authority/COLLABORATIVE_DISCOVERY.md` v1, `00_authority/SPINE_REFINEMENT.md` v1, `00_authority/MANIFEST.md` v52.
+- **Status**: active
+- **Signed-by**: Devon-77fb | Devin (Cognition AI) | 2026-05-04 | session `devin-77fb25185c00483eb965e894efc62e39`
 
 ### 2026-05-03 — cost-tools (token_proxy.py) deployed on Beast and indexed in spine
 
