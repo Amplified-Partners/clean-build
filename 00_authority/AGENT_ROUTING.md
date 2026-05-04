@@ -49,7 +49,7 @@ Applies whenever a unit of work has to be assigned to an agent. Examples:
 
 ### 4. Strategic / business / hiring / pricing decisions
 
-→ **Antigravity** (Business Arbiter / COO) for synthesis. → **Ewan** for the irreversible / truth-affecting decision. Per `00_authority/PRINCIPLES.md`: Truth or outside world → Ewan.
+→ **Antigravity** (Business Arbiter / COO) for synthesis. → **Ewan** for the irreversible / truth-affecting decision. Per `AGENTS.md` § "Authority + routing": "Truth or outside world → Ewan: anything that changes what may be treated as true, or what is owed to the outside world."
 
 ### 5. External research / brainstorm inputs
 
@@ -61,7 +61,7 @@ Applies whenever a unit of work has to be assigned to an agent. Examples:
 
 ### 7. Repeated, schedulable tasks
 
-→ **Devon's scheduled sessions** (07:00 / 08:00 / 09:00 / 14:00 UTC per `00_authority/PRINCIPLES.md` and the Linear knowledge note). Examples: Beast health check, Linear status sweep, daily plan.
+→ **Devon's scheduled sessions** (07:00 / 08:00 / 09:00 / 14:00 UTC per the Amplified Partners Linear governance knowledge note "Devon's Scheduled Sessions" — org-wide, not in-repo `[SOURCE REQUIRED]` for an in-repo authority once promoted). Examples: 07:00 Beast health check, 08:00 Linear status sweep, 09:00 review and plan, 14:00 Linear triage sweep.
 
 ### 8. Customer-facing or irreversible production change
 

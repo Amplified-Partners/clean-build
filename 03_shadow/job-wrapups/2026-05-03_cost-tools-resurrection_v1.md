@@ -23,7 +23,7 @@ Open in any order:
 - This file.
 - `https://github.com/Amplified-Partners/cost-tools/pull/2` — Linux portability + Dockerfile + compose + RUNBOOK + README. Created and approved (status pending review at time of writing).
 - `https://github.com/Amplified-Partners/cost-tools/blob/devin/2026-05-04-linux-deploy/RUNBOOK.md` — operational playbook (5 failure modes, 30-second rollback, escalation rule).
-- `00_authority/MANIFEST.md` (v45+).
+- `00_authority/MANIFEST.md` (v49+).
 - `00_authority/AGENT_ROUTING.md` (new this PR — agent-layer routing rule that stacks on top of the cost-tools model-layer routing).
 - `01_truth/SYSTEMS-AND-API-REGISTER.md` — cost-tools section.
 - `02_build/INFRASTRUCTURE.md` — `token-proxy` container row.
@@ -92,7 +92,7 @@ The result: from a clean-build agent's perspective, this code did not exist. It 
 In a single PR on `clean-build` (this PR, branch `devin/2026-05-04-amp-28-cost-tools-indexing`):
 
 - New `00_authority/AGENT_ROUTING.md` — the **agent-layer** routing rule (which agent runs which task), explicitly stacking on top of the **model-layer** routing the proxy enforces.
-- `00_authority/MANIFEST.md` v45 — `AGENT_ROUTING.md` indexed under Authoritative now; cost-tools indexed via the registers below.
+- `00_authority/MANIFEST.md` v49 — `AGENT_ROUTING.md` indexed under **Candidate authority** (matches its own `status: candidate` and DECISION_LOG entry); cost-tools indexed via the registers below.
 - `00_authority/DECISION_LOG.md` — entries for "cost-tools indexed in spine" and "Agent routing established".
 - `00_authority/TAXONOMY.md` v2 — adds the lock that **cost-tier classification is the proxy's job**, not the taxonomy's job; the taxonomy stays an entity/role document, not a cost ladder.
 - `01_truth/SYSTEMS-AND-API-REGISTER.md` v2 — new section `cost-tools / token-proxy` with file paths, line counts, endpoint list, attribution.
@@ -150,7 +150,7 @@ In a single PR on `clean-build` (this PR, branch `devin/2026-05-04-amp-28-cost-t
 **`Amplified-Partners/clean-build` (this PR, branch `devin/2026-05-04-amp-28-cost-tools-indexing`):**
 
 - `00_authority/AGENT_ROUTING.md` — new.
-- `00_authority/MANIFEST.md` — v45 (AGENT_ROUTING indexed; cost-tools registers cited; changelog entry).
+- `00_authority/MANIFEST.md` — v49 (AGENT_ROUTING indexed under Candidate authority; cost-tools registers cited; changelog entry).
 - `00_authority/DECISION_LOG.md` — two new entries (cost-tools resurrection; agent routing).
 - `00_authority/TAXONOMY.md` — v2 (locks cost-tier as proxy concern, not taxonomy concern).
 - `01_truth/SYSTEMS-AND-API-REGISTER.md` — v2 (cost-tools / token-proxy section).

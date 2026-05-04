@@ -1,7 +1,7 @@
 ---
 title: Governed workspace manifest (authoritative inventory)
 date: 2026-05-03
-version: 45
+version: 49
 status: draft
 ---
 
@@ -74,7 +74,6 @@ not the GitHub slug. Do not guess another pattern under this org for this lane.
 - `00_authority/SIGNATURES.md` (every AI signs committed work; Radical Attribution applied mechanically; agent chooses format)
 - `00_authority/USE_IT_OR_CUT_IT.md` (sounds good + built + unused = cut; remediation rule for bloat; archive exempt)
 - `00_authority/OPINION_CONFIDENCE.md` (opinions labelled + confidence numbered; tiered thresholds 50% / 85% / 95% by reversibility)
-- `00_authority/AGENT_ROUTING.md` `[LOGIC TO BE CONFIRMED]` (agent-layer routing — which agent runs which task; stacks on top of `cost-tools/token_proxy.py` model-layer routing; eight rules; AMP-28)
 - `00_authority/PROMOTION_GATE.md`
 - `00_authority/BUILD_LOOP.md`
 - `00_authority/DECISION_LOG.md`
@@ -107,12 +106,18 @@ not the GitHub slug. Do not guess another pattern under this org for this lane.
   - `01_truth/processes/2026-04_stateless-handover_neutrality-clause_v1.md` `[LOGIC TO BE CONFIRMED]` (candidate addendum to the job-wrapup SOP; neutrality rule for stateless handovers; authoritative `00_authority/OPINION_CONFIDENCE.md` references this file)
 - `01_truth/schemas/` `[LOGIC TO BE CONFIRMED]` (schema contracts to be populated)
   - `01_truth/schemas/README.md` `[LOGIC TO BE CONFIRMED]` (folder purpose stub)
+  - `01_truth/schemas/2026-05_public-data-validation_v1.md` `[LOGIC TO BE CONFIRMED]` (public-data verdict schema: 3-band PROVEN/PLAUSIBLE/DISPROVEN + BLOCKED gap-marker; additive `VALIDATION:` field on catalogue; reference impl at `02_build/validators/`)
+- `00_authority/AGENT_ROUTING.md` `[LOGIC TO BE CONFIRMED]` (agent-layer routing — which agent runs which task; stacks on top of `cost-tools/token_proxy.py` model-layer routing; eight rules; AMP-28; status: candidate — pending Ewan review per `DECISION_LOG.md`)
 - `01_truth/interfaces/` `[LOGIC TO BE CONFIRMED]` (API contracts to be populated)
   - `01_truth/interfaces/README.md` `[LOGIC TO BE CONFIRMED]` (folder purpose stub)
+- `01_truth/research/` `[LOGIC TO BE CONFIRMED]` (truth-tier research evidence; promotion target for shadow research)
+  - `01_truth/research/validations/README.md` `[LOGIC TO BE CONFIRMED]` (promotion target for `03_shadow/validators/` verdicts once human-reviewed)
 - `01_truth/SYSTEMS-AND-API-REGISTER.md` `[LOGIC TO BE CONFIRMED]` (single register of all APIs, MCP servers, telephony systems, code modules, and their locations across all Amplified Partners repos)
 - `02_build/README.md` `[LOGIC TO BE CONFIRMED]` (runnable artefacts routing stub)
+- `02_build/validators/README.md` `[LOGIC TO BE CONFIRMED]` (public-data validation framework; reference impl of `01_truth/schemas/2026-05_public-data-validation_v1.md`; ProfServices pilot at AMP-67)
 - `03_shadow/README.md` `[LOGIC TO BE CONFIRMED]` (experiment routing stub)
 - `03_shadow/job-wrapups/README.md` `[NON-AUTHORITATIVE]` (wrap-ups/escalation notes location; learning only)
+- `03_shadow/validators/README.md` `[NON-AUTHORITATIVE]` (shadow tier for public-data verdicts produced by `02_build/validators/`; non-authoritative pending review-promote)
 
 ## Reference only (sanitised; never authoritative by default)
 
@@ -164,13 +169,37 @@ not the GitHub slug. Do not guess another pattern under this org for this lane.
 
 ## Changelog
 
-### v45 — 2026-05-03
+### v49 — 2026-05-03
 
-- Added `00_authority/AGENT_ROUTING.md` to **Authoritative now** as `[LOGIC TO BE CONFIRMED]`: agent-layer routing rule (which agent runs which task). Stacks on top of, and explicitly references, the model-layer routing in `cost-tools/token_proxy.py` (which decides Sonnet vs Haiku per call). Companion to AMP-28.
+- Added `00_authority/AGENT_ROUTING.md` to **Candidate authority** as `[LOGIC TO BE CONFIRMED]`: agent-layer routing rule (which agent runs which task). Stacks on top of, and explicitly references, the model-layer routing in `cost-tools/token_proxy.py` (which decides Sonnet vs Haiku per call). Companion to AMP-28. Filed under Candidate authority to match the file's own `status: candidate` and the `DECISION_LOG.md` entry status `candidate (pending Ewan review)`.
 - Indexed cost-tools (`token_proxy.py`) into the spine via the existing register and manifest pointers — see `01_truth/SYSTEMS-AND-API-REGISTER.md` v2 (cost-tools / token-proxy section) and `02_build/INFRASTRUCTURE.md` v2 (token-proxy container row under AI / ML services). The proxy was on disk at `/opt/amplified/apps/real/token_proxy.py` since 2026-03-12 but was never deployed and never indexed; it is now deployed on Beast as the `token-proxy` container on `amplified-net` with healthcheck and `restart: always`.
 - Resurrection wrap-up filed at `03_shadow/job-wrapups/2026-05-03_cost-tools-resurrection_v1.md` documenting the discovery, verification (n=69, 100% routing accuracy on the labelled set, 30.7% saved on the test sample, 5× latency drop), deploy, and pattern for future dormant-code finds.
 
 Signed-by: Devon-6ca5 | Devin (Cognition AI) | 2026-05-03 | session `devin-6ca57553eefe4806b613070325964703`
+
+### v48 — 2026-05-03
+
+- Added `02_build/validators/README.md` to **Candidate authority** for symmetry with the now-indexed `03_shadow/validators/README.md` (build-tier reference impl + shadow-tier landing zone). The schema doc — `01_truth/schemas/2026-05_public-data-validation_v1.md` — already pointed at the build-tier README; this closes the index gap.
+
+Signed-by: Devon-ab74 | 2026-05-03 | devin-ab740f2c78ee477a9c16ea3b6ed15293
+
+### v47 — 2026-05-03
+
+- Added `03_shadow/validators/README.md` to **Candidate authority**: shadow tier where public-data verdicts produced by `02_build/validators/` land before human-review promotion to `01_truth/research/validations/`. Same indexed class as `03_shadow/job-wrapups/README.md`.
+
+Signed-by: Devon-ab74 | 2026-05-03 | devin-ab740f2c78ee477a9c16ea3b6ed15293
+
+### v46 — 2026-05-03
+
+- Added `01_truth/research/` and `01_truth/research/validations/README.md` to **Candidate authority**: stub for the truth-tier promotion target where `03_shadow/validators/` verdicts land after human review. Frontmatter `date` advanced to 2026-05-03 to match this entry.
+
+Signed-by: Devon-ab74 | 2026-05-03 | devin-ab740f2c78ee477a9c16ea3b6ed15293
+
+### v45 — 2026-05-03
+
+- Added `01_truth/schemas/2026-05_public-data-validation_v1.md` to **Candidate authority**: defines the 3-band PROVEN/PLAUSIBLE/DISPROVEN public-data verdict scheme + BLOCKED gap-marker, additive `VALIDATION:` field on the insight catalogue, and the shadow-then-promote storage path. Reference implementation lives at `02_build/validators/`. Linked to AMP-67 (ProfServices vertical, 16 entries INS-079..INS-094).
+
+Signed-by: Devon-ab74 | 2026-05-03 | devin-ab740f2c78ee477a9c16ea3b6ed15293
 
 ### v44 — 2026-05-01
 
