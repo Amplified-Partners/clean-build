@@ -46,6 +46,14 @@ This contradicts the documented behaviour in `ENFORCER-SPEC.md` ("All checks run
 
 **Fix path:** add a `subprocess.run(['systemctl', 'is-active', 'fail2ban'], ...)`-style probe (or, since the enforcer runs in-container, a host-mount or DBus call) when `fail2ban_enabled` is true; merge its result into the security details. Tracked separately from this merge.
 
+### `config.yaml` is not loaded — env vars are the only configuration source
+
+`enforcer.py:29` imports `yaml` but never reads `config.yaml`. `EnforcerConfig.__init__` (`enforcer.py:59-91`) populates every setting from environment variables only. `ENFORCER-SPEC.md` and `IMPLEMENTATION-SUMMARY.md` describe `config.yaml` as an active configuration source, but it is documentation-only at runtime.
+
+**Production impact:** an operator editing `config.yaml` (e.g. to change check intervals, expected containers, or thresholds) sees no behavioural change — the file is inert. All deployed config flows through `docker-compose.yml`'s `environment:` block.
+
+**Fix path:** either implement YAML loading in `EnforcerConfig.__init__` as a fallback when env vars are not set, or remove the unused `import yaml` and update the spec to call `config.yaml` documentation-only. Tracked separately from this merge.
+
 ---
 
 *Extracted from Beast `/opt/amplified/apps/enforcer/` by Devon | 2026-04-30 | session `aa4d863ad679468692e75a40b8825358`*
