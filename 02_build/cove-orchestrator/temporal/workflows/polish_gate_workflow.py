@@ -192,6 +192,6 @@ def _format_pr_comment(summary: str, passed: bool, pr_url: str) -> str:
     return (
         f"{badge}\n\n"
         f"```\n{summary}\n```\n\n"
-        f"_Posted by Cove `polish_gate` workflow — see "
+        f"_Posted by Cove `polish_gate` workflow for [{pr_url}]({pr_url}) — see "
         f"[AMP-73](https://linear.app/amplifiedpartners/issue/AMP-73) for context._"
     )

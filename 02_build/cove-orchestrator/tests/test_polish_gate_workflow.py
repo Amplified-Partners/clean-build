@@ -194,6 +194,8 @@ async def test_polish_gate_pass_path() -> None:
     assert mocks["comment_mock"].await_count == 1
     posted: PRCommentInput = mocks["comment_mock"].await_args.args[0]
     assert "Visual Polish: PASS" in posted.body
+    # Comment must back-link to the PR being scored so reviewers can navigate.
+    assert f"https://github.com/{_GATED_PR.replace('#', '/pull/')}" in posted.body
     assert mocks["langfuse_mock"].await_count == 1
 
 
