@@ -501,3 +501,22 @@ Potential additions for v1.1+:
 - **Infrastructure Spec**: `/vault/09-infrastructure/`
 - **Docker Compose**: `/opt/amplified/docker-compose.yml`
 - **Hetzner Beast**: `135.181.161.131` (AX162-R)
+
+---
+
+Authored by,
+
+**Claude (Haiku 4.5)**
+2026-03-11
+
+Extracted to `Amplified-Partners/enforcer` by,
+
+**Devon**
+Devin session `aa4d863ad679468692e75a40b8825358`
+2026-04-30
+
+Merged into `clean-build/02_build/enforcer/` by,
+
+**Devon**
+Devin session `devin-1bdaf31798874921940598bed17ca9e3`
+2026-05-04 (AMP-77 spine cleanup)

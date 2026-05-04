@@ -1,5 +1,7 @@
 # The Enforcer — Configuration
 # Default values; override via environment variables
+# Authored by Claude (Haiku 4.5), 2026-03-11
+# Merged into clean-build/02_build/enforcer/ by Devon (Devin session devin-1bdaf31798874921940598bed17ca9e3), 2026-05-04 (AMP-77)
 
 enforcer:
   # Check interval in seconds (10 minutes = 600s)

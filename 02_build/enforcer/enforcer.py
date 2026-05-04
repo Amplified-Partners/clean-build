@@ -300,8 +300,8 @@ def create_app(config: EnforcerConfig, enforcer: EnforcerEngine) -> FastAPI:
             '# TYPE enforcer_healthy gauge',
             f'enforcer_healthy {1 if enforcer.is_healthy else 0}',
             '',
-            '# HELP enforcer_checks_total Total number of checks run',
-            '# TYPE enforcer_checks_total counter',
+            '# HELP enforcer_checks_total Number of checks in last cycle',
+            '# TYPE enforcer_checks_total gauge',
             f'enforcer_checks_total {len(enforcer.last_results)}',
         ]
         
