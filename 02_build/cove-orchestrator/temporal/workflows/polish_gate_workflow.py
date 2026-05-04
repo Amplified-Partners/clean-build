@@ -78,6 +78,8 @@ class PolishGateWorkflow:
             backoff_coefficient=2.0,
         )
 
+        # Critical path — these activities determine the gate decision.
+        # Any failure here aborts and returns passed=False with the error.
         try:
             shots = await workflow.execute_activity(
                 screenshot_pr_preview,
@@ -129,15 +131,32 @@ class PolishGateWorkflow:
                 ],
                 start_to_close_timeout=timedelta(seconds=30),
             )
+        except Exception as e:  # noqa: BLE001
+            return PolishGateResult(
+                pr_id=input.pr_id,
+                passed=False,
+                composite=0.0,
+                threshold=input.threshold,
+                summary="",
+                error=str(e),
+            )
 
-            comment_body = _format_pr_comment(gate.summary, gate.passed, input.pr_url)
+        # Side effects — PR comment + Langfuse trace. These are observability
+        # / UX, NOT part of the gate decision: a Langfuse outage or a flaky
+        # GitHub API call must NOT cause the workflow to report passed=False
+        # for an otherwise-passing PR.
+        comment_body = _format_pr_comment(gate.summary, gate.passed, input.pr_url)
+        try:
             await workflow.execute_activity(
                 post_pr_comment,
                 args=[PRCommentInput(pr_id=input.pr_id, body=comment_body)],
                 start_to_close_timeout=timedelta(seconds=30),
                 retry_policy=retry,
             )
+        except Exception as e:  # noqa: BLE001
+            workflow.logger.warning("post_pr_comment failed pr_id=%s: %s", input.pr_id, e)
 
+        try:
             await workflow.execute_activity(
                 langfuse_log_polish_score,
                 args=[
@@ -154,25 +173,18 @@ class PolishGateWorkflow:
                     )
                 ],
                 start_to_close_timeout=timedelta(seconds=30),
+                retry_policy=retry,
             )
-
-            return PolishGateResult(
-                pr_id=input.pr_id,
-                passed=gate.passed,
-                composite=gate.composite,
-                threshold=gate.threshold,
-                summary=gate.summary,
-            )
-
         except Exception as e:  # noqa: BLE001
-            return PolishGateResult(
-                pr_id=input.pr_id,
-                passed=False,
-                composite=0.0,
-                threshold=input.threshold,
-                summary="",
-                error=str(e),
-            )
+            workflow.logger.warning("langfuse_log_polish_score failed pr_id=%s: %s", input.pr_id, e)
+
+        return PolishGateResult(
+            pr_id=input.pr_id,
+            passed=gate.passed,
+            composite=gate.composite,
+            threshold=gate.threshold,
+            summary=gate.summary,
+        )
 
 
 def _format_pr_comment(summary: str, passed: bool, pr_url: str) -> str:

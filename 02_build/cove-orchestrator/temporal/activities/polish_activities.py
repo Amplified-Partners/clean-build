@@ -202,7 +202,9 @@ async def screenshot_pr_preview(input: ScreenshotInput) -> ScreenshotResult:
     return ScreenshotResult(
         pr_id=input.pr_id,
         paths=[desktop_path, mobile_path],
-        captured_at=time.strftime("%Y-%m-%dT%H:%M:%SZ"),
+        # gmtime() — `Z` suffix means UTC; localtime would be a silent bug
+        # outside Docker (which usually pins TZ=UTC).
+        captured_at=time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
     )
 
 

@@ -46,8 +46,21 @@ _GATED_PR = "Amplified-Partners/amplified-site#42"
 # ─── Mock activity factories ────────────────────────────────────────────────
 
 
-def _make_mocks(*, uiclip: float, dim_score: int, hard_pass: bool, threshold: float = 0.65) -> dict[str, Any]:
-    """Return a dict {activity_name: AsyncMock} with realistic return values."""
+def _make_mocks(
+    *,
+    uiclip: float,
+    dim_score: int,
+    hard_pass: bool,
+    threshold: float = 0.65,
+    comment_raises: bool = False,
+    langfuse_raises: bool = False,
+) -> dict[str, Any]:
+    """Return a dict {activity_name: AsyncMock} with realistic return values.
+
+    If comment_raises / langfuse_raises is True, the corresponding side-effect
+    activity will raise — used to verify that side-effect failures do not
+    flip the gate decision.
+    """
     composite = uiclip * 0.4 + (dim_score - 1) / 9.0 * 0.6
     passed = hard_pass and composite >= threshold
 
@@ -86,8 +99,14 @@ def _make_mocks(*, uiclip: float, dim_score: int, hard_pass: bool, threshold: fl
             summary=f"composite={composite:.4f} threshold={input.threshold:.4f}",
         )
 
-    comment_mock = AsyncMock(return_value=True)
-    langfuse_mock = AsyncMock(return_value=True)
+    comment_mock = AsyncMock(
+        side_effect=RuntimeError("github 503") if comment_raises else None,
+        return_value=True,
+    )
+    langfuse_mock = AsyncMock(
+        side_effect=RuntimeError("langfuse down") if langfuse_raises else None,
+        return_value=True,
+    )
 
     async def _comment(input: PRCommentInput) -> bool:
         return await comment_mock(input)
@@ -200,3 +219,27 @@ async def test_polish_gate_fail_path_hard_check() -> None:
     assert result.passed is False
     posted: PRCommentInput = mocks["comment_mock"].await_args.args[0]
     assert "Visual Polish: FAIL" in posted.body
+
+
+@pytest.mark.asyncio
+async def test_side_effect_failures_do_not_flip_gate_decision() -> None:
+    """A passing PR must remain passing even if comment + Langfuse both fail.
+
+    Regression: previously the workflow's catch-all `except Exception`
+    converted any side-effect failure into passed=False (Devin Review
+    finding BUG_..._0001).
+    """
+    async with await WorkflowEnvironment.start_time_skipping() as env:
+        mocks = _make_mocks(
+            uiclip=0.85,
+            dim_score=9,
+            hard_pass=True,
+            threshold=0.65,
+            comment_raises=True,
+            langfuse_raises=True,
+        )
+        result = await _run_workflow(env, mocks)
+
+    assert result.passed is True
+    assert result.composite == pytest.approx(mocks["expected_composite"])
+    assert result.error is None  # critical-path success ⇒ no error reported
