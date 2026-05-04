@@ -281,7 +281,13 @@ async def uiclip_score(input: UIClipInput) -> UIClipResult:
 
 
 def _parse_uiclip_score(raw: str) -> float:
-    """Extract a [0, 1] float from a JSON-ish reply, clamped to range."""
+    """Extract a [0, 1] float from a JSON-ish reply.
+
+    Out-of-range or unparseable replies raise ``ValueError`` so the activity
+    fails fast and Temporal retries; we deliberately do **not** clamp
+    silently — a model returning 1.4 means the prompt is broken, not that
+    the UI is great.
+    """
     match = re.search(r"\{.*\}", raw, re.DOTALL)
     if not match:
         raise ValueError(f"UIClip response had no JSON object: {raw!r}")
@@ -441,7 +447,11 @@ async def evaluate_polish_gate(input: GateEvaluationInput) -> GateEvaluationResu
     # that doesn't have visual-polish-system installed (e.g. lint-only CI).
     from scoring.engine import run_pipeline  # type: ignore[import-not-found]
 
-    result = run_pipeline(
+    # run_pipeline is synchronous (reads rubric.json + rules.json, does pure
+    # arithmetic). Offload to a thread so we don't block the worker's event
+    # loop during execution — same pattern as langfuse_log_polish_score below.
+    result = await asyncio.to_thread(
+        run_pipeline,
         rubric_path=input.rubric_path,
         rules_path=input.rules_path,
         raw_scores=input.dimension_scores,
