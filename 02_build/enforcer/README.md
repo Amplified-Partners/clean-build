@@ -30,6 +30,14 @@ This contradicts the documented behaviour in `ENFORCER-SPEC.md` ("All checks run
 
 **Fix path:** swap to `redis.asyncio.Redis`, `asyncio.open_connection`, `asyncio.create_subprocess_exec`, or wrap blocking calls in `loop.run_in_executor`. Tracked separately from this merge.
 
+### `fail2ban_enabled` config flag is accepted but ignored
+
+`checks/security_check.py:check_security` accepts a `fail2ban_enabled` argument (passed from `config.yaml` and `enforcer.py:164`) but never references it in the function body. The function only checks firewall and SSH-key auth — fail2ban is silently skipped regardless of the flag. `ENFORCER-SPEC.md` lists fail2ban as one of the security checks, so the spec and implementation disagree.
+
+**Production impact:** the `fail2ban_enabled: true` config setting on Beast does nothing today. Fail2ban status is not actually monitored by the enforcer.
+
+**Fix path:** add a `subprocess.run(['systemctl', 'is-active', 'fail2ban'], ...)`-style probe (or, since the enforcer runs in-container, a host-mount or DBus call) when `fail2ban_enabled` is true; merge its result into the security details. Tracked separately from this merge.
+
 ---
 
 *Extracted from Beast `/opt/amplified/apps/enforcer/` by Devon | 2026-04-30 | session `aa4d863ad679468692e75a40b8825358`*

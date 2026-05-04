@@ -86,7 +86,7 @@ enforcer:
     - qdrant
     - traefik
   healthcheck:
-    test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+    test: ["CMD", "python", "-c", "import httpx; httpx.get('http://localhost:8000/health').raise_for_status()"]
     interval: 30s
     timeout: 5s
     retries: 3

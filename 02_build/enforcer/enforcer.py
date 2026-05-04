@@ -210,8 +210,11 @@ class EnforcerEngine:
             result = await check_func(**kwargs)
             duration = (datetime.utcnow() - start).total_seconds() * 1000
             
-            # Add timing
-            if isinstance(result, CheckResult):
+            # Add timing — each check module has its own dataclass type with
+            # a duration_ms attribute, so test by attribute presence rather
+            # than `isinstance(result, CheckResult)` (which is always False
+            # because none of the per-check dataclasses inherit from CheckResult).
+            if hasattr(result, 'duration_ms'):
                 result.duration_ms = duration
             
             return result
