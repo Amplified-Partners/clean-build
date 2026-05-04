@@ -92,8 +92,9 @@ GitKraken's docs assume a single MCP config per agent / IDE. Putting the
 canonical entry at the repo root means any agent attached to this workspace
 gets the same Git mechanics surface, without each agent maintaining its own
 private copy. Keeping it small (one server, no fluff) honours
-`USE_IT_OR_CUT_IT.md` — if no agent ends up using GitKraken in practice,
-this file is removed in a follow-up.
+[`00_authority/USE_IT_OR_CUT_IT.md`](./00_authority/USE_IT_OR_CUT_IT.md) — if
+no agent ends up using GitKraken in practice, this file is removed in a
+follow-up.
 
 ## Status
 
