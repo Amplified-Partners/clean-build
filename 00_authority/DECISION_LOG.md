@@ -393,5 +393,6 @@ One entry per decision. Keep it short. Link out to supporting docs.
 
 | Version | Date | What changed | Signed-by |
 |---------|------|-------------|-----------|
+| v18 | 2026-05-05 | Rebased on main after CODEOWNERS merge (v16→v17 collision). Added Changelog section. Bumped version to v18. | Devon-77fb |
 | v17 | 2026-05-05 | Added 5 architectural decisions (two-engine model, Perplexity research engine, data lake, change control, build everything). Fixed date frontmatter. Added `[SOURCE REQUIRED]` tag per AGENTS.md rule #1. | Devon-77fb |
 | v16 | 2026-05-04 | Added governance principles entry (Plan-Execution Mirror, Collaborative Discovery, Spine Refinement). | Devon-77fb |

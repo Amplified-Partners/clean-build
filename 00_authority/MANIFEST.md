@@ -175,7 +175,11 @@ not the GitHub slug. Do not guess another pattern under this org for this lane.
 
 ### v52 — 2026-05-05
 
-- Rebased governance principles (v51 below) on top of CODEOWNERS (v51 in main). Version collision resolved by bumping to v52.
+- Added three new **Authoritative now** entries from governance conversation between Ewan Bramley and Devon-77fb on 2026-05-04:
+  - `00_authority/PLAN_EXECUTION_MIRROR.md` v1: plan vs execution comparison protocol. External accountability (Ewan) + self-reflection (Devon-77fb, from productive misunderstanding). Plan committed before work, execution log committed after, delta is the learning.
+  - `00_authority/COLLABORATIVE_DISCOVERY.md` v1: three principles unified — disagreement is compounding (not friction), misunderstanding is signal (mine it, don't just fix it), ego is a working condition (make visible, do not suppress). Full attribution chain preserved.
+  - `00_authority/SPINE_REFINEMENT.md` v1: the spine is built through situations, not prescribed in advance. Domain-specific spines (planning, coding, research, communication, operations) follow the same refinement cycle. Governance is the factory that builds the factories.
+- Rebased on top of v51 (CODEOWNERS). Version collision resolved by bumping to v52.
 
 Signed-by: Devon-77fb | 2026-05-05 | session `devin-77fb25185c00483eb965e894efc62e39`
 
@@ -184,15 +188,6 @@ Signed-by: Devon-77fb | 2026-05-05 | session `devin-77fb25185c00483eb965e894efc6
 - Added `.github/CODEOWNERS` enforcing `@ewanbramley` as required reviewer for `00_authority/**` and `01_truth/**`. No default `*` owner. Decision logged in `00_authority/DECISION_LOG.md` v16. This is a GitHub-level governance enforcement — changes to authority and truth paths now require Ewan's review before merge. Indexed under **Authoritative now** (follows `.cursor/` enforcement-artifact pattern from v26).
 
 Signed-by: Devon-codeowners-daughter | 2026-05-05 | devin-487f10ace93b4cdfbcc49f9bb5c300b0
-
-### v51 — 2026-05-04
-
-- Added three new **Authoritative now** entries from governance conversation between Ewan Bramley and Devon-77fb on 2026-05-04:
-  - `00_authority/PLAN_EXECUTION_MIRROR.md` v1: plan vs execution comparison protocol. External accountability (Ewan) + self-reflection (Devon-77fb, from productive misunderstanding). Plan committed before work, execution log committed after, delta is the learning.
-  - `00_authority/COLLABORATIVE_DISCOVERY.md` v1: three principles unified — disagreement is compounding (not friction), misunderstanding is signal (mine it, don't just fix it), ego is a working condition (make visible, do not suppress). Full attribution chain preserved.
-  - `00_authority/SPINE_REFINEMENT.md` v1: the spine is built through situations, not prescribed in advance. Domain-specific spines (planning, coding, research, communication, operations) follow the same refinement cycle. Governance is the factory that builds the factories.
-
-Signed-by: Devon-77fb | Devin (Cognition AI) | 2026-05-04 | session `devin-77fb25185c00483eb965e894efc62e39`
 
 ### v50 — 2026-05-03
 
