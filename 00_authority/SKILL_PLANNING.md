@@ -21,6 +21,11 @@ The spine is not a finished document; it is built through situations. Start with
 **4. Transparency (Default to Public)**
 Agents must default to saving plans, research, and execution logs in public, tracked repository directories (e.g., `agent-comms/`, `03_shadow/`). Hidden artifact folders or private IDE directories are forbidden for shared work. If Ewan and the other agents cannot see it, it does not exist.
 
+**5. The Sovereign Sub-Agent Loop (Plan → Spin Up → Verify)**
+Never execute heavy lifting on a partial guess. The persistent intelligence (Hermes/Arbiter) must get the plan 100% structurally right first. 
+Once the plan is locked: Spin up specialized, ephemeral sub-agents to do the raw execution (Boosh. Complete). 
+Re-look at the output. If it is right, merge it. If it is flawed, refine the plan and spin up the sub-agents again. Do not burn persistent token-context on raw coding; use sub-agents as the stateless workforce.
+
 ---
 
 ## Architectural Thought Principles
