@@ -79,6 +79,7 @@ not the GitHub slug. Do not guess another pattern under this org for this lane.
 - `00_authority/DECISION_LOG.md`
 - `STATUS.md` (operations status board — async handshake between Devon and OpenClaw; versioned handoffs, no chat)
 - `02_build/INFRASTRUCTURE.md` (canonical infrastructure manifest — single source of truth for all 40 containers, services, scheduled jobs, and server specs on Amplified Core)
+- `.github/CODEOWNERS` (GitHub CODEOWNERS — requires `@ewanbramley` review for `00_authority/**` and `01_truth/**` changes; no default owner)
 - `.cursor/rules/stateless-handover-kaizen.mdc` `[LOGIC TO BE CONFIRMED]` (mechanical enforcement of existing handover policy; not a separate policy spine)
 - `.cursor/hooks.json` `[LOGIC TO BE CONFIRMED]` (**No hooks** — `"hooks": {}`. **TESTING NEED:** reinstatement gate → `.cursor/HOOKS_TESTING_NEED.md`; history → `03_shadow/2026-04-16_stop-hook_followup-checklist-loop_bug-report.md` § Final resolution)
 - `.cursor/hooks/stateless-handover-stop.py` `[LOGIC TO BE CONFIRMED]` (**Dormant / testing only** — **not invoked** while `hooks` is empty; do not treat as enforcement)
@@ -171,7 +172,7 @@ not the GitHub slug. Do not guess another pattern under this org for this lane.
 
 ### v51 — 2026-05-05
 
-- Added `.github/CODEOWNERS` enforcing `@ewanbramley` as required reviewer for `00_authority/**` and `01_truth/**`. No default `*` owner. Decision logged in `00_authority/DECISION_LOG.md` v16. This is a GitHub-level governance enforcement — changes to authority and truth paths now require Ewan's review before merge.
+- Added `.github/CODEOWNERS` enforcing `@ewanbramley` as required reviewer for `00_authority/**` and `01_truth/**`. No default `*` owner. Decision logged in `00_authority/DECISION_LOG.md` v16. This is a GitHub-level governance enforcement — changes to authority and truth paths now require Ewan's review before merge. Indexed under **Authoritative now** (follows `.cursor/` enforcement-artifact pattern from v26).
 
 Signed-by: Devon-codeowners-daughter | 2026-05-05 | devin-487f10ace93b4cdfbcc49f9bb5c300b0
 
