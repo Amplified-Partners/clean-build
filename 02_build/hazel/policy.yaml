@@ -47,6 +47,12 @@ protected_globs:
   - "$HOME/**/*.framework/**"
   - "$HOME/.Trash/**"             # leave it for the user; reap step empties it last
 
+  # --- Agent state backups (AMP-102 | Kimmy | 2026-05-05) ---
+  # These are COPY backups of agent state that must survive Hazel sweeps.
+  # Original agent data lives elsewhere; these are the safety copies.
+  - "$HOME/claude-backup-*/**"    # Claude Desktop + Terminal backups
+  - "$HOME/agent-backup-*/**"    # Generic agent backup pattern
+
 # --- Step 2: secret detection (terminal) -----------------------------------
 secret_patterns:
   - id: github_pat_classic
