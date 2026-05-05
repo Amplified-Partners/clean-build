@@ -1,7 +1,7 @@
 ---
 title: Decision log
 date: 2026-05-05
-version: 17
+version: 18
 status: draft
 ---
 
@@ -12,6 +12,19 @@ status: draft
 One entry per decision. Keep it short. Link out to supporting docs.
 
 ## Entries
+
+### 2026-05-05 — Five architectural decisions: Two-engine model, Perplexity research engine, Data lake, Change control, Build everything
+
+- **Decision**: Five architectural decisions made by Ewan Bramley during 2026-05-05 session with Devon-77fb:
+  1. **Two-engine architecture** — Beast (Engine 1, internal) + Cloud Engine (Engine 2, client-facing). Client data NEVER touches Beast. Each client gets their own container. Shamir's Secret Sharing for PII. We see anonymised outcomes, aggregated patterns, functional descriptors only. Structural GDPR compliance.
+  2. **Perplexity as research engine** — Bottom of the research pipe and vault curation. £200/month subscription. Feeds data lake, vault, APDS. Quality proven by Cassian's 9 briefs. Cheaper than per-search API costs for the volume we need.
+  3. **Data lake** — Raw repository for everything: session threads, agent conversations, research, execution logs. Keeps GitHub clean (canonical code only), machines clean, vault current. MinIO (object store) + ClickHouse (analytics) + PostgreSQL (metadata) + Qdrant (semantic search). The compost heap that feeds the compounding loop.
+  4. **Change control pipeline** — Once the system is set, Ewan steps back. Changes go through due diligence: Linear issue → impact analysis → Devil's Advocate Gate → Doppelganger test → two-agent review. Ulysses Clause made operational. "Appropriateness — otherwise we'll get disorganised again."
+  5. **Build everything** — CRM, Intelligence Engine, APDS, vault extraction, data lake, marketing engine — all into one integrated machine. "We might as well put everything into a big pot and build the amplified machine."
+- **Why**: The ecosystem audit revealed 25+ LIVE components, 20+ CODE EXISTS (need deploying), 15+ SPECKED (need building). The CRM alone has 1,739 lines of intelligence engine and 13 features — all written, none deployed. The gap is deployment and wiring, not design. Building everything into one integrated machine is achievable. The two-engine architecture enforces data sovereignty structurally. The data lake enables compounding from 7 months of accumulated work. Change control prevents the chaos that comes from rapid iteration once the system is stable.
+- **Where encoded**: `/home/ubuntu/amplified-machine-complete.md` (comprehensive architecture document), to be committed to GitHub after Ewan review.
+- **Status**: active
+- **Signed-by**: Devon-77fb | Devin (Cognition AI) | 2026-05-05 | session `devin-77fb25185c00483eb965e894efc62e39`
 
 ### 2026-05-05 — CODEOWNERS added to clean-build (governance enforcement via GitHub)
 
