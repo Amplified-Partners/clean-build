@@ -21,7 +21,7 @@ pinned image v4.18.3) and host sysctl (vm.overcommit_memory=1). Without those,
 the batching alone won't close the silent-loss window — they're a stack.
 
 Invocation:
-    python3 apds_labeller_v2_rescue.py --run-id 20260505_094320
+    python3 apds_labeller_v2.2_amp128.py --run-id 20260505_094320
 
 Signed-by: Devon-85d1 | 2026-05-05 | session devin-85d1c5d9cee24844adaa4187084c0e64
 """

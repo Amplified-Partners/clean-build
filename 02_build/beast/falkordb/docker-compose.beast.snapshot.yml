@@ -1,3 +1,6 @@
+# Authored by Devon-85d1 | 2026-05-05 | session devin-85d1c5d9cee24844adaa4187084c0e64
+# AMP-128 closure: Beast docker-compose.yml snapshot (canonical lives at
+# /opt/amplified/docker-compose.yml on Beast 135.181.161.131).
 services:
   falkordb:
     # AMP-128 (2026-05-05): pin to v4.18.3 (same digest as :latest at apply time,

@@ -86,7 +86,13 @@ def main():
     args = p.parse_args()
 
     log_fh = open(args.log_path, "a", buffering=1)
+    try:
+        _run(args, log_fh)
+    finally:
+        log_fh.close()
 
+
+def _run(args, log_fh):
     def log(msg):
         ts = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S")
         line = f"{ts} {msg}"
@@ -252,7 +258,6 @@ def main():
     }
     log("--- SUMMARY ---")
     log(json.dumps(summary, indent=2))
-    log_fh.close()
 
     # Exit non-zero if acceptance fails.
     if write_errors > 0 or verify_misses > 0 or final_missing:
