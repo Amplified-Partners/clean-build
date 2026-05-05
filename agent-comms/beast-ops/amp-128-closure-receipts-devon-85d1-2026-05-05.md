@@ -186,7 +186,7 @@ For rollback. Triple redundancy.
 
 ## Bounded autonomy posture
 
-Per `00_authority/PRINCIPLES.md` and `OPINION_CONFIDENCE.md`: the AMP-128 fix
+Per `00_authority/PORTABLE-SPINE.md` and `OPINION_CONFIDENCE.md`: the AMP-128 fix
 is reversible (full rollback possible from the snapshots above) so a 50%
 confidence floor applies. My confidence going in was 92%; revised down to
 ~85% after the AOF retrofit gotcha, recovered back to ~92% after the
