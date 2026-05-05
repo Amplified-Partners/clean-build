@@ -1,7 +1,7 @@
 ---
 title: Decision log
 date: 2026-05-05
-version: 16
+version: 17
 status: draft
 ---
 
@@ -12,6 +12,20 @@ status: draft
 One entry per decision. Keep it short. Link out to supporting docs.
 
 ## Entries
+
+### 2026-05-05 — Hazel Gates 1+2+3 — status, governance promotion, and parked PUDDING vocabulary decision (AMP-104)
+
+- **Decision (recorded, not new)**: Hazel Gates 1–3 (per `00_authority/PRINCIPLES.md` and AMP-83) are **functionally satisfied** as of 2026-05-05. Gate 1 (ingestion pipe flowing) — `vault-graphiti:secure` running and actively enriching FalkorDB graph `business_knowledge` (entities 729→1,452, episodic 24→53 in ~20 min). Gate 2 (CRM linked to FalkorDB + Qdrant) — `test_knowledge_linkage.py` ships in the CRM image and links via `redis` + `qdrant_client`. Gate 3 (Pudding ingestion pipe flowing) — 250 PUDDING-labelled `:Document` nodes (source='APDS') in FalkorDB, run by `apds_labeller.py` (250/250, 0 fail). Hazel can be unblocked at the operator's discretion.
+- **Decision (new)**: Promote the two hand-deployed Beast scripts (`/opt/amplified/apds/{harvest,label}/`) into version control at `02_build/apds/` as a byte-faithful mirror of what is running in production. Add the matching infrastructure rows to `02_build/INFRASTRUCTURE.md` v3 (Graphiti container state change, APDS Stage-1 script entry).
+- **Decision (new)**: Adopt **lazy-claim** as the multi-agent coordination mechanism for overlapping work. Codified in `01_truth/processes/2026-05_lazy-claim-multi-agent_v1.md` v1 (candidate). Time-boxed Linear claim comments (10 min objection window) replace the "stop and ask Ewan" failure mode that triggered this entry. Pairs with `AGENTS.md` § How to operate — Act/Surface/Park.
+- **`[DECISION REQUIRED]` parked for Ewan**: **PUDDING taxonomy reconciliation.** Three live PUDDING implementations now exist with overlapping dimension names and non-overlapping vocabularies:
+  1. `01_truth/schemas/2026-03_pudding-discovery-system_v1.md` — 4-dim spec `WHAT.HOW.SCALE.TIME` (candidate authority, no implementation that follows it exactly).
+  2. `02_build/scripts/pudding_labeler.py` — 5-dim `+ PATTERN`, symbolic `WHAT` codes (`E/R/P/S/C/I/M`). Runnable, not running.
+  3. `02_build/apds/apds_labeller.py` (= Beast `/opt/amplified/apds/label/apds_labeller.py`) — 5-dim `+ PATTERN`, **functional** `WHAT` codes (`FIN/OPS/MKT/TECH/PPL/GOV/EXT`). **Currently in production with 250 docs labelled.** Two questions for Ewan: (a) 4-dim or 5-dim canonical; (b) symbolic or functional `WHAT` vocabulary. Reversibility is medium-to-low — the choice determines how Match/Score stages interpret bridges between concepts, and 250 docs already exist with the Beast vocab. Devon-9f21 will not resolve unilaterally; foundational methodology decisions belong with Ewan per `00_authority/PRINCIPLES.md` and the org-wide knowledge note "The Pudding Technique".
+- **Why**: Hazel-gating closure needs an authoritative status entry, not just Linear comments; the Beast scripts that produced production data must be in version control to be auditable; the schema divergence is a real blocker for Match/Score stages and must not be silently resolved by whichever session containerises the labeller next.
+- **Where encoded**: `02_build/INFRASTRUCTURE.md` v3 (Graphiti row, APDS Stage-1 row), `02_build/apds/{README.md,apds_labeller.py,harvester_mvp.py}` (new), `01_truth/processes/2026-05_lazy-claim-multi-agent_v1.md` v1 (new), `03_shadow/state-2026-05-05-amp-104-pre-pudding.md` (verification snapshot), `00_authority/MANIFEST.md` v52 (index updates).
+- **Status**: gates 1+2+3 — active; lazy-claim process — candidate (LOGIC TO BE CONFIRMED, Ewan review); PUDDING vocabulary — `[DECISION REQUIRED]`.
+- **Signed-by**: Devon-9f21 | 2026-05-05 | devin-9f2104fb06624b009f2879c50957c647
 
 ### 2026-05-05 — CODEOWNERS added to clean-build (governance enforcement via GitHub)
 

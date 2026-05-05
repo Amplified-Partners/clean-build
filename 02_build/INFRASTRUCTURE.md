@@ -1,11 +1,12 @@
 ---
 title: Infrastructure manifest — Amplified Partners Core Server
-date: 2026-05-03
-version: 2
+date: 2026-05-05
+version: 3
 status: authoritative now
 signed-by:
   - Devon | 2026-04-30 | devin-66aa3ce48c7e407f8ad9bf066541b604
   - Devon-6ca5 | 2026-05-03 | devin-6ca57553eefe4806b613070325964703
+  - Devon-9f21 | 2026-05-05 | devin-9f2104fb06624b009f2879c50957c647
 ---
 
 <!-- markdownlint-disable-file MD013 -->
@@ -86,6 +87,8 @@ Reversal: unset the env var. 30 seconds, no restart of the proxy needed.
 | **qdrant** | `qdrant/qdrant:latest` | Running | Vector database. 57,434 embeddings (384-dim). Semantic search over vault content. Internal ports 6333-6334. |
 | **clickhouse** | `clickhouse/clickhouse-server:latest` | Running | Columnar analytics database. Internal ports 8123 (HTTP), 9000 (native). |
 | **searxng** | `searxng/searxng:latest` | Running | Metasearch engine for research agents. Internal port 8080. |
+| **vault-graphiti** | `vault-graphiti:secure` (rebuilt locally 2026-05-05; previous tag `vault-graphiti:latest` from 2026-03-14 deprecated — it baked `LITELLM_API_KEY` into a Dockerfile layer) | Running | Graphiti enrichment service — reads `:Document` nodes in FalkorDB graph `business_knowledge`, extracts `:Entity` and `:Episodic` nodes via LiteLLM (Claude Sonnet). Active enrichment confirmed 2026-05-05: counts grew from 729→24→48 (entities/episodic/categories) at start of session to 1,452→53→48 inside ~20 min. **Key rotation tracked in AMP-105.** Linear: AMP-104. |
+| **apds-labeller** *(script, not yet a container)* | `python3 /opt/amplified/apds/label/apds_labeller.py` | One-shot, run on demand | APDS Stage-1 PUDDING labeller. Reads `/opt/amplified/apds/harvest/harvest_<run>.json` (output of `harvester_mvp.py` against SearXNG), calls Ollama `llama3.1:8b` for PUDDING JSON (5-dim: `WHAT.HOW.SCALE.TIME.PATTERN`), writes `:Document {source: 'APDS', …}` to FalkorDB graph `business_knowledge`. **2026-05-05 run: 250/250 successful, 0 failed.** Version-controlled mirror at `02_build/apds/`. **Containerisation pending** schema-divergence resolution (`00_authority/DECISION_LOG.md` v17). Linear: AMP-104. |
 
 ## Amplified Machine (core product)
 
@@ -202,6 +205,14 @@ Source: `/root/cove-repo/infrastructure/`
 ---
 
 ## Changelog
+
+### v3 — 2026-05-05
+
+- Added **vault-graphiti** row under § Knowledge and search: image rebuilt as `vault-graphiti:secure` on 2026-05-05 (de-secretised — `LITELLM_API_KEY` removed from Dockerfile layer; rotation tracked in AMP-105). Container now **running** and **actively enriching** FalkorDB graph `business_knowledge`. Verified mid-session: entity count grew from 729 to 1,452, episodic from 24 to 53, in ~20 min. This was Hazel Gate 1 (ingestion pipe flowing).
+- Added **apds-labeller** row under § Knowledge and search as a script entry (not yet containerised). Beast path `/opt/amplified/apds/label/apds_labeller.py`. 2026-05-05 run: 250/250 successful. Version-controlled mirror at `02_build/apds/` (this PR). Containerisation deferred until PUDDING schema divergence is resolved (see `00_authority/DECISION_LOG.md` v17). This was Hazel Gate 3 (Pudding ingestion pipe flowing) — functionally satisfied.
+- No other rows changed; all edits are additive. Linear: AMP-104.
+
+Signed-by: Devon-9f21 | Devin (Cognition AI) | 2026-05-05 | session `devin-9f2104fb06624b009f2879c50957c647`
 
 ### v2 — 2026-05-03
 
