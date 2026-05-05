@@ -476,7 +476,7 @@ def _run(args, rescue_run_id, log_fh):
 
     res = rc.execute_command(
         "GRAPH.QUERY", GRAPH_NAME,
-        f"MATCH (d:Document) WHERE d.id STARTS WITH 'apds_{args.run_id}' RETURN count(d)"
+        f"MATCH (d:Document) WHERE d.id STARTS WITH {cypher_string('apds_' + args.run_id)} RETURN count(d)"
     )
     if res and len(res) > 1 and res[1]:
         log(f"Run {args.run_id} now has: {res[1][0][0]} docs in graph")
