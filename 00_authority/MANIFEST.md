@@ -1,7 +1,7 @@
 ---
 title: Governed workspace manifest (authoritative inventory)
 date: 2026-05-05
-version: 54
+version: 55
 status: draft
 ---
 
@@ -117,9 +117,9 @@ not the GitHub slug. Do not guess another pattern under this org for this lane.
 - `02_build/README.md` `[LOGIC TO BE CONFIRMED]` (runnable artefacts routing stub)
 - `02_build/validators/README.md` `[LOGIC TO BE CONFIRMED]` (public-data validation framework; reference impl of `01_truth/schemas/2026-05_public-data-validation_v1.md`; ProfServices pilot at AMP-67)
 - `02_build/compose/ollama/README.md` `[LOGIC TO BE CONFIRMED]` (Ollama compose mirror from Beast; AMP-46 host-loopback port-mapping fix; version control + recovery; Beast is source-of-truth)
-- `02_build/compose/ollama/docker-compose.yml` `[LOGIC TO BE CONFIRMED]` (mirror of `/opt/amplified/apps/ollama/docker-compose.yml` on Beast; verified end-to-end in `00_authority/DECISION_LOG.md` v16 entry)
+- `02_build/compose/ollama/docker-compose.yml` `[LOGIC TO BE CONFIRMED]` (mirror of `/opt/amplified/apps/ollama/docker-compose.yml` on Beast; verified end-to-end in `00_authority/DECISION_LOG.md` v17 entry)
 - `02_build/compose/litellm/README.md` `[LOGIC TO BE CONFIRMED]` (LiteLLM compose mirror from Beast; AMP-72 secrets-to-`.env` migration; version control + recovery; Beast is source-of-truth; `.env` is **not** mirrored)
-- `02_build/compose/litellm/docker-compose.yml` `[LOGIC TO BE CONFIRMED]` (mirror of `/opt/amplified/apps/litellm/docker-compose.yml` on Beast; secrets removed and now read via `env_file:`; verified end-to-end in `00_authority/DECISION_LOG.md` v18 entry)
+- `02_build/compose/litellm/docker-compose.yml` `[LOGIC TO BE CONFIRMED]` (mirror of `/opt/amplified/apps/litellm/docker-compose.yml` on Beast; secrets removed and now read via `env_file:`; verified end-to-end in `00_authority/DECISION_LOG.md` v19 entry)
 - `03_shadow/README.md` `[LOGIC TO BE CONFIRMED]` (experiment routing stub)
 - `03_shadow/job-wrapups/README.md` `[NON-AUTHORITATIVE]` (wrap-ups/escalation notes location; learning only)
 - `03_shadow/validators/README.md` `[NON-AUTHORITATIVE]` (shadow tier for public-data verdicts produced by `02_build/validators/`; non-authoritative pending review-promote)
@@ -173,6 +173,12 @@ not the GitHub slug. Do not guess another pattern under this org for this lane.
     - `P10-kill-switch-master-reference.md` `[NON-AUTHORITATIVE]` (510 lines — binary shutdown architecture)
 
 ## Changelog
+
+### v55 — 2026-05-04
+
+- Fixed two off-by-one DECISION_LOG cross-references in the **Candidate authority** entries created at v52 / v54 (Devin Review BUG-0001, BUG-0002): the Ollama `docker-compose.yml` description now points to `DECISION_LOG.md` v17 (was v16 — main now holds v16 = CODEOWNERS); the LiteLLM `docker-compose.yml` description now points to `DECISION_LOG.md` v19 (was v18 — v18 is the AMP-71 host-loopback entry; AMP-72 secrets-to-`.env` is v19). Both descriptions were copy-edited inside the v52 / v54 changelog entries themselves but the inline cross-references were missed during the merge with main.
+
+Signed-by: Devon-a9a7 | 2026-05-04 | devin-a9a78d0c72d9491aa3a70b18cb741936
 
 ### v54 — 2026-05-04
 
