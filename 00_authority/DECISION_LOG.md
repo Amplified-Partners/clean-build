@@ -1,7 +1,7 @@
 ---
 title: Decision log
 date: 2026-05-03
-version: 15
+version: 16
 status: draft
 ---
 
@@ -36,6 +36,15 @@ One entry per decision. Keep it short. Link out to supporting docs.
 - **Where encoded**: `01_truth/schemas/2026-05_public-data-validation_v1.md` v1, `02_build/validators/` (framework + ProfServices runners), `03_shadow/validators/profservices/` (16 verdict JSONs + `rollup.json`), `01_truth/schemas/research-index/00-insight-catalogue_v1.md` (16 `VALIDATION:` lines added), `01_truth/research/validations/README.md` (truth-tier promotion stub), `00_authority/MANIFEST.md` v45–v48 changelog entries.
 - **Status**: candidate (pending Ewan review of the PR + verdicts)
 - **Signed-by**: Devon-ab74 | 2026-05-03 | devin-ab740f2c78ee477a9c16ea3b6ed15293
+
+### 2026-05-02 — Marketing Engine Phase 0 parked pending customer signal
+
+- **Decision**: Park `Amplified-Partners/marketing-engine` PR #1 ("Phase 0 — Kaizen bug, radical attribution, GMB prompts, email reports, model upgrade") and close it without merge. Phase 0 work pauses until a real customer signal motivates resumption.
+- **Why**: PR #1 has been open since 2026-04-30 with no progress. Per `00_authority/USE_IT_OR_CUT_IT.md`, unused implementations are cut. Marketing Engine has no current customer driving the work — shipping it speculatively burns context. Eli (Claude / advisory lane) recommended park; Devon (Devin / GitHub authority) executes.
+- **Where encoded**: `Amplified-Partners/marketing-engine` PR #1 closed with link to this entry. Comment on the PR pointing here.
+- **Status**: parked
+- **Reversal condition**: a paying customer or signed-letter-of-intent that requires Marketing Engine output. On reversal, reopen branch `Amplified-Partners/marketing-engine` head from PR #1 and rebase onto current `main`.
+- **Signed-by**: Devon-5da3 | 2026-05-02 | devin-5da3bd275191469c8400142fd0ae1d69
 
 ### 2026-05-01 — Systems and API Register created as candidate authority
 
@@ -354,3 +363,15 @@ One entry per decision. Keep it short. Link out to supporting docs.
   `01_truth/processes/2026-04_job-wrapup_and_escalation-note_sop_v1.md` (v14),
   `AGENTS.md`, `03_shadow/job-wrapups/README.md`.
 - **Status**: active
+
+---
+
+## Changelog
+
+### v16 — 2026-05-03
+
+- Added entry: "2026-05-02 — Marketing Engine Phase 0 parked pending customer signal." Records park decision for `Amplified-Partners/marketing-engine` PR #1 under `00_authority/USE_IT_OR_CUT_IT.md`. Reversal condition documented inline.
+- Establishes the changelog section on this file (previously absent). Per `AGENTS.md` § "PR reviewers — what to flag" rule 3, every `00_authority/*` edit must bump version + append a changelog entry. Entries v1–v15 of this file (the date-stamped decision entries above; v14 was AMP-67 ProfServices validation framework, v15 was AMP-28 cost-tools indexing + AGENT_ROUTING.md) implicitly tracked version-equivalent state without a dedicated changelog block. Going forward, the version field bumps and changelog entries co-exist, matching the pattern in `MANIFEST.md` and `SIGNATURES.md`.
+- Numbering note: this entry was originally drafted as `v14` against pre-rebase main. AMP-67 (PR #35) merged first taking v14, then AMP-28 (PR #39) merged taking v15, so this rebased entry is now v16.
+
+Signed-by: Devon-5da3 | 2026-05-03 | devin-5da3bd275191469c8400142fd0ae1d69
