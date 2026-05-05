@@ -393,8 +393,11 @@ def main():
 
     rescue_run_id = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
     log_path = LOG_DIR / f"labeller_rescue_{rescue_run_id}.log"
-    log_fh = open(log_path, "a", buffering=1)
+    with open(log_path, "a", buffering=1) as log_fh:
+        _run(args, rescue_run_id, log_fh)
 
+
+def _run(args, rescue_run_id, log_fh):
     def log(msg: str):
         print(msg, flush=True)
         log_fh.write(msg + "\n")
@@ -477,8 +480,6 @@ def main():
     )
     if res and len(res) > 1 and res[1]:
         log(f"Run {args.run_id} now has: {res[1][0][0]} docs in graph")
-
-    log_fh.close()
 
 
 if __name__ == "__main__":

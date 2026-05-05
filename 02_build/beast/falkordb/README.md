@@ -26,7 +26,7 @@ The new APDS labeller pairs with this fix and lives in `../apds-labeller/`.
 | `--auto-aof-rewrite-percentage` | (n/a) | `100` | Compact AOF when it doubles. |
 | `--auto-aof-rewrite-min-size` | (n/a) | `64mb` | Minimum size before triggering rewrite. |
 | `--save` | `3600 1`, `300 100`, `60 10000` | `900 1`, `300 10`, `60 1000` | Tighter RDB checkpointing. AOF is the primary durability layer; RDB is a fast-load fallback. |
-| `--maxmemory` | `8gb` | `16gb` | Half of the 24G hard limit, leaves COW headroom for BGSAVE. |
+| `--maxmemory` | `8gb` | `16gb` | Two-thirds of the 24G hard limit, leaves 8G COW headroom for BGSAVE. |
 | `--maxmemory-policy` | `noeviction` | `noeviction` | Same. **Do not** set `allkeys-lru` on a graph DB — silent eviction breaks graph consistency. |
 | `THREAD_COUNT` | `8` | `16` | Beast has 96 cores; raise FalkorDB's worker pool. |
 | `CACHE_SIZE` | `64` | `50` | Slightly reduced (per-graph query plan cache). |
