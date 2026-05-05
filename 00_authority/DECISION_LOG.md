@@ -1,7 +1,7 @@
 ---
 title: Decision log
-date: 2026-05-03
-version: 17
+date: 2026-05-05
+version: 18
 status: draft
 ---
 
@@ -12,6 +12,14 @@ status: draft
 One entry per decision. Keep it short. Link out to supporting docs.
 
 ## Entries
+
+### 2026-05-05 — CODEOWNERS added to clean-build (governance enforcement via GitHub)
+
+- **Decision**: Add `.github/CODEOWNERS` to `Amplified-Partners/clean-build` requiring `@ewanbramley` as a reviewer for all changes to `00_authority/**` and `01_truth/**`. No default `*` owner — other paths remain open for any reviewer.
+- **Why**: `00_authority/` and `01_truth/` contain governance and truth-layer documents. Changes to these paths are significant or irreversible and should require Ewan's review before merge. GitHub's CODEOWNERS mechanism enforces this automatically at PR time.
+- **Where encoded**: `.github/CODEOWNERS`; `00_authority/MANIFEST.md` v51; this entry.
+- **Status**: active (pending PR merge).
+- **Signed-by**: Devon-codeowners-daughter | 2026-05-05 | devin-487f10ace93b4cdfbcc49f9bb5c300b0
 
 ### 2026-05-03 — LiteLLM host-loopback port mapping + pudding-testing env-driven base URLs (AMP-71)
 
@@ -387,28 +395,34 @@ One entry per decision. Keep it short. Link out to supporting docs.
 
 ## Changelog
 
-This section was added in v16 to satisfy `AGENTS.md` rule #3 (authority files must record version bumps in a changelog). Earlier `version` bumps (v1 — v13) were made without a corresponding changelog entry; that history is preserved in git but not enumerated here. From v14 onward, every bump appends an entry below.
+This section was added in v17 (the AMP-46 rebase commit, originally drafted as v16 — renumbered during merge with main when CODEOWNERS PR #49 took v16) to satisfy `AGENTS.md` rule #3 (authority files must record version bumps in a changelog). Earlier `version` bumps (v1 — v13) were made without a corresponding changelog entry; that history is preserved in git but not enumerated here. From v14 onward, every bump appends an entry below.
+
+### v18 — 2026-05-03
+
+Added the `2026-05-03 — LiteLLM host-loopback port mapping + pudding-testing env-driven base URLs (AMP-71)` entry to `## Entries` (renumbered from v17 during merge with main). Decision is reversible. Linked to [AMP-71](https://linear.app/amplifiedpartners/issue/AMP-71/) and PR #38. Manifest pointer references `02_build/INFRASTRUCTURE.md` v4.
+
+Signed-by: Devon-a9a7 | 2026-05-03 | devin-a9a78d0c72d9491aa3a70b18cb741936
 
 ### v17 — 2026-05-03
 
-Added the `2026-05-03 — LiteLLM host-loopback port mapping + pudding-testing env-driven base URLs (AMP-71)` entry to the top of `## Entries`. Decision is reversible. Linked to [AMP-71](https://linear.app/amplifiedpartners/issue/AMP-71/) and PR #38. Manifest pointer references `02_build/INFRASTRUCTURE.md` v4 (rebased onto updated PR #32 base, which sits above current main with the AMP-28 token-proxy row).
+Added the `2026-05-03 — Ollama port-mapping fix on Beast (AMP-46)` entry to `## Entries` (renumbered from v16 during merge with main; main now holds v16 = CODEOWNERS PR #49). Decision is reversible. Linked to [AMP-46](https://linear.app/amplifiedpartners/issue/AMP-46/beast-ops-fix-ollama-container-port-mapping) and PR #32. Manifest pointer now references `02_build/INFRASTRUCTURE.md` v3.
 
 Signed-by: Devon-a9a7 | 2026-05-03 | devin-a9a78d0c72d9491aa3a70b18cb741936
 
-### v16 — 2026-05-03
+### v16 — 2026-05-05
 
-Added the `2026-05-03 — Ollama port-mapping fix on Beast (AMP-46)` entry to `## Entries` (immediately below the AMP-67 entry, below the AMP-28 entries added by PR #39). Decision is reversible. Linked to [AMP-46](https://linear.app/amplifiedpartners/issue/AMP-46/beast-ops-fix-ollama-container-port-mapping) and PR #32. Manifest pointer now references `02_build/INFRASTRUCTURE.md` v3 (rebased onto current main).
+Recorded retroactively. The `2026-05-05 — CODEOWNERS added to clean-build (governance enforcement via GitHub)` entry shipped on `main` via PR #49 with a frontmatter version bump to v16 but no changelog entry; preserved here so the audit trail stays complete. Linked to PR #49. Manifest pointer references `00_authority/MANIFEST.md` v51.
 
-Signed-by: Devon-a9a7 | 2026-05-03 | devin-a9a78d0c72d9491aa3a70b18cb741936
+Signed-by: Devon-a9a7 | 2026-05-04 | devin-a9a78d0c72d9491aa3a70b18cb741936
 
 ### v15 — 2026-05-03
 
-Added two entries to `## Entries`: `2026-05-03 — cost-tools (token_proxy.py) deployed on Beast and indexed in spine` and `2026-05-03 — Agent routing rule established (AGENT_ROUTING.md)`. Recorded retroactively in v16 because the v15 bump shipped on `main` (PR #39, AMP-28) without a changelog entry — preserved here so the audit trail is complete.
+Added two entries to `## Entries`: `2026-05-03 — cost-tools (token_proxy.py) deployed on Beast and indexed in spine` and `2026-05-03 — Agent routing rule established (AGENT_ROUTING.md)`. Recorded retroactively in v17 (originally drafted as v16) because the v15 bump shipped on `main` (PR #39, AMP-28) without a changelog entry — preserved here so the audit trail is complete.
 
 Signed-by: Devon-a9a7 | 2026-05-03 | devin-a9a78d0c72d9491aa3a70b18cb741936
 
 ### v14 — 2026-05-03
 
-Added the `2026-05-03 — Public-data validation framework + ProfServices pilot (AMP-67)` entry to `## Entries`. Recorded retroactively in v16 because the v14 bump shipped on `main` (PR #35) without a changelog entry — preserved here so the audit trail starts at the first observed bump.
+Added the `2026-05-03 — Public-data validation framework + ProfServices pilot (AMP-67)` entry to `## Entries`. Recorded retroactively in v17 (originally drafted as v16) because the v14 bump shipped on `main` (PR #35) without a changelog entry — preserved here so the audit trail starts at the first observed bump.
 
 Signed-by: Devon-a9a7 | 2026-05-03 | devin-a9a78d0c72d9491aa3a70b18cb741936

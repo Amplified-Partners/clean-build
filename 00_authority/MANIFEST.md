@@ -1,7 +1,7 @@
 ---
 title: Governed workspace manifest (authoritative inventory)
-date: 2026-05-03
-version: 52
+date: 2026-05-05
+version: 53
 status: draft
 ---
 
@@ -79,6 +79,7 @@ not the GitHub slug. Do not guess another pattern under this org for this lane.
 - `00_authority/DECISION_LOG.md`
 - `STATUS.md` (operations status board — async handshake between Devon and OpenClaw; versioned handoffs, no chat)
 - `02_build/INFRASTRUCTURE.md` (canonical infrastructure manifest — single source of truth for all 40 containers, services, scheduled jobs, and server specs on Amplified Core)
+- `.github/CODEOWNERS` (GitHub CODEOWNERS — requires `@ewanbramley` review for `00_authority/**` and `01_truth/**` changes; no default owner)
 - `.cursor/rules/stateless-handover-kaizen.mdc` `[LOGIC TO BE CONFIRMED]` (mechanical enforcement of existing handover policy; not a separate policy spine)
 - `.cursor/hooks.json` `[LOGIC TO BE CONFIRMED]` (**No hooks** — `"hooks": {}`. **TESTING NEED:** reinstatement gate → `.cursor/HOOKS_TESTING_NEED.md`; history → `03_shadow/2026-04-16_stop-hook_followup-checklist-loop_bug-report.md` § Final resolution)
 - `.cursor/hooks/stateless-handover-stop.py` `[LOGIC TO BE CONFIRMED]` (**Dormant / testing only** — **not invoked** while `hooks` is empty; do not treat as enforcement)
@@ -171,21 +172,29 @@ not the GitHub slug. Do not guess another pattern under this org for this lane.
 
 ## Changelog
 
-### v52 — 2026-05-03
+### v53 — 2026-05-03
 
 - Bumped `02_build/INFRASTRUCTURE.md` to v4 (LiteLLM row updated with host-loopback bind `127.0.0.1:4000`, full provider set, public Traefik route; AMP-28 `simple-shuffle` clarification preserved on the same row).
-- Added `00_authority/DECISION_LOG.md` v17 entry: `2026-05-03 — LiteLLM host-loopback port mapping + pudding-testing env-driven base URLs (AMP-71)`. Linked to [AMP-71](https://linear.app/amplifiedpartners/issue/AMP-71/) and PR #38.
+- Added `00_authority/DECISION_LOG.md` v18 entry (renumbered from v17 during merge with main): `2026-05-03 — LiteLLM host-loopback port mapping + pudding-testing env-driven base URLs (AMP-71)`. Linked to [AMP-71](https://linear.app/amplifiedpartners/issue/AMP-71/) and PR #38.
 - LiteLLM compose **not** indexed in this manifest because it is **not** mirrored into the repo — the live file embeds plaintext API keys for six providers, gated on [AMP-72](https://linear.app/amplifiedpartners/issue/AMP-72/) (secrets-hardening).
+- Renumbered from a prior draft v52 during merge with main. Main had taken v51 with CODEOWNERS PR #49 between branch creation and merge.
 
 Signed-by: Devon-a9a7 | 2026-05-03 | devin-a9a78d0c72d9491aa3a70b18cb741936
 
-### v51 — 2026-05-03
+### v52 — 2026-05-03
 
 - Indexed two new files under **Candidate authority** for the AMP-46 Ollama port-mapping fix: `02_build/compose/ollama/README.md` and `02_build/compose/ollama/docker-compose.yml`. README follows the precedent set by `02_build/validators/README.md` (v48). The compose file is a mirror of `/opt/amplified/apps/ollama/docker-compose.yml` on Beast — Beast is source-of-truth; this is for version control, review, and recovery.
 - Bumped `02_build/INFRASTRUCTURE.md` to v3 (Ollama row updated with host-loopback bind, full model list, public Traefik route).
-- Added `00_authority/DECISION_LOG.md` v16 entry: `2026-05-03 — Ollama port-mapping fix on Beast (AMP-46)`. Linked to [AMP-46](https://linear.app/amplifiedpartners/issue/AMP-46/) and PR #32.
+- Added `00_authority/DECISION_LOG.md` v17 entry (renumbered from v16 during merge with main; main now holds v16 = CODEOWNERS PR #49): `2026-05-03 — Ollama port-mapping fix on Beast (AMP-46)`. Linked to [AMP-46](https://linear.app/amplifiedpartners/issue/AMP-46/) and PR #32.
+- Renumbered from a prior draft v51 during merge with main.
 
 Signed-by: Devon-a9a7 | 2026-05-03 | devin-a9a78d0c72d9491aa3a70b18cb741936
+
+### v51 — 2026-05-05
+
+- Added `.github/CODEOWNERS` enforcing `@ewanbramley` as required reviewer for `00_authority/**` and `01_truth/**`. No default `*` owner. Decision logged in `00_authority/DECISION_LOG.md` v16. This is a GitHub-level governance enforcement — changes to authority and truth paths now require Ewan's review before merge. Indexed under **Authoritative now** (follows `.cursor/` enforcement-artifact pattern from v26).
+
+Signed-by: Devon-codeowners-daughter | 2026-05-05 | devin-487f10ace93b4cdfbcc49f9bb5c300b0
 
 ### v50 — 2026-05-03
 
