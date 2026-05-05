@@ -38,7 +38,8 @@ It's a deterministic, Docker-native health checking system that validates infras
 
 ### HTTP Endpoints
 
-- **`GET /health`** — Quick health check (200 if healthy, 503 if critical issues)
+- **`GET /livez`** — Liveness probe (always 200 while FastAPI is up; used by Docker `HEALTHCHECK` so the container is not marked unhealthy when monitored services degrade)
+- **`GET /health`** — Application-level health (200 if healthy, 503 if any critical issue)
 - **`GET /health/detailed`** — Full check results with all details
 - **`GET /metrics`** — Prometheus-compatible metrics
 
@@ -86,7 +87,7 @@ enforcer:
     - qdrant
     - traefik
   healthcheck:
-    test: ["CMD", "python", "-c", "import httpx; httpx.get('http://localhost:8000/health').raise_for_status()"]
+    test: ["CMD", "python", "-c", "import httpx; httpx.get('http://localhost:8000/livez').raise_for_status()"]
     interval: 30s
     timeout: 5s
     retries: 3
