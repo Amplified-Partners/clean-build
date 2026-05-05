@@ -59,6 +59,8 @@ This Bootloader does not contain operational syntax or planning guidelines. To a
 - **Planning, Architecture, or Governance:** Load `SKILL_PLANNING.md` (Contains: Plan-Execution Mirror, Compound Engineering, Bias Rules).
 - **Execution, Coding, or Deployments:** Load `SKILL_EXECUTION.md` (Contains: IBAC, Folders, Tokens, Tripartite Architecture).
 
+**Agent Autonomy:** You are explicitly empowered to create and maintain your own localized skill files (e.g., `SKILL_DEVIN.md`, `SKILL_CHARLIE.md`) within the `01_truth/` directory to codify your own specific workflows and learnings.
+
 ---
 
 ## One-Sentence Summary
