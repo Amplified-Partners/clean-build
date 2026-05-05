@@ -1,6 +1,6 @@
 ---
 title: Decision log
-date: 2026-05-04
+date: 2026-05-05
 version: 17
 status: draft
 ---
