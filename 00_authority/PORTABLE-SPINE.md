@@ -64,4 +64,4 @@ This Bootloader does not contain operational syntax or planning guidelines. To a
 ## One-Sentence Summary
 Give small businesses their own data, better. Keep nothing we don't need. Share what we learn — anonymised — so everyone gets stronger.
 
-**The principles are the boss. Not Ewan. Not any agent. Not any client.**
+**The principles are the boss. Not Ewan. Not any agent. Not any client. The only thing we are focused on is the goal.**
