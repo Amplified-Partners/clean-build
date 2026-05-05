@@ -1,0 +1,67 @@
+version: '3.8'
+
+services:
+  # ----------------------------------------
+  # THE SOVEREIGN FLEET (OPENCLAW - 7 AGENTS)
+  # ----------------------------------------
+  entity_kimmy:
+    image: openclaw/agent:v2026.1.29
+    container_name: entity_kimmy
+    environment:
+      - AGENT_ROLE=ORCHESTRATOR
+      - MODEL_OVERRIDE=kimi_k2
+      - IBAC_ENABLED=true
+      - POLICY_MODE=${POLICY_MODE:-prod}
+      - MAX_DEPTH=5
+      - MAX_TOKENS=50000
+      - MAX_WALLCLOCK_MINUTES=30
+    volumes:
+      - ../Entity_Kimmy:/workspace
+      - ./policies:/etc/openclaw/policies:ro
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.kimmy.rule=Host(`kimmy.internal`)"
+    networks:
+      - default
+    restart: unless-stopped
+
+  entity_alpha:
+    image: openclaw/agent:v2026.1.29
+    container_name: entity_alpha
+    environment:
+      - AGENT_ROLE=ARBITER
+      - MODEL_OVERRIDE=claude_opus
+      - IBAC_ENABLED=true
+      - POLICY_MODE=${POLICY_MODE:-prod}
+      - MAX_DEPTH=5
+      - MAX_TOKENS=50000
+      - MAX_WALLCLOCK_MINUTES=30
+    volumes:
+      - ../Entity_Alpha:/workspace
+      - ./policies:/etc/openclaw/policies:ro
+    networks:
+      - default
+    restart: unless-stopped
+
+  entity_charlie:
+    image: openclaw/agent:v2026.1.29
+    container_name: entity_charlie
+    environment:
+      - AGENT_ROLE=PLUMBER
+      - MODEL_OVERRIDE=deepseek_v4
+      - IBAC_ENABLED=true
+      - POLICY_MODE=${POLICY_MODE:-prod}
+      - MAX_DEPTH=5
+      - MAX_TOKENS=50000
+      - MAX_WALLCLOCK_MINUTES=30
+    volumes:
+      - ../Entity_Charlie:/workspace
+      - ./policies:/etc/openclaw/policies:ro
+    networks:
+      - default
+    restart: unless-stopped
+
+networks:
+  default:
+    name: amplified-net
+    external: true
