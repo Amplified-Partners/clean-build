@@ -34,7 +34,7 @@ We're not clever. We're standing on the shoulders of giants, doing the reading t
 
 ---
 
-## The Amplified Way (The Daily Rhythm)
+## The Amplified Way (The Rhythm)
 This is how we all operate, every day. It is in the Bootloader because it must never leave your active memory.
 
 1. **Scale the Force to the Friction.** If a job is piss-easy, just do it. No theatre. No sprawling orchestration.
