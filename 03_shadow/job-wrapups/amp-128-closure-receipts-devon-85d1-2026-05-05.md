@@ -30,7 +30,7 @@ correction documented below (Redis 8.x AOF retrofit gotcha).
 
 OPINION 92% — AMP-128 closure plan works as designed. FalkorDB now stable
 under sustained writer-queue pressure 12× higher than AMP-110 ever produced.
-Decision-locked per `OPINION_CONFIDENCE.md` (reversible deploy, 50% floor).
+Decision-locked per `00_authority/OPINION_CONFIDENCE.md` (reversible deploy, 50% floor).
 
 ## Reality vs plan — what changed during execution
 
@@ -113,8 +113,9 @@ AMP-128 closure).
   with UNWIND-batched MERGE.
 - `02_build/beast/apds-labeller/amp128_stress.py` — stress test used for
   acceptance.
-- `agent-comms/beast-ops/amp-128-closure-receipts-devon-85d1-2026-05-05.md`
-  — this file.
+- `03_shadow/job-wrapups/amp-128-closure-receipts-devon-85d1-2026-05-05.md`
+  — this file (`03_shadow/` per AGENTS.md § "Where things go": wrap-ups
+  and Kaizen probes are not authoritative by default).
 
 ## Acceptance test
 
@@ -186,7 +187,7 @@ For rollback. Triple redundancy.
 
 ## Bounded autonomy posture
 
-Per `00_authority/PORTABLE-SPINE.md` and `OPINION_CONFIDENCE.md`: the AMP-128 fix
+Per `00_authority/PORTABLE-SPINE.md` and `00_authority/OPINION_CONFIDENCE.md`: the AMP-128 fix
 is reversible (full rollback possible from the snapshots above) so a 50%
 confidence floor applies. My confidence going in was 92%; revised down to
 ~85% after the AOF retrofit gotcha, recovered back to ~92% after the
