@@ -1,0 +1,137 @@
+services:
+  falkordb:
+    # AMP-128 (2026-05-05): pin to v4.18.3 (same digest as :latest at apply time,
+    # sha256:30c530c193ac48cb6ea8c6cae745f793d2c098a0a138f7b3e46c1d90848845ba).
+    # Lock against silent upgrade.
+    image: falkordb/falkordb:v4.18.3
+    container_name: falkordb
+    restart: unless-stopped
+    # NO host port mapping — internal Docker network only
+    # This BLOCKS all external access (Mac, internet, everything)
+    environment:
+      # Redis server args (memory, connections, persistence)
+      # AMP-128: AOF enabled with everysec fsync to cap write loss at <1s.
+      # See https://linear.app/amplifiedpartners/issue/AMP-128 for context.
+      REDIS_ARGS: >-
+        --appendonly yes
+        --appendfsync everysec
+        --auto-aof-rewrite-percentage 100
+        --auto-aof-rewrite-min-size 64mb
+        --save 900 1
+        --save 300 10
+        --save 60 1000
+        --maxmemory 16gb
+        --maxmemory-policy noeviction
+        --maxclients 100
+        --timeout 300
+        --tcp-keepalive 60
+        --io-threads 4
+        --io-threads-do-reads yes
+        --slowlog-log-slower-than 10000
+        --slowlog-max-len 128
+        --loglevel notice
+      # FalkorDB graph module args (threads, cache, limits)
+      # AMP-128: tightened DELTA / queued / buffer values to surface back-pressure
+      # as errors instead of silent hangs under sustained MERGE.
+      FALKORDB_ARGS: >-
+        THREAD_COUNT 16
+        CACHE_SIZE 50
+        TIMEOUT_MAX 60000
+        TIMEOUT_DEFAULT 30000
+        QUERY_MEM_CAPACITY 1073741824
+        DELTA_MAX_PENDING_CHANGES 1000
+        NODE_CREATION_BUFFER 16384
+        MAX_QUEUED_QUERIES 4096
+      # Disable browser UI (saves resources)
+      BROWSER: "0"
+    volumes:
+      - falkordb-data:/var/lib/falkordb/data
+    networks:
+      - amplified-net
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    deploy:
+      resources:
+        limits:
+          # AMP-128: bumped from 16G to 24G to leave COW headroom for BGSAVE
+          # while maxmemory is 16GB (was 8GB).
+          memory: 24G
+          cpus: "8"
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: amplified
+      POSTGRES_PASSWORD_FILE: /run/secrets/pg_password
+      POSTGRES_DB: amplified_main
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - amplified-net
+    secrets:
+      - pg_password
+
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes --maxmemory 2gb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis-data:/data
+    networks:
+      - amplified-net
+
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: qdrant
+    restart: unless-stopped
+    volumes:
+      - qdrant-data:/qdrant/storage
+    networks:
+      - amplified-net
+
+  portainer:
+    image: portainer/portainer-ce:latest
+    container_name: portainer
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer-data:/data
+    networks:
+      - amplified-net
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.portainer.rule=Host(`portainer.beast.amplifiedpartners.ai`)"
+      - "traefik.http.routers.portainer.tls.certresolver=letsencrypt"
+      - "traefik.http.services.portainer.loadbalancer.server.port=9000"
+
+  watchtower:
+    image: containrrr/watchtower
+    container_name: watchtower
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - WATCHTOWER_CLEANUP=true
+      - WATCHTOWER_POLL_INTERVAL=86400
+
+volumes:
+  falkordb-data:
+  postgres-data:
+  redis-data:
+  qdrant-data:
+  portainer-data:
+
+networks:
+  amplified-net:
+    external: true
+
+secrets:
+  pg_password:
+    file: /opt/amplified/secrets/pg_password.txt
