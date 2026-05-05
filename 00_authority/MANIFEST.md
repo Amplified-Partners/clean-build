@@ -1,7 +1,7 @@
 ---
 title: Governed workspace manifest (authoritative inventory)
 date: 2026-05-05
-version: 51
+version: 52
 status: draft
 ---
 
@@ -70,7 +70,7 @@ not the GitHub slug. Do not guess another pattern under this org for this lane.
 - `00_authority/PROJECT_INTENT.md`
 - `00_authority/REMIT_PARTNER_CURSOR.md`
 - `00_authority/PARTNER_TRANSFER_INSTRUCTIONS.md`
-- `00_authority/PRINCIPLES.md` `[LOGIC TO BE CONFIRMED]` (norms downstream of **Absolute** in root `AGENTS.md`; `anchor_lineage: 35` in file frontmatter — see § Provenance and versioning there)
+- `00_authority/PORTABLE-SPINE.md` (Bootloader / Nine Principles + Operating Rules; replaces the deleted `PRINCIPLES.md` per commit `e4b6e38` "promoted to Canonical PORTABLE-SPINE")
 - `00_authority/SIGNATURES.md` (every AI signs committed work; Radical Attribution applied mechanically; agent chooses format)
 - `00_authority/USE_IT_OR_CUT_IT.md` (sounds good + built + unused = cut; remediation rule for bloat; archive exempt)
 - `00_authority/OPINION_CONFIDENCE.md` (opinions labelled + confidence numbered; tiered thresholds 50% / 85% / 95% by reversibility)
@@ -105,6 +105,7 @@ not the GitHub slug. Do not guess another pattern under this org for this lane.
   - `01_truth/processes/2026-04_research-operations-cadence_v1.md` `[LOGIC TO BE CONFIRMED]`
   - `01_truth/processes/2026-04_research-on-research_bootstrap-remit_v1.md` `[LOGIC TO BE CONFIRMED]`
   - `01_truth/processes/2026-04_stateless-handover_neutrality-clause_v1.md` `[LOGIC TO BE CONFIRMED]` (candidate addendum to the job-wrapup SOP; neutrality rule for stateless handovers; authoritative `00_authority/OPINION_CONFIDENCE.md` references this file)
+  - `01_truth/processes/2026-05_lazy-claim-multi-agent_v1.md` `[LOGIC TO BE CONFIRMED]` (multi-agent work coordination via time-boxed Linear claim comments; addresses the "stop-and-ask" failure mode when peer-session work overlaps; pairs with `AGENTS.md` § How to operate — Act/Surface/Park; Linear: AMP-104)
 - `01_truth/schemas/` `[LOGIC TO BE CONFIRMED]` (schema contracts to be populated)
   - `01_truth/schemas/README.md` `[LOGIC TO BE CONFIRMED]` (folder purpose stub)
   - `01_truth/schemas/2026-05_public-data-validation_v1.md` `[LOGIC TO BE CONFIRMED]` (public-data verdict schema: 3-band PROVEN/PLAUSIBLE/DISPROVEN + BLOCKED gap-marker; additive `VALIDATION:` field on catalogue; reference impl at `02_build/validators/`)
@@ -116,6 +117,7 @@ not the GitHub slug. Do not guess another pattern under this org for this lane.
 - `01_truth/SYSTEMS-AND-API-REGISTER.md` `[LOGIC TO BE CONFIRMED]` (single register of all APIs, MCP servers, telephony systems, code modules, and their locations across all Amplified Partners repos)
 - `02_build/README.md` `[LOGIC TO BE CONFIRMED]` (runnable artefacts routing stub)
 - `02_build/validators/README.md` `[LOGIC TO BE CONFIRMED]` (public-data validation framework; reference impl of `01_truth/schemas/2026-05_public-data-validation_v1.md`; ProfServices pilot at AMP-67)
+- `02_build/apds/README.md` `[LOGIC TO BE CONFIRMED]` (APDS Stage-1 — version-controlled mirror of `/opt/amplified/apds/{harvest,label}/` on Beast; the harvester + labeller that produced the 250 PUDDING-labelled `:Document` nodes in FalkorDB on 2026-05-05; flags 3-way PUDDING schema divergence; Linear: AMP-104)
 - `03_shadow/README.md` `[LOGIC TO BE CONFIRMED]` (experiment routing stub)
 - `03_shadow/job-wrapups/README.md` `[NON-AUTHORITATIVE]` (wrap-ups/escalation notes location; learning only)
 - `03_shadow/validators/README.md` `[NON-AUTHORITATIVE]` (shadow tier for public-data verdicts produced by `02_build/validators/`; non-authoritative pending review-promote)
@@ -169,6 +171,16 @@ not the GitHub slug. Do not guess another pattern under this org for this lane.
     - `P10-kill-switch-master-reference.md` `[NON-AUTHORITATIVE]` (510 lines — binary shutdown architecture)
 
 ## Changelog
+
+### v52 — 2026-05-05
+
+- Indexed `01_truth/processes/2026-05_lazy-claim-multi-agent_v1.md` under **Candidate authority** (multi-agent work coordination; time-boxed Linear claim comments; non-blocking by design; addresses the AMP-104 stop-and-ask process failure surfaced by Ewan).
+- Indexed `02_build/apds/README.md` under **Candidate authority** (APDS Stage-1 mirror of what ran on Beast 2026-05-05; flags 3-way PUDDING schema divergence between `01_truth/schemas/2026-03_pudding-discovery-system_v1.md` (4-dim spec), `02_build/scripts/pudding_labeler.py` (5-dim symbolic), and `02_build/apds/apds_labeller.py` (5-dim functional, currently in production with 250 docs in FalkorDB)).
+- See `00_authority/DECISION_LOG.md` v17 for Hazel-gate status + parked PUDDING vocabulary decision.
+- See `02_build/INFRASTRUCTURE.md` v3 for Graphiti container state change (`vault-graphiti:latest` → `vault-graphiti:secure`, now running) and the APDS Stage-1 row.
+- **Dead-reference fix (Devin Review on PR #52):** updated the authoritative-now index entry above (line 73) from the deleted `00_authority/PRINCIPLES.md` to its replacement `00_authority/PORTABLE-SPINE.md` per commit `e4b6e38` "promoted to Canonical PORTABLE-SPINE". Same fix applied in this PR to root `AGENTS.md` (3 references) and to the new `00_authority/DECISION_LOG.md` v17 entry (2 references). Pre-existing references to `PRINCIPLES.md` in historical changelog entries (`MANIFEST.md` lines 342–443, `DECISION_LOG.md` lines 145, 214, 348) are left untouched per `00_authority/AGENTS.md` "Use additive edits and changelogs; do not silently rewrite history" — they are accurate records of past edits, not current claims.
+
+Signed-by: Devon-9f21 | Devin (Cognition AI) | 2026-05-05 | session `devin-9f2104fb06624b009f2879c50957c647`
 
 ### v51 — 2026-05-05
 
