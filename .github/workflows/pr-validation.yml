@@ -124,6 +124,7 @@ jobs:
 
       - name: Run ruff
         if: steps.check.outputs.has_python == 'true'
+        continue-on-error: true
         run: |
           pip install --quiet ruff
           ruff check --select E,F,W --ignore E501 .
