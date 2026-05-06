@@ -1,7 +1,7 @@
 ---
 title: PR workflow — branch protection, Linear linkage, review authority
-date: 2026-05-03
-version: 1
+date: 2026-05-06
+version: 2
 status: authoritative
 ---
 
@@ -27,7 +27,11 @@ Applies to the active Amplified-Partners repos covered by AMP-70:
 - `Amplified-Partners/clean-build`
 - `Amplified-Partners/ground-truth`
 - `Amplified-Partners/crm`
-- `Amplified-Partners/beast-code-export`
+
+`Amplified-Partners/beast-code-export` was originally in scope but was archived
+on 2026-05-04 and is read-only — see `00_authority/DECISION_LOG.md` v19. If it is
+ever un-archived, re-add it here and to `02_build/scripts/apply_branch_protection.py`
+`REPOS`.
 
 Other active repos may opt in by running `02_build/scripts/apply_branch_protection.py`
 with their slug.
@@ -128,6 +132,16 @@ configuration to the current spec.
   2026-05-03.
 
 ## Changelog
+
+### v2 — 2026-05-06
+
+- Dropped `Amplified-Partners/beast-code-export` from § Scope. The repo was
+  archived on 2026-05-04 and is read-only; branch protection is moot for it.
+  Decision: `00_authority/DECISION_LOG.md` v19. Companion edits:
+  `02_build/scripts/apply_branch_protection.py` `REPOS`,
+  `00_authority/MANIFEST.md` v54.
+
+Signed-by: Devon-4330 | 2026-05-06 | session devin-4330c661a80b4770aa8f62980c21366a
 
 ### v1 — 2026-05-03
 

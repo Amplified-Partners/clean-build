@@ -1,7 +1,7 @@
 ---
 title: Governed workspace manifest (authoritative inventory)
-date: 2026-05-05
-version: 53
+date: 2026-05-06
+version: 54
 status: draft
 ---
 
@@ -172,6 +172,12 @@ not the GitHub slug. Do not guess another pattern under this org for this lane.
     - `P10-kill-switch-master-reference.md` `[NON-AUTHORITATIVE]` (510 lines — binary shutdown architecture)
 
 ## Changelog
+
+### v54 — 2026-05-06
+
+- AMP-70 follow-up. `Amplified-Partners/beast-code-export` was archived on 2026-05-04 (returns `Repository was archived so is read-only` on push and on PR-merge API). Dropped from the active-repos scope of `00_authority/PR_WORKFLOW.md` (now at v2) and from `02_build/scripts/apply_branch_protection.py` `REPOS`. Branch protection applied 2026-05-06 to the three remaining active repos (`clean-build`, `ground-truth`, `crm`) by `Devon-4330` using `devi_org_github`. The `beast-code-export` PR #2 cannot be closed — the archived repo rejects PR state changes — and remains open as a tombstone. Decision recorded at `00_authority/DECISION_LOG.md` v19 (2026-05-06 entry). Source: AMP-70.
+
+Signed-by: Devon-4330 | 2026-05-06 | session devin-4330c661a80b4770aa8f62980c21366a
 
 ### v53 — 2026-05-05
 
