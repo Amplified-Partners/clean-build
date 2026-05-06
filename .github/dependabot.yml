@@ -1,6 +1,7 @@
 # Dependabot config — standardised across Amplified-Partners org.
 # Schedule: weekly, Monday 09:00 UTC. Limit: 5 PRs per ecosystem.
-# Signed: Devon-dependabot-daughter | 2026-05-05
+# Minor/patch: auto-merge. Major: requires review.
+# Devon-4c1a | 2026-05-06 | Dependabot standardisation
 version: 2
 updates:
   - package-ecosystem: "github-actions"
@@ -13,4 +14,9 @@ updates:
     open-pull-requests-limit: 5
     labels:
       - "dependencies"
-      - "auto-merge"
+      - "ci"
+    groups:
+      minor-and-patch:
+        update-types:
+          - "minor"
+          - "patch"
