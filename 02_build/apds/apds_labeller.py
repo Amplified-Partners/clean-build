@@ -54,7 +54,10 @@ FALKORDB_HOST = os.getenv("FALKORDB_HOST", "172.18.0.22")
 FALKORDB_PORT = int(os.getenv("FALKORDB_PORT", "6379"))
 GRAPH_NAME = "business_knowledge"
 OLLAMA_URL = os.getenv("OLLAMA_URL", "http://172.18.0.12:11434")
-HARVEST_FILE = "/opt/amplified/apds/harvest/harvest_20260505_033410.json"
+HARVEST_FILE = os.getenv(
+    "APDS_HARVEST_FILE",
+    "/opt/amplified/apds/harvest/harvest_20260505_033410.json",
+)
 
 PUDDING_PROMPT = """You are a PUDDING taxonomy labeller. Assign exactly one label per dimension.
 
@@ -143,10 +146,13 @@ def main():
         sys.exit(1)
     print(f"Connected to FalkorDB graph '{GRAPH_NAME}'")
 
-    harvest_path = Path(HARVEST_FILE)
+    # Precedence: CLI arg > APDS_HARVEST_FILE env var > hardcoded default.
+    harvest_file = sys.argv[1] if len(sys.argv) > 1 else HARVEST_FILE
+    harvest_path = Path(harvest_file)
     if not harvest_path.exists():
-        print(f"ERROR: Harvest file not found: {HARVEST_FILE}")
+        print(f"ERROR: Harvest file not found: {harvest_file}")
         sys.exit(1)
+    print(f"Reading harvest from: {harvest_path}")
 
     with open(harvest_path) as f:
         harvest = json.load(f)
