@@ -1,6 +1,7 @@
 # Authored by Devon-85d1 | 2026-05-05 | session devin-85d1c5d9cee24844adaa4187084c0e64
-# AMP-128 closure: Beast docker-compose.yml snapshot (canonical lives at
-# /opt/amplified/docker-compose.yml on Beast 135.181.161.131).
+# Updated by Devon-6164 | 2026-05-06 | session devin-6164c4ee90b94eea8d66b864d041e2ef
+# AMP-128 closure + localhost port bindings for diagnostic access.
+# Canonical lives at /opt/amplified/docker-compose.yml on Beast 135.181.161.131.
 services:
   falkordb:
     # AMP-128 (2026-05-05): pin to v4.18.3 (same digest as :latest at apply time,
@@ -9,8 +10,12 @@ services:
     image: falkordb/falkordb:v4.18.3
     container_name: falkordb
     restart: unless-stopped
-    # NO host port mapping — internal Docker network only
-    # This BLOCKS all external access (Mac, internet, everything)
+    # 127.0.0.1-only port binding — diagnostic access from Beast host,
+    # not internet-exposed. Agents can use redis-cli -p 6380 or
+    # curl localhost:6380 without needing docker exec.
+    # Port 6380 avoids clash with the Redis container on 6379.
+    ports:
+      - "127.0.0.1:6380:6379"
     environment:
       # Redis server args (memory, connections, persistence)
       # AMP-128: AOF enabled with everysec fsync to cap write loss at <1s.
@@ -69,6 +74,9 @@ services:
     image: postgres:16-alpine
     container_name: postgres
     restart: unless-stopped
+    ports:
+      # Port 5434 because docker-postgres-1 already occupies 5432
+      - "127.0.0.1:5434:5432"
     environment:
       POSTGRES_USER: amplified
       POSTGRES_PASSWORD_FILE: /run/secrets/pg_password
@@ -85,6 +93,8 @@ services:
     container_name: redis
     restart: unless-stopped
     command: redis-server --appendonly yes --maxmemory 2gb --maxmemory-policy allkeys-lru
+    ports:
+      - "127.0.0.1:6379:6379"
     volumes:
       - redis-data:/data
     networks:
@@ -94,6 +104,9 @@ services:
     image: qdrant/qdrant:latest
     container_name: qdrant
     restart: unless-stopped
+    ports:
+      - "127.0.0.1:6333:6333"
+      - "127.0.0.1:6334:6334"
     volumes:
       - qdrant-data:/qdrant/storage
     networks:
