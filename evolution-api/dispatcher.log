@@ -1,0 +1,8 @@
+2026-05-02 09:08:13,906 - dispatcher - INFO - Dispatcher running on port 3000
+2026-05-02 09:08:13,906 - dispatcher - INFO - Routing rules:
+2026-05-02 09:08:13,906 - dispatcher - INFO -   @pete → Pete (⚡)
+2026-05-02 09:08:13,906 - dispatcher - INFO -   @charlie → Charlie (🔧)
+2026-05-02 09:08:13,906 - dispatcher - INFO -   @delta → Delta (🦙)
+2026-05-02 09:08:13,906 - dispatcher - INFO -   (default) → Clawd (🦞)
+2026-05-02 09:08:13,906 - dispatcher - INFO - 
+Ready to receive webhooks from Evolution API

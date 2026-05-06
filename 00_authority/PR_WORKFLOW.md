@@ -38,9 +38,12 @@ with their slug.
   OpenClaw, dependabot) or human (Ewan).
 - **Reviewer** — a second agent or human, distinct from the author.
 - **Arbiter** — Antigravity, holding merge authority. Until Antigravity has a
-  GitHub identity, the human Architect (`@ewan-dot`) holds the role
-  operationally. CODEOWNERS files in each repo carry a `[SOURCE REQUIRED]`
-  marker for the Antigravity GitHub user; remove and update once provisioned.
+  GitHub identity (`[SOURCE REQUIRED]` — pending Antigravity GitHub
+  provisioning), the human Architect (`@ewanbramley`) holds the role
+  operationally. CODEOWNERS gates governance and truth-layer paths only
+  (`00_authority/**`, `01_truth/**` in clean-build); other paths satisfy the
+  branch-protection 1-review rule via any approving reviewer. Remove this
+  marker and add the Antigravity GitHub user to CODEOWNERS once provisioned.
 
 ## Branch naming
 

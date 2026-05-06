@@ -32,7 +32,9 @@ status: candidate-authority
      new name, retarget the PR).
 6. **Wait for the Arbiter review.** A second agent / CODEOWNER reviews and
    approves. Until Antigravity has a GitHub identity, the human Architect
-   (`@ewan-dot`) holds this role.
+   (`@ewanbramley`) holds this role. CODEOWNERS in `clean-build` only
+   gates `00_authority/**` and `01_truth/**`; PRs touching other paths
+   satisfy the branch-protection 1-review rule via any approving reviewer.
 7. **Merge** is performed by the Arbiter, not the author.
 
 ## Procedure (for repo operators applying the policy to a new repo)

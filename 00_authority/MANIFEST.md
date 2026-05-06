@@ -1,7 +1,7 @@
 ---
 title: Governed workspace manifest (authoritative inventory)
-date: 2026-05-03
-version: 51
+date: 2026-05-05
+version: 53
 status: draft
 ---
 
@@ -80,6 +80,7 @@ not the GitHub slug. Do not guess another pattern under this org for this lane.
 - `00_authority/PR_WORKFLOW.md` (branch protection + Linear linkage + review authority for active repos; AMP-70)
 - `STATUS.md` (operations status board — async handshake between Devon and OpenClaw; versioned handoffs, no chat)
 - `02_build/INFRASTRUCTURE.md` (canonical infrastructure manifest — single source of truth for all 40 containers, services, scheduled jobs, and server specs on Amplified Core)
+- `.github/CODEOWNERS` (GitHub CODEOWNERS — requires `@ewanbramley` review for `00_authority/**` and `01_truth/**` changes; no default owner)
 - `.cursor/rules/stateless-handover-kaizen.mdc` `[LOGIC TO BE CONFIRMED]` (mechanical enforcement of existing handover policy; not a separate policy spine)
 - `.cursor/hooks.json` `[LOGIC TO BE CONFIRMED]` (**No hooks** — `"hooks": {}`. **TESTING NEED:** reinstatement gate → `.cursor/HOOKS_TESTING_NEED.md`; history → `03_shadow/2026-04-16_stop-hook_followup-checklist-loop_bug-report.md` § Final resolution)
 - `.cursor/hooks/stateless-handover-stop.py` `[LOGIC TO BE CONFIRMED]` (**Dormant / testing only** — **not invoked** while `hooks` is empty; do not treat as enforcement)
@@ -117,6 +118,7 @@ not the GitHub slug. Do not guess another pattern under this org for this lane.
 - `01_truth/SYSTEMS-AND-API-REGISTER.md` `[LOGIC TO BE CONFIRMED]` (single register of all APIs, MCP servers, telephony systems, code modules, and their locations across all Amplified Partners repos)
 - `02_build/README.md` `[LOGIC TO BE CONFIRMED]` (runnable artefacts routing stub)
 - `02_build/validators/README.md` `[LOGIC TO BE CONFIRMED]` (public-data validation framework; reference impl of `01_truth/schemas/2026-05_public-data-validation_v1.md`; ProfServices pilot at AMP-67)
+- `02_build/enforcer/README.md` `[LOGIC TO BE CONFIRMED]` (Beast health-monitoring service — 5 deterministic checks on 10-minute cycles: Docker container health, database connectivity, Traefik, session hygiene, security; FastAPI `/health` + `/health/detailed` + `/metrics` endpoints. Merged from `Amplified-Partners/enforcer` per AMP-77. **Known issue documented in README**: async check functions use blocking I/O — to fix in a follow-up.)
 - `03_shadow/README.md` `[LOGIC TO BE CONFIRMED]` (experiment routing stub)
 - `03_shadow/job-wrapups/README.md` `[NON-AUTHORITATIVE]` (wrap-ups/escalation notes location; learning only)
 - `03_shadow/validators/README.md` `[NON-AUTHORITATIVE]` (shadow tier for public-data verdicts produced by `02_build/validators/`; non-authoritative pending review-promote)
@@ -171,12 +173,24 @@ not the GitHub slug. Do not guess another pattern under this org for this lane.
 
 ## Changelog
 
-### v51 — 2026-05-03
+### v53 — 2026-05-05
 
-- Added `00_authority/PR_WORKFLOW.md` to **Authoritative now**: branch protection, Linear ticket linkage, branch-name convention, and CODEOWNERS-as-Arbiter policy for active repos (clean-build, ground-truth, crm, beast-code-export). Implementation lives in `.github/workflows/{pr-validation,linear-sync}.yml`, `.github/CODEOWNERS`, and `02_build/scripts/apply_branch_protection.py`.
-- Indexed `01_truth/processes/2026-05_pr-workflow_branch-protection_sop_v1.md` under **Candidate authority** as the operating SOP for the new policy. Decision recorded at `00_authority/DECISION_LOG.md` v16 (2026-05-03 entry). Source: AMP-70.
+- Added `00_authority/PR_WORKFLOW.md` to **Authoritative now**: branch protection on `main`, Linear ticket linkage (`AMP-NNN` in PR title or body), branch-name prefix convention, and PR↔Linear status sync for the four active repos (clean-build, ground-truth, crm, beast-code-export). Implementation lives in `.github/workflows/{pr-validation,linear-sync}.yml` and `02_build/scripts/apply_branch_protection.py`. CODEOWNERS gating for governance/truth paths is already in place in clean-build (v51); other repos get a minimal CODEOWNERS as part of this change.
+- Indexed `01_truth/processes/2026-05_pr-workflow_branch-protection_sop_v1.md` under **Candidate authority** as the operating SOP for the new policy. Decision recorded at `00_authority/DECISION_LOG.md` v18 (2026-05-03 entry). Source: AMP-70.
 
-Signed-by: Devon-4330 | 2026-05-03 | session devin-4330c661a80b4770aa8f62980c21366a
+Signed-by: Devon-4330 | 2026-05-05 | session devin-4330c661a80b4770aa8f62980c21366a
+
+### v52 — 2026-05-05
+
+- Added `02_build/enforcer/README.md` to **Candidate authority** as `[LOGIC TO BE CONFIRMED]`. The enforcer is a Beast health-monitoring service merged into `clean-build/02_build/enforcer/` from the now-to-be-archived `Amplified-Partners/enforcer` repo per **AMP-77** ("GitHub Repo Spine Cleanup"). Five deterministic checks (Docker, databases, Traefik, session hygiene, security) on a 10-minute cycle; FastAPI HTTP endpoints. Filed under Candidate authority because the source code's behaviour does not match its own spec — see the "Known Issue" section in `02_build/enforcer/README.md` (async check functions use blocking I/O, so concurrency claim in `ENFORCER-SPEC.md` is incorrect under load). Pre-existing source-repo defect, preserved verbatim by the merge; tracked separately for fix.
+
+Signed-by: Devon-1bda | Devin (Cognition AI) | 2026-05-04 | session `devin-1bdaf31798874921940598bed17ca9e3`
+
+### v51 — 2026-05-05
+
+- Added `.github/CODEOWNERS` enforcing `@ewanbramley` as required reviewer for `00_authority/**` and `01_truth/**`. No default `*` owner. Decision logged in `00_authority/DECISION_LOG.md` v16. This is a GitHub-level governance enforcement — changes to authority and truth paths now require Ewan's review before merge. Indexed under **Authoritative now** (follows `.cursor/` enforcement-artifact pattern from v26).
+
+Signed-by: Devon-codeowners-daughter | 2026-05-05 | devin-487f10ace93b4cdfbcc49f9bb5c300b0
 
 ### v50 — 2026-05-03
 
