@@ -19,6 +19,7 @@ import os
 import shutil
 import sys
 import time
+import uuid
 import hashlib
 import argparse
 from pathlib import Path
@@ -39,6 +40,8 @@ INGESTED_DIR = PORCH_DIR / "ingested"
 FAILED_DIR = PORCH_DIR / "failed"
 LABELS_LOG = PORCH_DIR / "labels_log.jsonl"
 WATCHER_LOG = PORCH_DIR / "watcher_log.jsonl"
+# AMP-38: skipped-file ledger so unsupported types are observable, not silent.
+SKIPPED_LOG = PORCH_DIR / "skipped_log.jsonl"
 
 QDRANT_HOST = os.getenv("QDRANT_HOST", "localhost")
 QDRANT_PORT = int(os.getenv("QDRANT_PORT", "6333"))
@@ -58,6 +61,43 @@ def log_event(event: dict):
 def file_hash(filepath: Path) -> str:
     """SHA-256 hash of file content for dedup."""
     return hashlib.sha256(filepath.read_bytes()).hexdigest()
+
+
+def log_skipped(filepath: Path, reason: str, extra: dict | None = None):
+    """Append a skip decision to the skipped-files ledger (AMP-38).
+
+    The point of this log is auditability: every file the watcher does NOT
+    ingest leaves a row, so a downstream verification pass can reconcile
+    raw -> clean counts without guessing.
+    """
+    try:
+        sha256 = file_hash(filepath) if filepath.is_file() else None
+    except OSError:
+        sha256 = None
+    record = {
+        "timestamp": datetime.now().isoformat(),
+        "path": str(filepath),
+        "name": filepath.name,
+        "extension": filepath.suffix,
+        "sha256": sha256,
+        "reason": reason,
+    }
+    if extra:
+        record.update(extra)
+    with open(SKIPPED_LOG, "a") as f:
+        f.write(json.dumps(record) + "\n")
+
+
+def content_point_id(filepath: Path, content_hash: str) -> str:
+    """Stable Qdrant point ID derived from content + path (AMP-38).
+
+    Previously this was ``md5(filename)`` which collides whenever two files
+    share a name (e.g. ``README.md`` across many directories on the Mac
+    dumps); the second upsert silently overwrote the first. Tying the ID
+    to ``sha256(content) + absolute path`` keeps re-runs idempotent while
+    eliminating the collision.
+    """
+    return str(uuid.uuid5(uuid.NAMESPACE_OID, f"{content_hash}:{filepath}"))
 
 
 def embed_and_store(filepath: Path, label: dict, dry_run: bool = False) -> bool:
@@ -89,9 +129,12 @@ def embed_and_store(filepath: Path, label: dict, dry_run: bool = False) -> bool:
 
         client = QdrantClient(host=QDRANT_HOST, port=QDRANT_PORT)
 
+        sha256 = file_hash(filepath)
+
         # Build payload with PUDDING label
         payload = {
             "filename": filepath.name,
+            "path": str(filepath),
             "content": content[:10000],  # Truncate for storage
             "pudding_label": label.get("pudding_label", ""),
             "pudding_what": label.get("what", ""),
@@ -102,11 +145,10 @@ def embed_and_store(filepath: Path, label: dict, dry_run: bool = False) -> bool:
             "word_count": label.get("word_count", 0),
             "source": "porch",
             "ingested_at": datetime.now().isoformat(),
-            "file_hash": file_hash(filepath),
+            "file_hash": sha256,
         }
 
-        # Generate a deterministic ID from the file hash
-        point_id = int(hashlib.md5(filepath.name.encode()).hexdigest()[:16], 16)
+        point_id = content_point_id(filepath, sha256)
 
         client.upsert(
             collection_name=QDRANT_COLLECTION,
@@ -176,8 +218,23 @@ def process_file(filepath: Path, dry_run: bool = False) -> bool:
 
 
 def scan_incoming(dry_run: bool = False) -> int:
-    """Scan incoming directory and process all files."""
-    files = [f for f in INCOMING_DIR.iterdir() if f.is_file() and f.suffix in SUPPORTED_EXTENSIONS]
+    """Scan incoming directory and process all files.
+
+    Files outside ``SUPPORTED_EXTENSIONS`` are recorded in ``SKIPPED_LOG``
+    with a SHA-256 and reason rather than silently dropped (AMP-38).
+    """
+    all_files = [f for f in INCOMING_DIR.iterdir() if f.is_file()]
+    files = []
+    skipped = 0
+    for f in all_files:
+        if f.suffix in SUPPORTED_EXTENSIONS:
+            files.append(f)
+        else:
+            log_skipped(f, reason="unsupported_extension")
+            skipped += 1
+
+    if skipped:
+        print(f"[SKIPPED] {skipped} file(s) outside supported extensions — see {SKIPPED_LOG}")
 
     if not files:
         return 0
@@ -232,3 +289,5 @@ if __name__ == "__main__":
         watch_mode(dry_run=args.dry_run, interval=args.interval)
     else:
         scan_incoming(dry_run=args.dry_run)
+
+# Signed-by: Devon-a3d1 | 2026-05-03 | devin-a3d15ca9ebeb4d9fa083e09ef0ac686a (AMP-38)

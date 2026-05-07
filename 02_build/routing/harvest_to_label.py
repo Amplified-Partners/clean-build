@@ -23,6 +23,7 @@ Usage:
     results = label_harvest_batch("/opt/amplified-machine/porch/incoming")
 
 Signed-by: Devon (Devin session f32d587cc3e54f959c5309d93f72bc97) - 2026-05-01
+Signed-by: Devon-a3d1 | 2026-05-03 | devin-a3d15ca9ebeb4d9fa083e09ef0ac686a (AMP-38: skip-ledger)
 """
 
 from __future__ import annotations
@@ -200,24 +201,62 @@ def label_harvested_item(
 SUPPORTED_EXTENSIONS = {".md", ".txt", ".json", ".yaml", ".yml", ".csv"}
 
 
+def _log_skipped(filepath: Path, reason: str, ledger: Path) -> None:
+    """Append an audit row for a file the batch chose not to label (AMP-38).
+
+    Silent extension drops were the headline failure mode in store_b_clean.
+    Every skip now leaves a SHA-256 + path + reason so a downstream verifier
+    can reconcile raw -> clean counts.
+    """
+    try:
+        sha256 = hashlib.sha256(filepath.read_bytes()).hexdigest()
+    except OSError:
+        sha256 = None
+    record = {
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "path": str(filepath),
+        "name": filepath.name,
+        "extension": filepath.suffix,
+        "sha256": sha256,
+        "reason": reason,
+    }
+    ledger.parent.mkdir(parents=True, exist_ok=True)
+    with open(ledger, "a", encoding="utf-8") as f:
+        f.write(json.dumps(record) + "\n")
+
+
 def label_harvest_batch(
     directory: str | Path,
     *,
     source_tier: str = "T1",
     output_jsonl: str | Path | None = None,
+    skipped_jsonl: str | Path | None = None,
 ) -> list[LabeledRecord]:
     """Label all supported files in a directory.
 
     Optionally writes results to a JSONL file for downstream consumption.
+    Files outside ``SUPPORTED_EXTENSIONS`` are recorded in
+    ``skipped_jsonl`` (default: ``<directory>/.skipped_log.jsonl``) so the
+    drop is auditable rather than silent (AMP-38).
     """
     dirpath = Path(directory)
     if not dirpath.is_dir():
         raise FileNotFoundError(f"Harvest directory not found: {dirpath}")
 
-    files = sorted(
-        f for f in dirpath.iterdir()
-        if f.is_file() and f.suffix in SUPPORTED_EXTENSIONS
-    )
+    skip_ledger = Path(skipped_jsonl) if skipped_jsonl else dirpath / ".skipped_log.jsonl"
+
+    all_entries = sorted(f for f in dirpath.iterdir() if f.is_file())
+    files: list[Path] = []
+    skipped = 0
+    for f in all_entries:
+        if f.suffix in SUPPORTED_EXTENSIONS:
+            files.append(f)
+        else:
+            _log_skipped(f, reason="unsupported_extension", ledger=skip_ledger)
+            skipped += 1
+
+    if skipped:
+        logger.info("Skipped %d unsupported file(s) in %s -> %s", skipped, dirpath, skip_ledger)
 
     if not files:
         logger.info("No files to label in %s", dirpath)
