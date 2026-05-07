@@ -257,14 +257,14 @@ async def handle_search_knowledge(args):
     limit = min(args.get("limit", 10), 100)
     async with pool.acquire() as conn:
         rows = await conn.fetch("""
-            SELECT id, content, source, chunk_index, metadata, created_at::text
+            SELECT id, content, source, source_type, metadata, created_at::text
             FROM knowledge_vectors
             WHERE content ILIKE '%' || $1 || '%'
             ORDER BY created_at DESC
             LIMIT $2
         """, query_text, limit)
         result = [{"id": str(r["id"]), "content": r["content"][:500], "source": r["source"],
-                    "chunk_index": r["chunk_index"], "metadata": json.loads(r["metadata"]) if r["metadata"] else None,
+                    "source_type": r["source_type"], "metadata": json.loads(r["metadata"]) if r["metadata"] else None,
                     "created_at": r["created_at"]} for r in rows]
         return [{"type": "text", "text": json.dumps(result, indent=2, default=str)}]
 
