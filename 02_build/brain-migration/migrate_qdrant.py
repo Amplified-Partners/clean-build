@@ -6,6 +6,7 @@ Devon-a704 | 2026-05-07 | Amplified Brain migration
 Runs ON Beast inside a container with access to both Qdrant (port 6333) and Postgres.
 """
 import json
+import os
 import sys
 import time
 import urllib.request
@@ -17,11 +18,11 @@ COLLECTION = "amplified_knowledge"
 BATCH_SIZE = 500  # points per scroll request
 PG_BATCH = 100    # rows per INSERT
 
-DB_HOST = "cove-postgres"
-DB_PORT = 5432
-DB_NAME = "amplified_brain"
-DB_USER = "brain_writer"
-DB_PASSWORD = "BrainWrite2026!devon"
+DB_HOST = os.environ.get("DB_HOST", "cove-postgres")
+DB_PORT = int(os.environ.get("DB_PORT", "5432"))
+DB_NAME = os.environ.get("DB_NAME", "amplified_brain")
+DB_USER = os.environ.get("DB_USER", "brain_writer")
+DB_PASSWORD = os.environ.get("DB_PASSWORD", "")  # Set via env var — never commit
 
 
 def qdrant_post(path, data=None):
