@@ -414,14 +414,22 @@ async def handle_insert_entity(args):
     summary = args.get("summary", "")
     properties = json.dumps(args.get("properties", {}))
     async with pool.acquire() as conn:
-        row = await conn.fetchrow("""
-            INSERT INTO entities (name, entity_type, summary, properties)
-            VALUES ($1, $2, $3, $4::jsonb)
-            ON CONFLICT (name, entity_type) DO UPDATE SET
-                summary = EXCLUDED.summary, properties = EXCLUDED.properties, updated_at = now()
-            RETURNING id::text
-        """, name, entity_type, summary, properties)
-        return [{"type": "text", "text": json.dumps({"upserted": True, "id": row["id"]})}]
+        existing = await conn.fetchrow(
+            "SELECT id FROM entities WHERE name = $1 AND entity_type = $2 LIMIT 1",
+            name, entity_type)
+        if existing:
+            await conn.execute("""
+                UPDATE entities SET summary = $1, properties = $2::jsonb, updated_at = now()
+                WHERE id = $3
+            """, summary, properties, existing["id"])
+            return [{"type": "text", "text": json.dumps({"upserted": True, "id": str(existing["id"])})}]
+        else:
+            row = await conn.fetchrow("""
+                INSERT INTO entities (name, entity_type, summary, properties)
+                VALUES ($1, $2, $3, $4::jsonb)
+                RETURNING id::text
+            """, name, entity_type, summary, properties)
+            return [{"type": "text", "text": json.dumps({"upserted": True, "id": row["id"]})}]
 
 
 async def handle_insert_relationship(args):
