@@ -1,11 +1,19 @@
 # CODEOWNERS — Amplified-Partners/clean-build
+#
+# Pattern:
+#   /00_authority/  → @ewan-dot         (governance, Ewan reviews)
+#   /beast-ops/     → @devin-ai-integration[bot] (infrastructure)
+#   .github/        → @devin-ai-integration[bot] (CI/CD infrastructure)
+#   *               → @ewan-dot         (default)
+#
+# Devon-8443 | 2026-05-06 | session devin-8443d1ee073243db8c6fa66f39b33745
 
-# Governance changes need Ewan
-00_authority/** @ewanbramley
+# Default — all changes require Ewan's review
+*                       @ewan-dot
 
-# Truth layer needs Ewan
-01_truth/** @ewanbramley
+# Governance layer — Ewan is the sole authority
+/00_authority/          @ewan-dot
 
-# No default owner — anyone can review
-
-# Signed-by: Devon-codeowners-daughter | 2026-05-05 | devin-487f10ace93b4cdfbcc49f9bb5c300b0
+# Infrastructure — Devon manages CI/CD and beast-ops
+/beast-ops/             @devin-ai-integration[bot]
+/.github/workflows/     @devin-ai-integration[bot]
