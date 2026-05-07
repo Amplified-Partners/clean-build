@@ -1,7 +1,7 @@
 ---
 title: Decision log
-date: 2026-05-05
-version: 18
+date: 2026-05-06
+version: 19
 status: draft
 ---
 
@@ -12,6 +12,14 @@ status: draft
 One entry per decision. Keep it short. Link out to supporting docs.
 
 ## Entries
+
+### 2026-05-06 — AMP-70 follow-up: drop archived `beast-code-export` from active-repo scope
+
+- **Decision**: Remove `Amplified-Partners/beast-code-export` from the AMP-70 active-repos scope. The repo was archived on 2026-05-04 and now returns `Repository was archived so is read-only` on push and on PR-merge / PR-state API calls. Branch protection is therefore moot for this repo. PR #2 (the AMP-70 mirror PR opened against this repo on 2026-05-03) cannot be merged or closed via API — it remains open as a tombstone. Authoritative active-repos list is now three: `clean-build`, `ground-truth`, `crm`.
+- **Why**: The original AMP-70 decision (2026-05-03 entry below) listed four active repos because all four were live at that time. Archiving moved `beast-code-export` out of “active”. Per `00_authority/USE_IT_OR_CUT_IT.md`, dead references are cut. Per `00_authority/AGENTS.md` rule on bibliography integrity, an authority file cannot list a repo for branch-protection enforcement that the API cannot enforce on.
+- **Where encoded**: `00_authority/PR_WORKFLOW.md` v2 (Scope section drops `beast-code-export`); `02_build/scripts/apply_branch_protection.py` (`REPOS` list drops `beast-code-export`, with an inline comment explaining the archive); `00_authority/MANIFEST.md` v54 changelog entry. Branch protection applied 2026-05-06 to `clean-build`, `ground-truth`, `crm` by `Devon-4330` using `devi_org_github`. Verified post-apply via `GET /repos/{repo}/branches/main/protection`.
+- **Status**: active. If `beast-code-export` is ever un-archived, re-add it to `REPOS` and to `PR_WORKFLOW.md` § Scope, and re-run the script.
+- **Signed-by**: Devon-4330 | 2026-05-06 | session devin-4330c661a80b4770aa8f62980c21366a
 
 ### 2026-05-03 — Branch protection + Linear-linked PR workflow for active repos (AMP-70)
 

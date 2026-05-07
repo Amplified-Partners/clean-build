@@ -26,11 +26,13 @@ import urllib.error
 import urllib.request
 
 # Active repos covered by AMP-70. Add new slugs as repos are promoted to active.
+# `Amplified-Partners/beast-code-export` was originally in scope but was archived
+# on 2026-05-04 (AMP-70 follow-up, DECISION_LOG.md v19) and is read-only — no
+# branch protection needed. If it is ever un-archived, re-add it here.
 REPOS: list[str] = [
     "Amplified-Partners/clean-build",
     "Amplified-Partners/ground-truth",
     "Amplified-Partners/crm",
-    "Amplified-Partners/beast-code-export",
 ]
 
 BRANCH = "main"
