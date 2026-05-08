@@ -124,7 +124,28 @@ def main() -> int:
     parser.add_argument("--author", default="Ewan_Sair")
     parser.add_argument("--dry-run", action="store_true", help="Plan only; do not copy.")
     parser.add_argument("--verbose", action="store_true")
+    parser.add_argument(
+        "--quiet",
+        action="store_true",
+        help="Suppress per-batch progress lines (cron-friendly). Final stats still printed.",
+    )
+    parser.add_argument(
+        "--lock-file",
+        default=None,
+        help="Optional path to an exclusive flock; refuses to start if held. Use to prevent overlapping cron runs.",
+    )
     args = parser.parse_args()
+
+    lock_fd = None
+    if args.lock_file:
+        import fcntl
+
+        lock_fd = open(args.lock_file, "w")
+        try:
+            fcntl.flock(lock_fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError:
+            print(f"[V3] another instance holds {args.lock_file}; exiting cleanly.")
+            return 0
 
     source_dir = Path(args.source)
     clean_dir = Path(args.clean)
@@ -132,10 +153,12 @@ def main() -> int:
     ledger_path.parent.mkdir(parents=True, exist_ok=True)
     clean_dir.mkdir(parents=True, exist_ok=True)
 
-    print(f"[V3] source={source_dir} clean={clean_dir} dry_run={args.dry_run}")
-    print("[V3] indexing existing clean files...")
+    if not args.quiet:
+        print(f"[V3] source={source_dir} clean={clean_dir} dry_run={args.dry_run}")
+        print("[V3] indexing existing clean files...")
     existing_prefixes, existing_count = index_existing_clean(clean_dir)
-    print(f"[V3] {existing_count} existing files in clean ({len(existing_prefixes)} unique hash prefixes)")
+    if not args.quiet:
+        print(f"[V3] {existing_count} existing files in clean ({len(existing_prefixes)} unique hash prefixes)")
 
     seen_hashes: set[str] = set(existing_prefixes)  # any prefix-match is a hit
     stats = {
@@ -165,7 +188,7 @@ def main() -> int:
 
     for filepath in source_dir.rglob("*"):
         stats["files_walked"] += 1
-        if stats["files_walked"] % 5000 == 0:
+        if not args.quiet and stats["files_walked"] % 5000 == 0:
             print(f"[V3] walked {stats['files_walked']:>7d}, added {stats['added']:>7d}")
 
         try:
