@@ -1,0 +1,10 @@
+# Authored by Devon-9892, 2026-05-09 (session devin-9892b8c738c64d0fa1c66d9f771bba5f)
+# AMP-217: [Vellum Phase 1][U13] Export pipeline + Ed25519 signing
+"""
+Vellum — Governance & Audit Ledger for Amplified Partners.
+
+U13: Export pipeline + Ed25519 signing.
+Provides cryptographic attestation of ledger entries and verifiable data export.
+"""
+
+__version__ = "0.1.0"
