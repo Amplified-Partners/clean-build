@@ -1,10 +1,10 @@
 [Unit]
 Description=Docker-User Firewall Rules (AMP-289)
 Documentation=https://linear.app/amplifiedpartners/issue/AMP-289
-# Must run after iptables/nftables are available but before Docker publishes ports
-After=network-pre.target
-Before=docker.service
-Wants=docker.service
+# Run after Docker (it creates the DOCKER-USER chain on start).
+# PartOf ensures rules re-apply whenever Docker restarts.
+After=docker.service
+PartOf=docker.service
 
 [Service]
 Type=oneshot
@@ -12,10 +12,7 @@ RemainAfterExit=yes
 ExecStart=/opt/amplified/security/docker-user-firewall.sh
 ExecReload=/opt/amplified/security/docker-user-firewall.sh
 
-# Run again if Docker restarts (it flushes DOCKER-USER on restart)
-ExecStartPost=/bin/sh -c 'echo "DOCKER-USER rules loaded"'
-
 [Install]
-WantedBy=multi-user.target
+WantedBy=multi-user.target docker.service
 
 # Signed-by: Devon-abaf | 2026-05-09 | session devin-abaf337e1eda492f85af1d26fa1614b9

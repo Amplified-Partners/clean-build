@@ -23,8 +23,11 @@ LOCALHOST_CIDR="127.0.0.0/8"                    # Loopback
 # Public ports (Traefik only)
 PUBLIC_TCP_PORTS="80,443"
 
+# ─── Ensure DOCKER-USER chain exists (may run before Docker creates it) ───────
+iptables -N DOCKER-USER 2>/dev/null || true
+
 # ─── Flush existing DOCKER-USER rules ────────────────────────────────────────
-iptables -F DOCKER-USER 2>/dev/null || true
+iptables -F DOCKER-USER
 
 # ─── Rule 1: Allow established/related connections (stateful) ─────────────────
 iptables -A DOCKER-USER -m conntrack --ctstate ESTABLISHED,RELATED -j RETURN
