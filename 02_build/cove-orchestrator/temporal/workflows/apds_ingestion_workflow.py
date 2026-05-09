@@ -1,8 +1,8 @@
-"""APDSIngestionWorkflow — 30-minute scheduled APDS pipeline (AMP-158).
+"""APDSIngestionWorkflow — 10-minute scheduled APDS pipeline (AMP-158).
 
 Architect directive (Ewan Bramley): APDS ingestion pipeline runs on a
-**30-minute cadence** (``*/30 * * * *``). This schedule is hardcoded here
-and activated once AMP-282 (Temporal gRPC blocker) is resolved.
+**10-minute cadence** (``*/10 * * * *``). This schedule is hardcoded here
+and registered on worker boot.
 
 Pipeline stages (sequential):
 
@@ -12,11 +12,8 @@ Pipeline stages (sequential):
     4. log_pipeline_run        — observability record to pipeline_runs table
 
 The workflow is designed to be started by a Temporal Schedule with a
-30-minute interval. The ``APDSScheduleStarter`` helper registers that
+10-minute interval. The ``APDSScheduleStarter`` helper registers that
 schedule on first boot; subsequent worker restarts are idempotent.
-
-Blocked-on: AMP-282 (Temporal gRPC frontend port 7233 connection refused).
-Once Temporal is healthy, deploy the worker and the schedule self-registers.
 
 Signed-by: Devon-ad8f | 2026-05-09 | devin-ad8f2a94b2ca4d9a8e7690fcec0c11bb
 """
@@ -43,9 +40,9 @@ with workflow.unsafe.imports_passed_through():
     )
 
 # ── Schedule constants (Architect directive, AMP-158) ─────────────────
-# Cron: */30 * * * *  — every 30 minutes, on the minute.
-APDS_CRON_SCHEDULE = "*/30 * * * *"
-APDS_SCHEDULE_ID = "apds-ingestion-30min"
+# Cron: */10 * * * *  — every 10 minutes, on the minute.
+APDS_CRON_SCHEDULE = "*/10 * * * *"
+APDS_SCHEDULE_ID = "apds-ingestion-10min"
 APDS_TASK_QUEUE = "cove-build-queue"
 APDS_WORKFLOW_ID_PREFIX = "apds-ingestion"
 
@@ -76,7 +73,7 @@ class APDSIngestionResult:
 class APDSIngestionWorkflow:
     """Full APDS pipeline: ingest -> label -> store -> log.
 
-    Runs on a 30-minute Temporal Schedule (``*/30 * * * *``).
+    Runs on a 10-minute Temporal Schedule (``*/10 * * * *``).
     Each stage is a separate Temporal activity with its own retry policy.
     If ingestion finds zero new files, PUDDING extraction and memory
     writes are skipped (idempotent no-op).

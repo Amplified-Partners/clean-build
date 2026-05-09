@@ -1,14 +1,14 @@
-"""Register the APDS 30-minute Temporal Schedule (AMP-158).
+"""Register the APDS 10-minute Temporal Schedule (AMP-158).
 
 Idempotent — safe to call on every worker boot. If the schedule already
-exists, this is a no-op. If Temporal is unreachable (AMP-282 blocker),
-the error is logged and the worker continues without the schedule.
+exists, this is a no-op. If Temporal is unreachable, the error is logged
+and the worker continues without the schedule.
 
 Usage (called from workers/main.py on startup):
 
     await register_apds_schedule(client)
 
-Architect directive: ``*/30 * * * *`` cadence, hardcoded.
+Architect directive: ``*/10 * * * *`` cadence, hardcoded.
 
 Signed-by: Devon-ad8f | 2026-05-09 | devin-ad8f2a94b2ca4d9a8e7690fcec0c11bb
 """
@@ -37,10 +37,10 @@ log = logging.getLogger("cove.schedule")
 
 
 async def register_apds_schedule(client: Client) -> None:
-    """Create (or verify) the APDS 30-minute ingestion schedule.
+    """Create (or verify) the APDS 10-minute ingestion schedule.
 
     Uses ``ScheduleSpec.cron_expressions`` with the architect-mandated
-    cron string ``*/30 * * * *``.  The schedule launches
+    cron string ``*/10 * * * *``.  The schedule launches
     ``APDSIngestionWorkflow`` with default inputs on the shared
     ``cove-build-queue`` task queue.
 
