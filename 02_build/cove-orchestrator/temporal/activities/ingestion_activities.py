@@ -112,6 +112,7 @@ class MemoryStoreResult:
     success: bool
     pg_vectors: int = 0
     pg_entities: int = 0
+    pg_labels: int = 0
     errors: int = 0
     error: str | None = None
 
@@ -439,7 +440,8 @@ async def write_to_memory_stores(input: MemoryStoreInput) -> MemoryStoreResult:
     """Write PUDDING-labelled files into amplified_brain PostgreSQL.
 
     Reads files that have PUDDING frontmatter, extracts taxonomy data,
-    and upserts into knowledge_vectors (pgvector/HNSW) and entities tables.
+    and upserts into knowledge_vectors (pgvector/HNSW), entities,
+    and pudding_labels tables.
 
     Canonical data layer — see 00_authority/DATA_ARCHITECTURE.md.
     """
@@ -460,6 +462,7 @@ async def write_to_memory_stores(input: MemoryStoreInput) -> MemoryStoreResult:
 
     pg_vectors = 0
     pg_entities = 0
+    pg_labels = 0
     errors = 0
 
     # ── Collect PUDDING-labelled files ────────────────────────────
@@ -583,6 +586,27 @@ async def write_to_memory_stores(input: MemoryStoreInput) -> MemoryStoreResult:
                         )
                         pg_entities += 1
 
+                        # ── Upsert pudding_label ──────────────────
+                        pcode = concept.get("pudding_code", "")
+                        if len(pcode) >= 4:
+                            dims = pcode.split(".")
+                            await conn.execute(
+                                """INSERT INTO pudding_labels
+                                   (entity_id, pudding_code,
+                                    what_dim, how_dim, scale_dim, time_dim,
+                                    confidence)
+                                VALUES ($1, $2, $3, $4, $5, $6, $7)
+                                ON CONFLICT DO NOTHING""",
+                                ent_id,
+                                pcode,
+                                dims[0] if len(dims) > 0 else None,
+                                dims[1] if len(dims) > 1 else None,
+                                dims[2] if len(dims) > 2 else None,
+                                dims[3] if len(dims) > 3 else None,
+                                concept.get("confidence", 0.0),
+                            )
+                            pg_labels += 1
+
                 except Exception as e:
                     errors += 1
                     activity.logger.warning(
@@ -592,7 +616,7 @@ async def write_to_memory_stores(input: MemoryStoreInput) -> MemoryStoreResult:
             activity.logger.info(
                 f"Batch {i // input.batch_size + 1}: "
                 f"vectors={pg_vectors}, entities={pg_entities}, "
-                f"errors={errors}"
+                f"labels={pg_labels}, errors={errors}"
             )
 
     finally:
@@ -600,13 +624,14 @@ async def write_to_memory_stores(input: MemoryStoreInput) -> MemoryStoreResult:
 
     activity.logger.info(
         f"Memory store complete: {pg_vectors} vectors, "
-        f"{pg_entities} entities, {errors} errors"
+        f"{pg_entities} entities, {pg_labels} labels, {errors} errors"
     )
 
     return MemoryStoreResult(
         success=errors == 0,
         pg_vectors=pg_vectors,
         pg_entities=pg_entities,
+        pg_labels=pg_labels,
         errors=errors,
         error=f"{errors} write failures" if errors else None,
     )
