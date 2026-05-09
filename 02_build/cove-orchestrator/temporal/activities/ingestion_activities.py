@@ -590,6 +590,9 @@ async def write_to_memory_stores(input: MemoryStoreInput) -> MemoryStoreResult:
                         pcode = concept.get("pudding_code", "")
                         if len(pcode) >= 4:
                             dims = pcode.split(".")
+                            # DB column is character(4) — store compact
+                            # form without dots (e.g. "3.5.2.1" → "3521")
+                            pcode_stored = pcode.replace(".", "")[:4]
                             await conn.execute(
                                 """INSERT INTO pudding_labels
                                    (entity_id, pudding_code,
@@ -598,7 +601,7 @@ async def write_to_memory_stores(input: MemoryStoreInput) -> MemoryStoreResult:
                                 VALUES ($1, $2, $3, $4, $5, $6, $7)
                                 ON CONFLICT DO NOTHING""",
                                 ent_id,
-                                pcode,
+                                pcode_stored,
                                 dims[0] if len(dims) > 0 else None,
                                 dims[1] if len(dims) > 1 else None,
                                 dims[2] if len(dims) > 2 else None,
