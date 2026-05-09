@@ -50,7 +50,7 @@ async def main():
     client = await Client.connect(TEMPORAL_ADDRESS)
 
     log.info(f"Starting worker on queue: {TASK_QUEUE}")
-    # Register the APDS 30-min schedule (AMP-158, idempotent)
+    # Register the APDS 10-min schedule (AMP-158, idempotent)
     await register_apds_schedule(client)
 
     worker = Worker(
