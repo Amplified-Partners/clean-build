@@ -6,17 +6,20 @@ MCP-compatible HTTP server for the amplified_brain Postgres database.
 Read-only by default. Write mode enabled via ALLOW_WRITES=true env var.
 
 Devon-a704 | 2026-05-07 | Brain MCP server build
+Devon-a81b | 2026-05-09 | Compound Design REST endpoints + AGE graph (AMP-280)
 """
 
 import os
+import re
 import json
 import logging
 from contextlib import asynccontextmanager
-from typing import Any
+from typing import Any, Optional
 
 import asyncpg
-from fastapi import FastAPI, Request, Response
+from fastapi import FastAPI, Query, Request, Response
 from fastapi.responses import JSONResponse
+from pydantic import BaseModel, Field
 from sse_starlette.sse import EventSourceResponse
 
 logging.basicConfig(level=logging.INFO)
@@ -180,11 +183,20 @@ WRITE_TOOLS = [
 ]
 
 
+async def _init_age_connection(conn):
+    """Per-connection init: load AGE extension and set search_path."""
+    try:
+        await conn.execute("LOAD 'age'")
+        await conn.execute('SET search_path = ag_catalog, "$user", public')
+    except Exception as e:
+        logger.warning(f"AGE init skipped (extension may not be installed): {e}")
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     global pool
     dsn = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
-    pool = await asyncpg.create_pool(dsn, min_size=2, max_size=10)
+    pool = await asyncpg.create_pool(dsn, min_size=2, max_size=10, init=_init_age_connection)
     logger.info(f"Connected to {DB_USER}@{DB_HOST}:{DB_PORT}/{DB_NAME} (writes={'enabled' if ALLOW_WRITES else 'disabled'})")
     yield
     await pool.close()
@@ -589,6 +601,336 @@ async def mcp_sse_message(request: Request):
     if result:
         await sessions[session_id].put(result)
     return Response(status_code=202)
+
+
+# ─── Compound Design REST Endpoints (AMP-280) ─────────────────────────────────
+# POST endpoints require ALLOW_WRITES=true (writer :8091)
+# GET endpoints work on both reader (:8090) and writer (:8091)
+
+
+class ArtifactCreate(BaseModel):
+    name: str
+    artifact_type: str
+    phase: str
+    description: Optional[str] = None
+    content: dict = Field(default_factory=dict)
+    tags: list[str] = Field(default_factory=list)
+    embedding: Optional[list[float]] = None
+    source: Optional[str] = "plugin:compound-design"
+
+
+class PatternCreate(BaseModel):
+    name: str
+    category: str
+    description: Optional[str] = None
+    rationale: Optional[str] = None
+    constraints: dict = Field(default_factory=dict)
+    examples: list = Field(default_factory=list)
+    embedding: Optional[list[float]] = None
+    source: Optional[str] = "plugin:compound-design"
+
+
+class ResearchCreate(BaseModel):
+    title: str
+    domain: str
+    summary: str
+    evidence: dict = Field(default_factory=dict)
+    confidence: Optional[float] = None
+    embedding: Optional[list[float]] = None
+    source: Optional[str] = "plugin:compound-design"
+
+
+class PuddingCreate(BaseModel):
+    name: str
+    bridge_a: str
+    bridge_b: str
+    mechanism: Optional[str] = None
+    pudding_score: Optional[float] = None
+    domain_distance: Optional[float] = None
+    confidence_band: Optional[str] = None
+    embedding: Optional[list[float]] = None
+    source: Optional[str] = "plugin:compound-design"
+
+
+class GraphEdgeCreate(BaseModel):
+    source_id: str
+    source_label: str  # 'Artifact' | 'Pattern' | 'Research' | 'Pudding' | 'Concept'
+    target_id: str
+    target_label: str
+    edge_type: str     # 'INFORMS' | 'DERIVES_FROM' | 'CONTRADICTS' | 'BRIDGES_TO' | 'VALIDATED_BY'
+    properties: dict = Field(default_factory=dict)
+
+
+def _vec_literal(embedding: list[float]) -> str:
+    return "[" + ",".join(str(f) for f in embedding) + "]"
+
+
+_UUID_RE = re.compile(r"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$", re.IGNORECASE)
+_VALID_LABELS = {"Artifact", "Pattern", "Research", "Pudding", "Concept"}
+_VALID_EDGES = {"INFORMS", "DERIVES_FROM", "CONTRADICTS", "BRIDGES_TO", "VALIDATED_BY"}
+
+
+# ─── POST Endpoints (Writer) ──────────────────────────────────────────────────
+
+
+@app.post("/design/artifacts")
+async def create_artifact(body: ArtifactCreate):
+    if not ALLOW_WRITES:
+        return JSONResponse({"error": "Write operations disabled"}, status_code=403)
+    async with pool.acquire() as conn:
+        if body.embedding:
+            row = await conn.fetchrow("""
+                INSERT INTO design_artifacts (name, artifact_type, phase, description, content, tags, embedding, source)
+                VALUES ($1, $2, $3, $4, $5::jsonb, $6, $7::vector, $8)
+                RETURNING id::text, created_at::text
+            """, body.name, body.artifact_type, body.phase, body.description,
+                json.dumps(body.content), body.tags, _vec_literal(body.embedding), body.source)
+        else:
+            row = await conn.fetchrow("""
+                INSERT INTO design_artifacts (name, artifact_type, phase, description, content, tags, source)
+                VALUES ($1, $2, $3, $4, $5::jsonb, $6, $7)
+                RETURNING id::text, created_at::text
+            """, body.name, body.artifact_type, body.phase, body.description,
+                json.dumps(body.content), body.tags, body.source)
+        return {"id": row["id"], "created_at": row["created_at"]}
+
+
+@app.post("/design/patterns")
+async def create_pattern(body: PatternCreate):
+    if not ALLOW_WRITES:
+        return JSONResponse({"error": "Write operations disabled"}, status_code=403)
+    async with pool.acquire() as conn:
+        if body.embedding:
+            row = await conn.fetchrow("""
+                INSERT INTO design_patterns (name, category, description, rationale, constraints, examples, embedding, source)
+                VALUES ($1, $2, $3, $4, $5::jsonb, $6::jsonb, $7::vector, $8)
+                RETURNING id::text, created_at::text
+            """, body.name, body.category, body.description, body.rationale,
+                json.dumps(body.constraints), json.dumps(body.examples),
+                _vec_literal(body.embedding), body.source)
+        else:
+            row = await conn.fetchrow("""
+                INSERT INTO design_patterns (name, category, description, rationale, constraints, examples, source)
+                VALUES ($1, $2, $3, $4, $5::jsonb, $6::jsonb, $7)
+                RETURNING id::text, created_at::text
+            """, body.name, body.category, body.description, body.rationale,
+                json.dumps(body.constraints), json.dumps(body.examples), body.source)
+        return {"id": row["id"], "created_at": row["created_at"]}
+
+
+@app.post("/design/research")
+async def create_research(body: ResearchCreate):
+    if not ALLOW_WRITES:
+        return JSONResponse({"error": "Write operations disabled"}, status_code=403)
+    async with pool.acquire() as conn:
+        if body.embedding:
+            row = await conn.fetchrow("""
+                INSERT INTO research_findings (title, domain, summary, evidence, confidence, embedding, source)
+                VALUES ($1, $2, $3, $4::jsonb, $5, $6::vector, $7)
+                RETURNING id::text, created_at::text
+            """, body.title, body.domain, body.summary, json.dumps(body.evidence),
+                body.confidence, _vec_literal(body.embedding), body.source)
+        else:
+            row = await conn.fetchrow("""
+                INSERT INTO research_findings (title, domain, summary, evidence, confidence, source)
+                VALUES ($1, $2, $3, $4::jsonb, $5, $6)
+                RETURNING id::text, created_at::text
+            """, body.title, body.domain, body.summary, json.dumps(body.evidence),
+                body.confidence, body.source)
+        return {"id": row["id"], "created_at": row["created_at"]}
+
+
+@app.post("/design/pudding")
+async def create_pudding(body: PuddingCreate):
+    if not ALLOW_WRITES:
+        return JSONResponse({"error": "Write operations disabled"}, status_code=403)
+    async with pool.acquire() as conn:
+        if body.embedding:
+            row = await conn.fetchrow("""
+                INSERT INTO pudding_concepts (name, bridge_a, bridge_b, mechanism, pudding_score,
+                    domain_distance, confidence_band, embedding, source)
+                VALUES ($1, $2, $3, $4, $5, $6, $7, $8::vector, $9)
+                RETURNING id::text, created_at::text
+            """, body.name, body.bridge_a, body.bridge_b, body.mechanism,
+                body.pudding_score, body.domain_distance, body.confidence_band,
+                _vec_literal(body.embedding), body.source)
+        else:
+            row = await conn.fetchrow("""
+                INSERT INTO pudding_concepts (name, bridge_a, bridge_b, mechanism, pudding_score,
+                    domain_distance, confidence_band, source)
+                VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+                RETURNING id::text, created_at::text
+            """, body.name, body.bridge_a, body.bridge_b, body.mechanism,
+                body.pudding_score, body.domain_distance, body.confidence_band, body.source)
+        return {"id": row["id"], "created_at": row["created_at"]}
+
+
+@app.post("/design/graph/edge")
+async def create_graph_edge(body: GraphEdgeCreate):
+    if not ALLOW_WRITES:
+        return JSONResponse({"error": "Write operations disabled"}, status_code=403)
+    if body.source_label not in _VALID_LABELS or body.target_label not in _VALID_LABELS:
+        return JSONResponse({"error": f"Invalid label. Valid: {_VALID_LABELS}"}, status_code=400)
+    if body.edge_type not in _VALID_EDGES:
+        return JSONResponse({"error": f"Invalid edge_type. Valid: {_VALID_EDGES}"}, status_code=400)
+    if not _UUID_RE.match(body.source_id):
+        return JSONResponse({"error": "source_id must be a valid UUID"}, status_code=400)
+    if not _UUID_RE.match(body.target_id):
+        return JSONResponse({"error": "target_id must be a valid UUID"}, status_code=400)
+    props_str = json.dumps(body.properties).replace("'", "\\'") if body.properties else "{}"
+    cypher = (
+        f"SELECT * FROM cypher('compound_design', $$ "
+        f"MATCH (a:{body.source_label} {{id: '{body.source_id}'}}), "
+        f"(b:{body.target_label} {{id: '{body.target_id}'}}) "
+        f"CREATE (a)-[e:{body.edge_type} {{properties: '{props_str}'}}]->(b) "
+        f"RETURN e "
+        f"$$) AS (e agtype)"
+    )
+    async with pool.acquire() as conn:
+        try:
+            await conn.execute(cypher)
+            return {"created": True, "edge_type": body.edge_type,
+                    "source": body.source_id, "target": body.target_id}
+        except Exception as e:
+            return JSONResponse({"error": f"Graph edge creation failed: {e}"}, status_code=500)
+
+
+# ─── GET Endpoints (Reader) ───────────────────────────────────────────────────
+
+
+@app.get("/design/recall")
+async def design_recall(
+    query_embedding: str = Query(None, description="JSON array of 384 floats"),
+    phase: Optional[str] = Query(None),
+    artifact_type: Optional[str] = Query(None),
+    limit: int = Query(10, ge=1, le=100),
+):
+    """Semantic recall across design artifacts using pgvector cosine distance."""
+    if not query_embedding:
+        return JSONResponse({"error": "query_embedding required (JSON array of 384 floats)"}, status_code=400)
+    try:
+        vec = json.loads(query_embedding)
+        if len(vec) != 384:
+            return JSONResponse({"error": f"Embedding must be 384 dimensions, got {len(vec)}"}, status_code=400)
+    except (json.JSONDecodeError, TypeError):
+        return JSONResponse({"error": "query_embedding must be valid JSON array"}, status_code=400)
+    vec_str = _vec_literal(vec)
+    filters = []
+    params = [vec_str, limit]
+    idx = 3
+    if phase:
+        filters.append(f"phase = ${idx}")
+        params.append(phase)
+        idx += 1
+    if artifact_type:
+        filters.append(f"artifact_type = ${idx}")
+        params.append(artifact_type)
+        idx += 1
+    where = (" AND " + " AND ".join(filters)) if filters else ""
+    async with pool.acquire() as conn:
+        rows = await conn.fetch(f"""
+            SELECT id::text, name, artifact_type, phase, description,
+                   content::text, tags, source, created_at::text,
+                   embedding <=> $1::vector AS distance
+            FROM design_artifacts
+            WHERE embedding IS NOT NULL{where}
+            ORDER BY embedding <=> $1::vector
+            LIMIT $2
+        """, *params)
+        results = [{"id": r["id"], "name": r["name"], "artifact_type": r["artifact_type"],
+                    "phase": r["phase"], "description": r["description"],
+                    "content": json.loads(r["content"]) if r["content"] else {},
+                    "tags": r["tags"], "source": r["source"],
+                    "distance": float(r["distance"]), "created_at": r["created_at"]} for r in rows]
+        return {"results": results, "count": len(results)}
+
+
+@app.get("/design/patterns")
+async def list_patterns(
+    category: Optional[str] = Query(None),
+    limit: int = Query(25, ge=1, le=200),
+):
+    """List design patterns, optionally filtered by category."""
+    async with pool.acquire() as conn:
+        if category:
+            rows = await conn.fetch("""
+                SELECT id::text, name, category, description, rationale,
+                       constraints::text, examples::text, source, created_at::text
+                FROM design_patterns WHERE category = $1
+                ORDER BY updated_at DESC LIMIT $2
+            """, category, limit)
+        else:
+            rows = await conn.fetch("""
+                SELECT id::text, name, category, description, rationale,
+                       constraints::text, examples::text, source, created_at::text
+                FROM design_patterns
+                ORDER BY updated_at DESC LIMIT $1
+            """, limit)
+        results = [{"id": r["id"], "name": r["name"], "category": r["category"],
+                    "description": r["description"], "rationale": r["rationale"],
+                    "constraints": json.loads(r["constraints"]) if r["constraints"] else {},
+                    "examples": json.loads(r["examples"]) if r["examples"] else [],
+                    "source": r["source"], "created_at": r["created_at"]} for r in rows]
+        return {"results": results, "count": len(results)}
+
+
+@app.get("/design/research")
+async def list_research(
+    domain: Optional[str] = Query(None),
+    limit: int = Query(25, ge=1, le=200),
+):
+    """List research findings, optionally filtered by domain."""
+    async with pool.acquire() as conn:
+        if domain:
+            rows = await conn.fetch("""
+                SELECT id::text, title, domain, summary, evidence::text,
+                       confidence, source, created_at::text
+                FROM research_findings WHERE domain = $1
+                ORDER BY updated_at DESC LIMIT $2
+            """, domain, limit)
+        else:
+            rows = await conn.fetch("""
+                SELECT id::text, title, domain, summary, evidence::text,
+                       confidence, source, created_at::text
+                FROM research_findings
+                ORDER BY updated_at DESC LIMIT $1
+            """, limit)
+        results = [{"id": r["id"], "title": r["title"], "domain": r["domain"],
+                    "summary": r["summary"],
+                    "evidence": json.loads(r["evidence"]) if r["evidence"] else {},
+                    "confidence": float(r["confidence"]) if r["confidence"] else None,
+                    "source": r["source"], "created_at": r["created_at"]} for r in rows]
+        return {"results": results, "count": len(results)}
+
+
+@app.get("/design/graph/traverse")
+async def graph_traverse(
+    start_id: str = Query(..., description="Starting node ID (UUID)"),
+    start_label: str = Query(..., description="Starting node label (Artifact|Pattern|Research|Pudding|Concept)"),
+    edge_type: Optional[str] = Query(None, description="Filter by edge type"),
+    depth: int = Query(2, ge=1, le=5),
+):
+    """Traverse the compound_design graph from a starting node."""
+    if start_label not in _VALID_LABELS:
+        return JSONResponse({"error": f"Invalid start_label. Valid: {_VALID_LABELS}"}, status_code=400)
+    if not _UUID_RE.match(start_id):
+        return JSONResponse({"error": "start_id must be a valid UUID"}, status_code=400)
+    if edge_type and edge_type not in _VALID_EDGES:
+        return JSONResponse({"error": f"Invalid edge_type. Valid: {_VALID_EDGES}"}, status_code=400)
+    edge_filter = f":{edge_type}" if edge_type else ""
+    cypher = (
+        f"SELECT * FROM cypher('compound_design', $$ "
+        f"MATCH (a:{start_label} {{id: '{start_id}'}})-[e{edge_filter}*1..{depth}]->(b) "
+        f"RETURN b, e "
+        f"$$) AS (node agtype, edges agtype)"
+    )
+    async with pool.acquire() as conn:
+        try:
+            rows = await conn.fetch(cypher)
+            results = [{"node": str(r["node"]), "edges": str(r["edges"])} for r in rows]
+            return {"results": results, "count": len(results), "start": start_id, "depth": depth}
+        except Exception as e:
+            return JSONResponse({"error": f"Graph traversal failed: {e}"}, status_code=500)
 
 
 if __name__ == "__main__":
