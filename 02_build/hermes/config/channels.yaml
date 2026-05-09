@@ -1,0 +1,5 @@
+# Purpose: Channel routing configuration (per-category, per-lane, primary + fallback).
+# Owner: U-12
+
+# Stub — implementation deferred to U-12.
+raise NotImplementedError("U-12")

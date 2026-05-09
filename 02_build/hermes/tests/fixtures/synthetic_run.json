@@ -1,0 +1,5 @@
+{
+  "purpose": "Synthetic run fixture — sample run with all 7 state-machine transitions + 1 nudge + 1 escalation.",
+  "owner": "U-03",
+  "_stub": true
+}

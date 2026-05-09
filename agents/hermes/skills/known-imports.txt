@@ -1,0 +1,4 @@
+# Purpose: Known imports — seeded list of stdlib + project deps Hermes has seen via researcher passes.
+# Owner: U-26
+
+# Seeded with stdlib + project deps. Updated by compounding loop when a researcher pass concludes.

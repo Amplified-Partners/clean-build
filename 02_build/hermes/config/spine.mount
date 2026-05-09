@@ -1,0 +1,5 @@
+# Purpose: Declarative spec for read-only mount of portable-spine/SPINE.md → /spine/SPINE.md.
+# Owner: U-04
+
+# Stub — implementation deferred to U-04.
+raise NotImplementedError("U-04")

@@ -1,0 +1,5 @@
+# Purpose: Docker Compose definition for Amplified Hermes on Beast.
+# Owner: U-02
+
+# Stub — implementation deferred to U-02.
+raise NotImplementedError("U-02")
