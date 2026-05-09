@@ -10,6 +10,7 @@ Devon-a81b | 2026-05-09 | Compound Design REST endpoints + AGE graph (AMP-280)
 """
 
 import os
+import re
 import json
 import logging
 from contextlib import asynccontextmanager
@@ -664,6 +665,11 @@ def _vec_literal(embedding: list[float]) -> str:
     return "[" + ",".join(str(f) for f in embedding) + "]"
 
 
+_UUID_RE = re.compile(r"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$", re.IGNORECASE)
+_VALID_LABELS = {"Artifact", "Pattern", "Research", "Pudding", "Concept"}
+_VALID_EDGES = {"INFORMS", "DERIVES_FROM", "CONTRADICTS", "BRIDGES_TO", "VALIDATED_BY"}
+
+
 # ─── POST Endpoints (Writer) ──────────────────────────────────────────────────
 
 
@@ -763,13 +769,15 @@ async def create_pudding(body: PuddingCreate):
 async def create_graph_edge(body: GraphEdgeCreate):
     if not ALLOW_WRITES:
         return JSONResponse({"error": "Write operations disabled"}, status_code=403)
-    valid_labels = {"Artifact", "Pattern", "Research", "Pudding", "Concept"}
-    valid_edges = {"INFORMS", "DERIVES_FROM", "CONTRADICTS", "BRIDGES_TO", "VALIDATED_BY"}
-    if body.source_label not in valid_labels or body.target_label not in valid_labels:
-        return JSONResponse({"error": f"Invalid label. Valid: {valid_labels}"}, status_code=400)
-    if body.edge_type not in valid_edges:
-        return JSONResponse({"error": f"Invalid edge_type. Valid: {valid_edges}"}, status_code=400)
-    props_str = json.dumps(body.properties) if body.properties else "{}"
+    if body.source_label not in _VALID_LABELS or body.target_label not in _VALID_LABELS:
+        return JSONResponse({"error": f"Invalid label. Valid: {_VALID_LABELS}"}, status_code=400)
+    if body.edge_type not in _VALID_EDGES:
+        return JSONResponse({"error": f"Invalid edge_type. Valid: {_VALID_EDGES}"}, status_code=400)
+    if not _UUID_RE.match(body.source_id):
+        return JSONResponse({"error": "source_id must be a valid UUID"}, status_code=400)
+    if not _UUID_RE.match(body.target_id):
+        return JSONResponse({"error": "target_id must be a valid UUID"}, status_code=400)
+    props_str = json.dumps(body.properties).replace("'", "\\'") if body.properties else "{}"
     cypher = (
         f"SELECT * FROM cypher('compound_design', $$ "
         f"MATCH (a:{body.source_label} {{id: '{body.source_id}'}}), "
@@ -903,9 +911,12 @@ async def graph_traverse(
     depth: int = Query(2, ge=1, le=5),
 ):
     """Traverse the compound_design graph from a starting node."""
-    valid_labels = {"Artifact", "Pattern", "Research", "Pudding", "Concept"}
-    if start_label not in valid_labels:
-        return JSONResponse({"error": f"Invalid start_label. Valid: {valid_labels}"}, status_code=400)
+    if start_label not in _VALID_LABELS:
+        return JSONResponse({"error": f"Invalid start_label. Valid: {_VALID_LABELS}"}, status_code=400)
+    if not _UUID_RE.match(start_id):
+        return JSONResponse({"error": "start_id must be a valid UUID"}, status_code=400)
+    if edge_type and edge_type not in _VALID_EDGES:
+        return JSONResponse({"error": f"Invalid edge_type. Valid: {_VALID_EDGES}"}, status_code=400)
     edge_filter = f":{edge_type}" if edge_type else ""
     cypher = (
         f"SELECT * FROM cypher('compound_design', $$ "
