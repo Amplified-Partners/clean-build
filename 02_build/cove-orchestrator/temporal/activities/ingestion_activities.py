@@ -599,7 +599,8 @@ async def write_to_memory_stores(input: MemoryStoreInput) -> MemoryStoreResult:
                                     what_dim, how_dim, scale_dim, time_dim,
                                     confidence)
                                 VALUES ($1, $2, $3, $4, $5, $6, $7)
-                                ON CONFLICT DO NOTHING""",
+                                ON CONFLICT (entity_id, pudding_code)
+                                DO NOTHING""",
                                 ent_id,
                                 pcode_stored,
                                 dims[0] if len(dims) > 0 else None,
