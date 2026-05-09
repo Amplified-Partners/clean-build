@@ -1,5 +1,29 @@
-# Purpose: Runtime configuration schema and defaults for Amplified Hermes.
-# Owner: U-04
+# Amplified Hermes — Runtime config
+# Owner: U-04 — minimal defaults for dev; full schema deferred to U-04
 
-# Stub — implementation deferred to U-04.
-raise NotImplementedError("U-04")
+hermes:
+  name: "Hermes-PM"
+  port: 9100
+  spine_path: "/Users/ewansair/portable-spine/SPINE.md"
+  agents_dir: "../../agents/hermes/"
+  tick_active_sec: 60
+  tick_idle_sec: 300
+
+model:
+  provider: "deepseek"
+  name: "deepseek-chat"
+  api_base: "https://api.deepseek.com"
+  api_key_env: "DEEPSEEK_API_KEY"
+
+whatsapp:
+  enabled: true
+  evolution_base_url: "http://localhost:8080"
+  evolution_apikey_env: "EVOLUTION_API_KEY"
+  instance: "default"
+  owner_number: "447970140373"  # Ewan's WhatsApp number — update this
+
+logging:
+  level: "INFO"
+  format: "json"
+
+# Signed-by: DeepSeek-Researcher | 2026-05-09 | session dsr-20260509-hermes-scaffold-v1

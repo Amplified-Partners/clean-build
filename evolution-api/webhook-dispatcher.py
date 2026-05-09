@@ -43,6 +43,27 @@ AGENT_ROUTES = {
         'emoji': '🦙',
         'personality': 'experimental, thorough'
     },
+    '@hermes': {
+        'name': 'Hermes',
+        'model': 'deepseek/deepseek-chat',
+        'webhook_url': os.getenv('HERMES_PM_URL', 'http://hermes.internal:9100/task'),
+        'emoji': '📋',
+        'personality': 'PM, build coordinator, decomposes and dispatches'
+    },
+    '@team': {
+        'name': 'TeamManager',
+        'model': 'moonshot/moonshot-v1',
+        'webhook_url': os.getenv('HERMES_TEAM_URL', 'http://hermes-team.internal:9100/task'),
+        'emoji': '👥',
+        'personality': 'agent health, workload balancing, onboarding'
+    },
+    '@radar': {
+        'name': 'Radar',
+        'model': 'xai/grok-3',
+        'webhook_url': os.getenv('HERMES_RADAR_URL', 'http://hermes-radar.internal:9100/task'),
+        'emoji': '📡',
+        'personality': 'market intelligence, competitive analysis, unfiltered'
+    },
 }
 
 # Default agent (Clawd)
@@ -185,6 +206,9 @@ def run_server(port=3000):
     logger.info(f"  @pete → Pete ({AGENT_ROUTES['@pete']['emoji']})")
     logger.info(f"  @charlie → Charlie ({AGENT_ROUTES['@charlie']['emoji']})")
     logger.info(f"  @delta → Delta ({AGENT_ROUTES['@delta']['emoji']})")
+    logger.info(f"  @hermes → Hermes PM ({AGENT_ROUTES['@hermes']['emoji']})")
+    logger.info(f"  @team → Team Manager ({AGENT_ROUTES['@team']['emoji']})")
+    logger.info(f"  @radar → Radar ({AGENT_ROUTES['@radar']['emoji']})")
     logger.info(f"  (default) → Clawd ({DEFAULT_AGENT['emoji']})")
     logger.info("\nReady to receive webhooks from Evolution API")
 

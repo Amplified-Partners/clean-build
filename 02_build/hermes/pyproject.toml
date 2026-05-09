@@ -1,5 +1,26 @@
-# Purpose: Python project metadata and dependencies for Amplified Hermes.
-# Owner: U-02
+[project]
+name = "amplified-hermes"
+version = "0.1.0"
+description = "Amplified Hermes — Build Coordinator"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.34",
+    "pyyaml>=6.0",
+    "httpx>=0.28",
+    "structlog>=25.1",
+    "pydantic>=2.10",
+    "pydantic-settings>=2.7",
+]
 
-# Stub — implementation deferred to U-02.
-raise NotImplementedError("U-02")
+[project.scripts]
+hermes = "hermes.main:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/hermes"]
+
+# Signed-by: DeepSeek-Researcher | 2026-05-09 | session dsr-20260509-hermes-scaffold-v1

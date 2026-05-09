@@ -5,11 +5,14 @@ Multi-agent WhatsApp routing using Evolution API as the WhatsApp gateway and Ope
 ## Architecture
 
 ```
-WhatsApp → Evolution API → Webhook Dispatcher → OpenClaw Agents
+WhatsApp → Evolution API → Webhook Dispatcher → Agents
                               ↓
                     @pete → Pete (Grok)
                     @charlie → Charlie (Gemini)
                     @delta → Delta (Llama)
+                    @hermes → Hermes PM (DeepSeek)
+                    @team → Team Manager (Kimi)
+                    @radar → Radar (Grok)
                     (none) → Clawd (Claude)
 ```
 
@@ -42,6 +45,9 @@ Send WhatsApp messages:
 - `@pete analyze this market data` → Routes to Pete
 - `@charlie fix the deployment script` → Routes to Charlie
 - `@delta research llama fine-tuning` → Routes to Delta
+- `@hermes plan the next build` → Routes to Hermes PM
+- `@team check agent workloads` → Routes to Team Manager
+- `@radar what's happening in AI regulation` → Routes to Radar
 - `Hello Clawd, how are you?` → Routes to Clawd (default)
 
 ## How It Works
