@@ -1,7 +1,7 @@
 ---
 title: Decision log
-date: 2026-05-07
-version: 20
+date: 2026-05-10
+version: 21
 status: draft
 ---
 
@@ -12,6 +12,14 @@ status: draft
 One entry per decision. Keep it short. Link out to supporting docs.
 
 ## Entries
+
+### 2026-05-10 — Epistemic Status Invariant: reference implementation committed to routing engine
+
+- **Decision**: Commit the Epistemic Status Invariant reference implementation at `02_build/routing/epistemic_status.py`. This is Layer 0 law for the substrate routing engine: every value flowing between layers carries a four-tier epistemic status (INTUITED / STRUCTURED / MEASURED / PROVEN), and the effective status is always the minimum of own claim, input floor, and precondition floor. Status laundering triggers a P0 halt. The module includes: the min-rule (`StatusedValue.effective_status`), `Layer` base class enforcing the invariant on every call, append-only `AuditLog`, `DriftDetector`, one-tier `PromotionRecord` gates (rubric codification → empirical calibration → formal proof), temporal staleness demotion, lens requirement for federated GLM consumers, and `aggregate_federation_updates` quarantine rule. Stdlib-only, ~450 lines, zero external dependencies, auditable in one read.
+- **Why**: The system already uses epistemic status tokens (`[LOGIC TO BE CONFIRMED]`, `[CURRENT BEST EVIDENCE]`, etc.) in prose governance. This module encodes the same principle as executable code: a value cannot claim a higher status than its inputs or preconditions justify. Without this invariant, the routing engine could launder INTUITED outputs through a PROVEN-claiming layer — the lying condition. OPINION 92% — reversible, no customer impact, foundational for all future routing work.
+- **Where encoded**: `02_build/routing/epistemic_status.py`, `00_authority/MANIFEST.md` v56.
+- **Status**: candidate (pending Ewan review via PR).
+- **Signed-by**: Devon-32cc | 2026-05-10 | devin-32cc0fc89ad04baba570382e2c3eb2f4
 
 ### 2026-05-07 — AMP-183: Promote gold from Perplexity process corpus to clean-build
 
@@ -402,6 +410,12 @@ One entry per decision. Keep it short. Link out to supporting docs.
 - **Status**: active
 
 ## Changelog
+
+### v21 — 2026-05-10
+
+- Added 2026-05-10 entry: Epistemic Status Invariant reference implementation. Records the decision to commit the Layer 0 min-rule enforcement module at `02_build/routing/epistemic_status.py`. MANIFEST bumped to v56.
+
+Signed-by: Devon-32cc | 2026-05-10 | devin-32cc0fc89ad04baba570382e2c3eb2f4
 
 ### v20 — 2026-05-07
 
