@@ -22,10 +22,11 @@ jobs:
           fetch-depth: 0
 
       - name: Get PR diff
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         run: |
-          BASE=${{ github.event.pull_request.base.sha }}
-          HEAD=${{ github.event.pull_request.head.sha }}
-          git diff "$BASE".."$HEAD" -- . ':!*.lock' ':!package-lock.json' ':!*.min.js' ':!*.min.css' | head -c 60000 > /tmp/pr_diff.txt
+          git diff "$BASE_SHA".."$HEAD_SHA" -- . ':!*.lock' ':!package-lock.json' ':!*.min.js' ':!*.min.css' | head -c 60000 > /tmp/pr_diff.txt
 
       - name: AI Review via DeepSeek
         id: review
@@ -84,7 +85,9 @@ jobs:
               result = json.loads(resp.read())
               review = result["choices"][0]["message"]["content"]
           except Exception as e:
-              review = f"VERDICT: APPROVED\n\nReview unavailable (API error: {e}). Auto-approving — CI checks are the gate."
+              err_type = type(e).__name__
+              review = f"VERDICT: CHANGES_REQUESTED\n\nReview unavailable ({err_type}). Blocking merge — manual review required."
+              print(f"DeepSeek API error: {err_type}", file=__import__('sys').stderr)
 
           print(review)
 
