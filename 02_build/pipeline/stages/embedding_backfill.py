@@ -146,6 +146,7 @@ async def run_backfill(
     except Exception as exc:
         logger.error("Connection failed: %s", exc)
         stats.errors = 1
+        stats.elapsed_s = time.monotonic() - t0
         return stats
 
     try:
@@ -248,8 +249,8 @@ async def run_backfill(
 
     finally:
         await conn.close()
+        stats.elapsed_s = time.monotonic() - t0
 
-    stats.elapsed_s = time.monotonic() - t0
     return stats
 
 
