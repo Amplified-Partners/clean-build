@@ -26,7 +26,7 @@ import os
 from datetime import datetime, timezone
 
 from vellum.agents import ResearcherOutput
-from vellum.delivery.imessage import mask_phone, send_brief_link
+from vellum.delivery.imessage import recipient_id, send_brief_link
 from vellum.delivery.share_links import generate_share_url
 from vellum.models import Sheet, SheetEntry, SheetMeta, ShareToken
 
@@ -251,12 +251,13 @@ async def run_morning_brief(tenant_id: str = "jesmond") -> bool:
     message = f"Good morning! Your brief for {now.strftime('%A %d %B')} is ready."
     delivered = await send_brief_link(phone, share_url, message)
 
+    rcpt = recipient_id(phone)
     if delivered:
-        logger.info("Brief delivered to %s via iMessage", mask_phone(phone))
+        logger.info("Brief delivered to %s via iMessage", rcpt)
     else:
         logger.error(
             "Brief delivery FAILED for %s — sheet %s still available",
-            mask_phone(phone),
+            rcpt,
             sheet.meta.id,
         )
 

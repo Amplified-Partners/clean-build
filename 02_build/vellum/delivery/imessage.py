@@ -9,6 +9,7 @@ Environment variables:
 from __future__ import annotations
 
 import asyncio
+import hashlib
 import logging
 import os
 import shlex
@@ -16,11 +17,10 @@ import shlex
 logger = logging.getLogger(__name__)
 
 
-def mask_phone(phone: str) -> str:
-    """Mask a phone number for safe logging: +44770***0000."""
-    if len(phone) <= 6:
-        return "***"
-    return phone[:5] + "***" + phone[-4:]
+def recipient_id(phone: str) -> str:
+    """Return a short, non-reversible hash for log correlation."""
+    digest = hashlib.sha256(phone.encode()).hexdigest()
+    return f"rcpt-{digest[:8]}"
 
 # ---------------------------------------------------------------------------
 # Configuration — all from environment, never hardcoded
@@ -126,17 +126,16 @@ async def send_brief_link(
             timeout=_SSH_TIMEOUT_SECONDS + 10,
         )
 
+        rcpt = recipient_id(phone_number)
+
         if proc.returncode == 0:
-            logger.info(
-                "iMessage sent to %s",
-                mask_phone(phone_number),
-            )
+            logger.info("iMessage sent to %s", rcpt)
             return True
 
         logger.error(
             "iMessage send failed (rc=%d) to %s: %s",
             proc.returncode,
-            mask_phone(phone_number),
+            rcpt,
             stderr.decode(errors="replace").strip(),
         )
         return False
@@ -144,13 +143,13 @@ async def send_brief_link(
     except TimeoutError:
         logger.error(
             "iMessage send timed out for %s (host=%s)",
-            mask_phone(phone_number),
+            recipient_id(phone_number),
             host,
         )
         return False
     except OSError:
         logger.exception(
             "iMessage send OS error for %s",
-            mask_phone(phone_number),
+            recipient_id(phone_number),
         )
         return False
