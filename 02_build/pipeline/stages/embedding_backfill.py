@@ -149,6 +149,8 @@ async def run_backfill(
         stats.elapsed_s = time.monotonic() - t0
         return stats
 
+    # All paths below go through the finally block, which closes conn.
+    # Python guarantees finally runs even on return statements inside try.
     try:
         stats.total_null = await count_null_embeddings(conn)
         logger.info("Rows with NULL embedding: %d", stats.total_null)
