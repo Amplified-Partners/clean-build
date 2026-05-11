@@ -24,10 +24,9 @@ import hmac
 import logging
 import os
 from datetime import datetime, timezone
-from uuid import uuid4
 
 from vellum.agents import ResearcherOutput
-from vellum.delivery.imessage import send_brief_link
+from vellum.delivery.imessage import mask_phone, send_brief_link
 from vellum.delivery.share_links import generate_share_url
 from vellum.models import Sheet, SheetEntry, SheetMeta, ShareToken
 
@@ -207,10 +206,14 @@ async def run_morning_brief(tenant_id: str = "jesmond") -> bool:
     """
     phone = os.environ.get("JESMOND_BOB_PHONE")
     base_url = os.environ.get("BRIEF_BASE_URL", "https://api.amplifiedpartners.ai")
-    token_secret = os.environ.get("BRIEF_TOKEN_SECRET", str(uuid4()))
+    token_secret = os.environ.get("BRIEF_TOKEN_SECRET")
 
     if not phone:
         logger.error("JESMOND_BOB_PHONE not set — cannot deliver brief")
+        return False
+
+    if not token_secret:
+        logger.error("BRIEF_TOKEN_SECRET not set — cannot generate share tokens")
         return False
 
     now = datetime.now(timezone.utc)
@@ -238,6 +241,9 @@ async def run_morning_brief(tenant_id: str = "jesmond") -> bool:
     )
 
     # 5. Generate phone-bound token and share URL
+    # NOTE: token persistence is handled by the auth module (daughter #1).
+    # Until that lands, the token is valid for HMAC re-derivation with
+    # the same BRIEF_TOKEN_SECRET — no DB lookup needed for validation.
     token = _generate_phone_bound_token(sheet.meta.id, phone, token_secret)
     share_url = generate_share_url(base_url, sheet.meta.id, token.token_id)
 
@@ -246,10 +252,13 @@ async def run_morning_brief(tenant_id: str = "jesmond") -> bool:
     delivered = await send_brief_link(phone, share_url, message)
 
     if delivered:
-        logger.info("Brief delivered to %s via iMessage", phone)
+        logger.info("Brief delivered to %s via iMessage", mask_phone(phone))
     else:
-        logger.error("Brief delivery FAILED for %s — sheet %s still available at %s",
-                      phone, sheet.meta.id, share_url)
+        logger.error(
+            "Brief delivery FAILED for %s — sheet %s still available",
+            mask_phone(phone),
+            sheet.meta.id,
+        )
 
     return delivered
 

@@ -15,6 +15,13 @@ import shlex
 
 logger = logging.getLogger(__name__)
 
+
+def mask_phone(phone: str) -> str:
+    """Mask a phone number for safe logging: +44770***0000."""
+    if len(phone) <= 6:
+        return "***"
+    return phone[:5] + "***" + phone[-4:]
+
 # ---------------------------------------------------------------------------
 # Configuration — all from environment, never hardcoded
 # ---------------------------------------------------------------------------
@@ -121,16 +128,15 @@ async def send_brief_link(
 
         if proc.returncode == 0:
             logger.info(
-                "iMessage sent to %s (sheet_url=%s)",
-                phone_number,
-                sheet_url,
+                "iMessage sent to %s",
+                mask_phone(phone_number),
             )
             return True
 
         logger.error(
             "iMessage send failed (rc=%d) to %s: %s",
             proc.returncode,
-            phone_number,
+            mask_phone(phone_number),
             stderr.decode(errors="replace").strip(),
         )
         return False
@@ -138,10 +144,13 @@ async def send_brief_link(
     except TimeoutError:
         logger.error(
             "iMessage send timed out for %s (host=%s)",
-            phone_number,
+            mask_phone(phone_number),
             host,
         )
         return False
     except OSError:
-        logger.exception("iMessage send OS error for %s", phone_number)
+        logger.exception(
+            "iMessage send OS error for %s",
+            mask_phone(phone_number),
+        )
         return False
