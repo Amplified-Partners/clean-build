@@ -14,7 +14,6 @@ import pytest
 from httpx import AsyncClient
 
 from vellum.webhooks.reply_to_loop import (
-    clear_stores,
     get_sheet,
     register_token,
 )

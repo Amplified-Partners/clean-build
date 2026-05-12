@@ -8,7 +8,7 @@ Signed-by: Devon-ae57 (daughter session of Devon-3397)
 from __future__ import annotations
 
 import os
-from datetime import datetime, timezone
+from datetime import datetime
 
 import httpx
 
