@@ -1,7 +1,7 @@
 ---
 title: Governed workspace manifest (authoritative inventory)
-date: 2026-05-07
-version: 55
+date: 2026-05-10
+version: 56
 status: draft
 ---
 
@@ -120,6 +120,7 @@ not the GitHub slug. Do not guess another pattern under this org for this lane.
   - `01_truth/research/validations/README.md` `[LOGIC TO BE CONFIRMED]` (promotion target for `03_shadow/validators/` verdicts once human-reviewed)
 - `01_truth/SYSTEMS-AND-API-REGISTER.md` `[LOGIC TO BE CONFIRMED]` (single register of all APIs, MCP servers, telephony systems, code modules, and their locations across all Amplified Partners repos)
 - `02_build/README.md` `[LOGIC TO BE CONFIRMED]` (runnable artefacts routing stub)
+- `02_build/routing/epistemic_status.py` `[LOGIC TO BE CONFIRMED]` (Epistemic Status Invariant — reference implementation; Layer 0 min-rule enforcement for the substrate routing engine; four tiers INTUITED→STRUCTURED→MEASURED→PROVEN; P0 halt on status laundering; audit log, drift detector, promotion gates, federation aggregation; ~450 lines, stdlib-only, no external deps)
 - `02_build/validators/README.md` `[LOGIC TO BE CONFIRMED]` (public-data validation framework; reference impl of `01_truth/schemas/2026-05_public-data-validation_v1.md`; ProfServices pilot at AMP-67)
 - `02_build/enforcer/README.md` `[LOGIC TO BE CONFIRMED]` (Beast health-monitoring service — 5 deterministic checks on 10-minute cycles: Docker container health, database connectivity, Traefik, session hygiene, security; FastAPI `/health` + `/health/detailed` + `/metrics` endpoints. Merged from `Amplified-Partners/enforcer` per AMP-77. **Known issue documented in README**: async check functions use blocking I/O — to fix in a follow-up.)
 - `03_shadow/README.md` `[LOGIC TO BE CONFIRMED]` (experiment routing stub)
@@ -175,6 +176,12 @@ not the GitHub slug. Do not guess another pattern under this org for this lane.
     - `P10-kill-switch-master-reference.md` `[NON-AUTHORITATIVE]` (510 lines — binary shutdown architecture)
 
 ## Changelog
+
+### v56 — 2026-05-10
+
+- Added `02_build/routing/epistemic_status.py` under **Candidate authority**: Epistemic Status Invariant reference implementation. Layer 0 min-rule for the substrate routing engine — every value carries a four-tier epistemic status (INTUITED / STRUCTURED / MEASURED / PROVEN); effective status is always min(own_claim, input_floor, precondition_floor). Includes P0Incident halt, audit log, drift detector, one-tier promotion gates, temporal staleness demotion, and federated aggregation rule. Stdlib-only, ~450 lines, auditable in one read. Decision recorded at `00_authority/DECISION_LOG.md` v21.
+
+Signed-by: Devon-32cc | 2026-05-10 | devin-32cc0fc89ad04baba570382e2c3eb2f4
 
 ### v55 — 2026-05-07
 
