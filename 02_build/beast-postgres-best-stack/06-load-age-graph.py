@@ -36,7 +36,9 @@ Rollback: SELECT drop_graph('business_brain', true);
 Safety:
     - Dry-run by default
     - Batched in configurable chunks (default 500)
-    - Idempotent vertex creation via MERGE on entity UUID stored as property
+    - Idempotent vertex creation via MERGE on entity primary key UUID
+    - All UUID values validated before interpolation (prevents injection)
+    - Text values escaped (backslash, quotes, newlines, tabs)
     - Progress reporting every batch
 """
 
@@ -44,6 +46,7 @@ import argparse
 import re
 import sys
 import time
+import uuid as uuid_mod
 from typing import Optional
 
 try:
@@ -79,11 +82,28 @@ def sanitize_label(raw: str) -> str:
     return label[0].upper() + label[1:]
 
 
+def validate_uuid(val: str) -> str:
+    """Validate and return a canonical UUID string. Raises ValueError if invalid."""
+    return str(uuid_mod.UUID(str(val)))
+
+
 def escape_cypher_string(s: Optional[str]) -> str:
-    """Escape a string for embedding in Cypher literal."""
+    """Escape a string for safe embedding in a Cypher literal.
+
+    Handles: backslash, single quote, double quote, newlines, tabs.
+    All ID values (UUIDs) are validated separately via validate_uuid()
+    before interpolation — they never pass through this function.
+    """
     if s is None:
         return ""
-    return s.replace("\\", "\\\\").replace("'", "\\'").replace('"', '\\"')
+    return (
+        s.replace("\\", "\\\\")
+        .replace("'", "\\'")
+        .replace('"', '\\"')
+        .replace("\n", "\\n")
+        .replace("\r", "\\r")
+        .replace("\t", "\\t")
+    )
 
 
 def get_connection(args):
@@ -166,18 +186,27 @@ def load_vertices(cursor, graph_name: str, dry_run: bool, batch_size: int) -> in
 
     loaded = 0
     errors = 0
+    skipped = 0
     t0 = time.time()
 
     for i in range(0, total, batch_size):
         batch = rows[i : i + batch_size]
         for entity_id, name, entity_type, summary in batch:
+            try:
+                safe_id = validate_uuid(entity_id)
+            except (ValueError, AttributeError):
+                skipped += 1
+                if skipped <= 3:
+                    print(f"    SKIP: invalid UUID {entity_id!r}")
+                continue
+
             label = sanitize_label(entity_type or "Unknown")
             safe_name = escape_cypher_string(name)
             safe_summary = escape_cypher_string(
-                (summary or "")[:500]  # Truncate long summaries for graph properties
+                (summary or "")[:500]
             )
             cypher = (
-                f"MERGE (n:{label} {{entity_id: '{entity_id}'}}) "
+                f"MERGE (n:{label} {{uuid: '{safe_id}'}}) "
                 f"ON CREATE SET n.name = '{safe_name}', "
                 f"n.summary = '{safe_summary}'"
             )
@@ -189,7 +218,7 @@ def load_vertices(cursor, graph_name: str, dry_run: bool, batch_size: int) -> in
             except Exception as e:
                 errors += 1
                 if errors <= 5:
-                    print(f"    ERROR on entity {entity_id}: {e}")
+                    print(f"    ERROR on entity {safe_id}: {e}")
 
         elapsed = time.time() - t0
         rate = loaded / elapsed if elapsed > 0 else 0
@@ -233,20 +262,31 @@ def load_edges(cursor, graph_name: str, dry_run: bool, batch_size: int) -> int:
 
     loaded = 0
     errors = 0
+    skipped = 0
     t0 = time.time()
 
     for i in range(0, total, batch_size):
         batch = rows[i : i + batch_size]
         for rel_id, source_id, target_id, relation_type, summary, weight in batch:
+            try:
+                safe_rel_id = validate_uuid(rel_id)
+                safe_source = validate_uuid(source_id)
+                safe_target = validate_uuid(target_id)
+            except (ValueError, AttributeError):
+                skipped += 1
+                if skipped <= 3:
+                    print(f"    SKIP: invalid UUID in rel {rel_id!r}")
+                continue
+
             edge_label = sanitize_label(relation_type or "RELATED")
             safe_summary = escape_cypher_string((summary or "")[:200])
             weight_val = float(weight) if weight is not None else 1.0
 
             cypher = (
-                f"MATCH (a {{entity_id: '{source_id}'}}), "
-                f"(b {{entity_id: '{target_id}'}}) "
+                f"MATCH (a {{uuid: '{safe_source}'}}), "
+                f"(b {{uuid: '{safe_target}'}}) "
                 f"CREATE (a)-[r:{edge_label} {{"
-                f"rel_id: '{rel_id}', "
+                f"uuid: '{safe_rel_id}', "
                 f"summary: '{safe_summary}', "
                 f"weight: {weight_val}"
                 f"}}]->(b) "
@@ -260,7 +300,7 @@ def load_edges(cursor, graph_name: str, dry_run: bool, batch_size: int) -> int:
             except Exception as e:
                 errors += 1
                 if errors <= 5:
-                    print(f"    ERROR on rel {rel_id}: {e}")
+                    print(f"    ERROR on rel {safe_rel_id}: {e}")
                 elif errors == 6:
                     print(f"    (suppressing further error output)")
 

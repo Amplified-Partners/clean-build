@@ -36,7 +36,11 @@
 -- Downtime: NONE (online DML; live tables are empty so no contention)
 -- Rollback: TRUNCATE entities, relationships, episodes;
 --
--- Safety: ON CONFLICT (id) DO NOTHING — idempotent if re-run.
+-- Safety:
+--   - Pre-flight aborts if live tables are not empty
+--   - Pre-flight checks for ID collisions between legacy and live tables
+--   - ON CONFLICT (id) DO UPDATE to overwrite on re-run (no silent data loss)
+--   - Post-flight RAISES EXCEPTION (rolls back) if counts don't match
 -- ─────────────────────────────────────────────────────────────────────────────
 
 BEGIN;
@@ -60,6 +64,20 @@ BEGIN
   END IF;
 
   RAISE NOTICE 'Pre-flight OK: all live tables empty';
+END $$;
+
+-- Check for ID collisions (should be zero since live tables are empty, but belt-and-braces)
+DO $$
+DECLARE
+  collision_count bigint;
+BEGIN
+  SELECT count(*) INTO collision_count
+  FROM entities_legacy_2026_05_10 l
+  INNER JOIN entities e ON l.id = e.id;
+
+  IF collision_count > 0 THEN
+    RAISE EXCEPTION 'Found % entity ID collisions between legacy and live tables. Investigate before promoting.', collision_count;
+  END IF;
 END $$;
 
 -- Count legacy rows for verification
@@ -99,7 +117,15 @@ SELECT
   created_at,
   updated_at
 FROM entities_legacy_2026_05_10
-ON CONFLICT (id) DO NOTHING;
+ON CONFLICT (id) DO UPDATE SET
+  name = EXCLUDED.name,
+  entity_type = EXCLUDED.entity_type,
+  summary = EXCLUDED.summary,
+  properties = EXCLUDED.properties,
+  source_type = EXCLUDED.source_type,
+  run_id = EXCLUDED.run_id,
+  signed_by = EXCLUDED.signed_by,
+  updated_at = EXCLUDED.updated_at;
 
 -- ── Promote relationships ───────────────────────────────────────────────────
 
@@ -131,7 +157,17 @@ SELECT
   created_at,
   updated_at
 FROM relationships_legacy_2026_05_10
-ON CONFLICT (id) DO NOTHING;
+ON CONFLICT (id) DO UPDATE SET
+  source_id = EXCLUDED.source_id,
+  target_id = EXCLUDED.target_id,
+  relation_type = EXCLUDED.relation_type,
+  summary = EXCLUDED.summary,
+  weight = EXCLUDED.weight,
+  properties = EXCLUDED.properties,
+  source_type = EXCLUDED.source_type,
+  run_id = EXCLUDED.run_id,
+  signed_by = EXCLUDED.signed_by,
+  updated_at = EXCLUDED.updated_at;
 
 -- ── Promote episodes ────────────────────────────────────────────────────────
 
@@ -155,7 +191,13 @@ SELECT
   'Devon-0178',
   created_at
 FROM episodes_legacy_2026_05_10
-ON CONFLICT (id) DO NOTHING;
+ON CONFLICT (id) DO UPDATE SET
+  name = EXCLUDED.name,
+  content = EXCLUDED.content,
+  source = EXCLUDED.source,
+  source_type = EXCLUDED.source_type,
+  run_id = EXCLUDED.run_id,
+  signed_by = EXCLUDED.signed_by;
 
 -- ── Post-flight verification ────────────────────────────────────────────────
 
@@ -181,9 +223,10 @@ BEGIN
     CASE WHEN lep > 0 THEN (ep_count::float / lep * 100) ELSE 0 END;
   RAISE NOTICE '──────────────────────────────────────';
 
-  -- Fail if counts don't match
+  -- Fail the transaction if counts don't match
   IF e_count <> le OR r_count <> lr OR ep_count <> lep THEN
-    RAISE WARNING 'Count mismatch — some rows may have had ON CONFLICT collisions';
+    RAISE EXCEPTION 'Count mismatch — entities: %/%, relationships: %/%, episodes: %/%. Rolling back.',
+      e_count, le, r_count, lr, ep_count, lep;
   END IF;
 END $$;
 
