@@ -1,168 +1,166 @@
-# Linear ↔ GitHub sync — comments on the linked Linear ticket as the PR moves
-# through opened, ready-for-review, merged, and closed states.
-#
-# Per AMP-70:
-#   - On PR opened/ready_for_review: post the PR link on the Linear ticket and
-#     move it to "In Review" if it is currently in Todo / Backlog / In Progress.
-#   - On PR merged: post a merge note on the Linear ticket. Status is left for
-#     the human (Arbiter) to advance to "Done" — no auto-close.
-#   - On PR closed without merge: post a closure note.
-#
-# Requires repo or organisation secret `LINEAR_API_KEY` (a Linear API key with
-# write access to the workspace). The job no-ops with a warning if the secret
-# is not configured.
-#
-# Authored by Devon-4330 | 2026-05-03 | session devin-4330c661a80b4770aa8f62980c21366a.
-name: Linear sync
+name: Sync PR merge to Linear
 
 on:
-  pull_request_target:
-    types: [opened, reopened, ready_for_review, closed]
-    branches: [main]
+  pull_request:
+    types: [closed]
 
 permissions:
   contents: read
   pull-requests: read
 
 jobs:
-  sync:
-    name: Sync to Linear
+  linear-update:
     runs-on: ubuntu-latest
-    if: github.actor != 'dependabot[bot]'
+    if: github.event.pull_request.merged == true
     steps:
-      - name: Extract Linear ticket reference
-        id: extract
-        env:
-          PR_TITLE: ${{ github.event.pull_request.title }}
-          PR_BODY: ${{ github.event.pull_request.body }}
-          HEAD_REF: ${{ github.event.pull_request.head.ref }}
+      - name: Extract Linear ticket ID
+        id: ticket
         run: |
-          set -euo pipefail
-          # Strip HTML comments from the body so PR-template example
-          # placeholders (AMP-NNN inside <!-- ... -->) do not get mistaken
-          # for the real ticket reference. Match priority is title, then
-          # stripped body, then head ref.
-          body_stripped=$(printf '%s' "${PR_BODY:-}" | python3 -c 'import re,sys; sys.stdout.write(re.sub(r"<!--.*?-->", "", sys.stdin.read(), flags=re.DOTALL))')
-          combined="${PR_TITLE}"$'\n'"${body_stripped}"$'\n'"${HEAD_REF}"
-          ticket=$(printf '%s' "$combined" | grep -Eoi 'AMP-[0-9]+' | head -1 | tr '[:lower:]' '[:upper:]' || true)
-          if [ -n "$ticket" ]; then
-            echo "ticket=$ticket" >> "$GITHUB_OUTPUT"
-            echo "Found ticket: $ticket"
-          else
-            echo "ticket=" >> "$GITHUB_OUTPUT"
-            echo "No AMP-XXX ticket reference found; skipping Linear sync."
+          # Look for AMP-XXX in PR title or body
+          TITLE="${{ github.event.pull_request.title }}"
+          BODY=$(cat << 'BODY_EOF'
+          ${{ github.event.pull_request.body }}
+          BODY_EOF
+          )
+
+          # Check title first, then body
+          TICKET=$(echo "$TITLE" | grep -oP 'AMP-\d+' | head -1)
+          if [ -z "$TICKET" ]; then
+            TICKET=$(echo "$BODY" | grep -oP 'AMP-\d+' | head -1)
           fi
 
-      - name: Sync to Linear
-        if: steps.extract.outputs.ticket != ''
+          if [ -z "$TICKET" ]; then
+            echo "No AMP-XXX ticket found in PR title or body. Skipping."
+            echo "found=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "Found ticket: $TICKET"
+            echo "found=true" >> "$GITHUB_OUTPUT"
+            echo "ticket_id=$TICKET" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Update Linear ticket
+        if: steps.ticket.outputs.found == 'true'
         env:
           LINEAR_API_KEY: ${{ secrets.LINEAR_API_KEY }}
-          TICKET: ${{ steps.extract.outputs.ticket }}
-          PR_URL: ${{ github.event.pull_request.html_url }}
-          PR_NUMBER: ${{ github.event.pull_request.number }}
+          TICKET_ID: ${{ steps.ticket.outputs.ticket_id }}
           PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
           PR_AUTHOR: ${{ github.event.pull_request.user.login }}
-          PR_ACTION: ${{ github.event.action }}
-          PR_DRAFT: ${{ github.event.pull_request.draft }}
-          PR_MERGED: ${{ github.event.pull_request.merged }}
-          MERGE_SHA: ${{ github.event.pull_request.merge_commit_sha }}
-          REPO: ${{ github.repository }}
+          REPO_NAME: ${{ github.repository }}
         run: |
-          set -euo pipefail
+          python3 << 'PYEOF'
+          import os, json, urllib.request
 
-          if [ -z "${LINEAR_API_KEY:-}" ]; then
-            echo "::warning::LINEAR_API_KEY secret not set; skipping Linear sync."
-            echo "::warning::Add it at: https://github.com/${REPO}/settings/secrets/actions"
-            exit 0
-          fi
+          api_key = os.environ["LINEAR_API_KEY"]
+          ticket_id = os.environ["TICKET_ID"]
+          pr_title = os.environ["PR_TITLE"]
+          pr_url = os.environ["PR_URL"]
+          pr_author = os.environ["PR_AUTHOR"]
+          repo = os.environ["REPO_NAME"]
 
-          # Determine event type and comment body.
-          # Draft PRs do not signal readiness for review, so we skip the
-          # comment + state move on `opened`/`reopened` while draft.
-          # `ready_for_review` always signals readiness, so we never skip
-          # there even if `pull_request.draft` somehow reads as true.
-          comment_body=""
-          should_move_to_review="false"
-          case "$PR_ACTION" in
-            opened|reopened)
-              if [ "$PR_DRAFT" = "true" ]; then
-                echo "Draft PR; skipping Linear sync until marked ready for review."
-                exit 0
-              fi
-              comment_body="**PR opened** by @${PR_AUTHOR} in \`${REPO}\`: [#${PR_NUMBER} — ${PR_TITLE}](${PR_URL})"
-              should_move_to_review="true"
-              ;;
-            ready_for_review)
-              comment_body="**PR ready for review** by @${PR_AUTHOR} in \`${REPO}\`: [#${PR_NUMBER} — ${PR_TITLE}](${PR_URL})"
-              should_move_to_review="true"
-              ;;
-            closed)
-              if [ "$PR_MERGED" = "true" ]; then
-                comment_body="**PR merged** by @${PR_AUTHOR} in \`${REPO}\`: [#${PR_NUMBER} — ${PR_TITLE}](${PR_URL}) — \`${MERGE_SHA:0:7}\`. Human review of acceptance criteria is required before this ticket is moved to Done."
-              else
-                comment_body="**PR closed without merge** by @${PR_AUTHOR} in \`${REPO}\`: [#${PR_NUMBER} — ${PR_TITLE}](${PR_URL})."
-              fi
-              ;;
-            *)
-              echo "Unhandled action: $PR_ACTION"
-              exit 0
-              ;;
-          esac
+          # First, find the issue by identifier
+          query = """
+          query($id: String!) {
+            issueSearch(filter: { number: { eq: $number } }, first: 1) {
+              nodes { id identifier state { name } }
+            }
+          }
+          """
 
-          # Resolve issue UUID from identifier (AMP-XXX).
-          query_payload=$(jq -nc --arg id "$TICKET" '{
-            query: "query($id: String!) { issue(id: $id) { id state { id name type } team { id } } }",
-            variables: { id: $id }
-          }')
-          resp=$(curl -fsS -X POST https://api.linear.app/graphql \
-            -H "Authorization: ${LINEAR_API_KEY}" \
-            -H "Content-Type: application/json" \
-            -d "$query_payload")
-          issue_id=$(printf '%s' "$resp" | jq -r '.data.issue.id // empty')
-          state_type=$(printf '%s' "$resp" | jq -r '.data.issue.state.type // empty')
-          state_name=$(printf '%s' "$resp" | jq -r '.data.issue.state.name // empty')
-          team_id=$(printf '%s' "$resp" | jq -r '.data.issue.team.id // empty')
-          if [ -z "$issue_id" ]; then
-            echo "::warning::Could not resolve Linear issue $TICKET. Response: $resp"
-            exit 0
-          fi
-          echo "Resolved $TICKET → $issue_id (state: $state_name / $state_type)"
+          # Use identifier filter instead
+          number = int(ticket_id.split("-")[1])
+          query = """
+          mutation($issueId: String!, $comment: String!) {
+            issueAddComment: commentCreate(input: { issueId: $issueId, body: $comment }) {
+              success
+            }
+          }
+          """
 
-          # Post the comment.
-          comment_payload=$(jq -nc --arg issueId "$issue_id" --arg body "$comment_body" '{
-            query: "mutation($issueId: String!, $body: String!) { commentCreate(input: { issueId: $issueId, body: $body }) { success } }",
-            variables: { issueId: $issueId, body: $body }
-          }')
-          curl -fsS -X POST https://api.linear.app/graphql \
-            -H "Authorization: ${LINEAR_API_KEY}" \
-            -H "Content-Type: application/json" \
-            -d "$comment_payload" | jq -e '.data.commentCreate.success' >/dev/null
-          echo "Posted comment on $TICKET."
+          # Step 1: Find issue ID by identifier
+          find_query = json.dumps({
+              "query": '{ issues(filter: { number: { eq: ' + str(number) + ' } }) { nodes { id identifier state { name } } } }'
+          }).encode()
 
-          # Move to "In Review" on PR open, unless the ticket is already
-          # there, completed, or canceled.
-          if [ "$should_move_to_review" = "true" ] \
-             && [ "$state_name" != "In Review" ] \
-             && [ "$state_type" != "completed" ] \
-             && [ "$state_type" != "canceled" ]; then
-            review_state_id=$(curl -fsS -X POST https://api.linear.app/graphql \
-              -H "Authorization: ${LINEAR_API_KEY}" \
-              -H "Content-Type: application/json" \
-              -d "$(jq -nc --arg teamId "$team_id" '{
-                query: "query($teamId: String!) { workflowStates(filter: { team: { id: { eq: $teamId } }, name: { eq: \"In Review\" } }) { nodes { id } } }",
-                variables: { teamId: $teamId }
-              }')" | jq -r '.data.workflowStates.nodes[0].id // empty')
-            if [ -n "$review_state_id" ]; then
-              update_payload=$(jq -nc --arg id "$issue_id" --arg stateId "$review_state_id" '{
-                query: "mutation($id: String!, $stateId: String!) { issueUpdate(id: $id, input: { stateId: $stateId }) { success } }",
-                variables: { id: $id, stateId: $stateId }
-              }')
-              curl -fsS -X POST https://api.linear.app/graphql \
-                -H "Authorization: ${LINEAR_API_KEY}" \
-                -H "Content-Type: application/json" \
-                -d "$update_payload" | jq -e '.data.issueUpdate.success' >/dev/null
-              echo "Moved $TICKET → In Review."
-            else
-              echo "::warning::Could not find 'In Review' workflow state for team $team_id; leaving status unchanged."
-            fi
-          fi
+          req = urllib.request.Request(
+              "https://api.linear.app/graphql",
+              data=find_query,
+              headers={
+                  "Authorization": api_key,
+                  "Content-Type": "application/json"
+              }
+          )
+
+          try:
+              resp = urllib.request.urlopen(req, timeout=30)
+              data = json.loads(resp.read())
+              issues = data.get("data", {}).get("issues", {}).get("nodes", [])
+
+              if not issues:
+                  print(f"No Linear issue found for {ticket_id}")
+                  exit(0)
+
+              issue = issues[0]
+              issue_id = issue["id"]
+              print(f"Found issue: {issue['identifier']} (state: {issue['state']['name']})")
+
+              # Step 2: Add comment about the merge
+              comment = f"**PR merged** → [{pr_title}]({pr_url})\n\nRepo: `{repo}`\nAuthor: `{pr_author}`"
+
+              comment_mutation = json.dumps({
+                  "query": 'mutation { commentCreate(input: { issueId: "' + issue_id + '", body: "' + comment.replace('"', '\\"') + '" }) { success } }'
+              }).encode()
+
+              req = urllib.request.Request(
+                  "https://api.linear.app/graphql",
+                  data=comment_mutation,
+                  headers={
+                      "Authorization": api_key,
+                      "Content-Type": "application/json"
+                  }
+              )
+              resp = urllib.request.urlopen(req, timeout=30)
+              result = json.loads(resp.read())
+              print(f"Comment added: {result}")
+
+              # Step 3: Transition to Done state (find the Done state ID first)
+              states_query = json.dumps({
+                  "query": '{ workflowStates(filter: { name: { in: ["Done", "Merged"] } }) { nodes { id name } } }'
+              }).encode()
+
+              req = urllib.request.Request(
+                  "https://api.linear.app/graphql",
+                  data=states_query,
+                  headers={
+                      "Authorization": api_key,
+                      "Content-Type": "application/json"
+                  }
+              )
+              resp = urllib.request.urlopen(req, timeout=30)
+              states_data = json.loads(resp.read())
+              states = states_data.get("data", {}).get("workflowStates", {}).get("nodes", [])
+
+              done_state = next((s for s in states if s["name"] == "Done"), None)
+              if done_state:
+                  update_mutation = json.dumps({
+                      "query": 'mutation { issueUpdate(id: "' + issue_id + '", input: { stateId: "' + done_state["id"] + '" }) { success } }'
+                  }).encode()
+
+                  req = urllib.request.Request(
+                      "https://api.linear.app/graphql",
+                      data=update_mutation,
+                      headers={
+                          "Authorization": api_key,
+                          "Content-Type": "application/json"
+                      }
+                  )
+                  resp = urllib.request.urlopen(req, timeout=30)
+                  result = json.loads(resp.read())
+                  print(f"Issue moved to Done: {result}")
+              else:
+                  print("No 'Done' state found — skipping state transition")
+
+          except Exception as e:
+              print(f"Linear API error: {type(e).__name__}: {e}")
+              exit(0)  # Don't fail the workflow on Linear errors
+          PYEOF
