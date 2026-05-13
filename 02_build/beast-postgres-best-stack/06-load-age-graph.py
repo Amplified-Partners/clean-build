@@ -37,6 +37,7 @@ Safety:
     - Dry-run by default
     - Batched in configurable chunks (default 500)
     - Idempotent vertex creation via MERGE on entity primary key UUID
+    - Uses MERGE ... SET (AGE 1.6.0 does not support ON CREATE SET / ON MATCH SET)
     - All UUID values validated before interpolation (prevents injection)
     - Text values escaped (backslash, quotes, newlines, tabs)
     - Progress reporting every batch
@@ -234,7 +235,7 @@ def load_vertices(cursor, graph_name: str, dry_run: bool, batch_size: int) -> in
             )
             cypher = (
                 f"MERGE (n:{label} {{uuid: '{safe_id}'}}) "
-                f"ON CREATE SET n.name = '{safe_name}', "
+                f"SET n.name = '{safe_name}', "
                 f"n.summary = '{safe_summary}'"
             )
             try:
