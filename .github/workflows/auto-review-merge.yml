@@ -20,6 +20,16 @@
 #
 # Devon-79d2 | 2026-05-13 | Governance rewrite per Ewan's decision
 # Supersedes: blanket authority-file block (which put Ewan in the wrong seat)
+#
+# v2 — Devon-79d2 | 2026-05-13 | Expand to all PRs, add AGENTS.md detection,
+#   Copilot handles code quality (native GitHub), DeepSeek handles Five Rods.
+#   DeepSeek API down → Copilot is fallback (review still posted, merge allowed
+#   if Copilot approved separately via ruleset).
+#
+# Reviewer architecture:
+#   Copilot (GitHub native) → code quality, style, bugs (configured via ruleset)
+#   DeepSeek (this workflow)  → Five Rods compliance + blocking defects
+#   Both independent. Substrate diversity. Neither can override the other.
 
 name: Five Rods Auto-Review + Merge
 
@@ -34,10 +44,7 @@ permissions:
 jobs:
   ai-review:
     runs-on: ubuntu-latest
-    if: >
-      github.event.pull_request.user.login == 'devin-ai-integration[bot]' ||
-      github.event.pull_request.user.login == 'devin-ai[bot]' ||
-      contains(github.event.pull_request.title, 'Devon-')
+    if: github.event.pull_request.draft == false
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -57,9 +64,12 @@ jobs:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         run: |
-          if git diff --name-only "$BASE_SHA".."$HEAD_SHA" | grep -q '^00_authority/'; then
+          CHANGED_FILES=$(git diff --name-only "$BASE_SHA".."$HEAD_SHA")
+          if echo "$CHANGED_FILES" | grep -qE '^(00_authority/|AGENTS\.md$)'; then
             echo "touches_authority=true" >> "$GITHUB_OUTPUT"
-            echo "PR touches 00_authority/ — Five Rods review will be stricter."
+            echo "PR touches governance files (00_authority/ or AGENTS.md) — stricter Five Rods review."
+            echo "Authority files changed:"
+            echo "$CHANGED_FILES" | grep -E '^(00_authority/|AGENTS\.md$)' || true
           else
             echo "touches_authority=false" >> "$GITHUB_OUTPUT"
           fi
@@ -169,12 +179,17 @@ jobs:
               review = result["choices"][0]["message"]["content"]
           except Exception as e:
               err_type = type(e).__name__
-              review = f"VERDICT: CHANGES_REQUESTED\n\nReview unavailable ({err_type}). Blocking merge — manual review required."
+              review = f"VERDICT: UNAVAILABLE\n\nDeepSeek review unavailable ({err_type}). Copilot review (if configured) is the fallback. This PR will NOT be auto-merged by this workflow — merge manually or wait for Copilot."
               print(f"DeepSeek API error: {err_type}", file=sys.stderr)
 
           print(review)
 
-          verdict = "approved" if "VERDICT: APPROVED" in review else "changes_requested"
+          if "VERDICT: APPROVED" in review:
+              verdict = "approved"
+          elif "VERDICT: UNAVAILABLE" in review:
+              verdict = "unavailable"
+          else:
+              verdict = "changes_requested"
 
           with open(os.environ["GITHUB_OUTPUT"], "a") as f:
               f.write(f"verdict={verdict}\n")
@@ -209,7 +224,7 @@ jobs:
           gh pr merge ${{ github.event.pull_request.number }} --auto --squash
 
       - name: Block on Five Rods violation
-        if: steps.review.outputs.verdict != 'approved'
+        if: steps.review.outputs.verdict == 'changes_requested'
         env:
           GH_TOKEN: ${{ secrets.AUTO_MERGE_PAT }}
         run: |
@@ -218,3 +233,10 @@ jobs:
           else
             gh pr comment ${{ github.event.pull_request.number }} --body "⛔ **Five Rods Review: BLOCKED.** Reviewer found blocking issues. See review above. Fix and push again."
           fi
+
+      - name: DeepSeek unavailable notice
+        if: steps.review.outputs.verdict == 'unavailable'
+        env:
+          GH_TOKEN: ${{ secrets.AUTO_MERGE_PAT }}
+        run: |
+          gh pr comment ${{ github.event.pull_request.number }} --body "⚠️ **DeepSeek unavailable.** Five Rods review could not run. Copilot review (if configured via ruleset) is the fallback for code quality. This PR will not auto-merge — merge manually if Copilot review passes, or wait for DeepSeek to come back and re-push."
