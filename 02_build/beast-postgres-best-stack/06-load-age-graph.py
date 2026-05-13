@@ -60,8 +60,25 @@ except ImportError:
 GRAPH_NAME = "business_brain"
 BATCH_SIZE = 500
 
-# Valid AGE label: must start with letter/underscore, contain only alnum/underscore
+# Valid AGE identifier: must start with letter/underscore, contain only alnum/underscore
+IDENTIFIER_RE = re.compile(r"^[a-zA-Z_][a-zA-Z0-9_]*$")
 LABEL_RE = re.compile(r"[^a-zA-Z0-9_]")
+
+
+def validate_graph_name(name: str) -> str:
+    """Validate graph name is a safe SQL/Cypher identifier.
+
+    Rejects anything that isn't purely alphanumeric + underscores,
+    starting with a letter. This prevents SQL injection via --graph-name.
+    """
+    name = name.strip()
+    if not name or not IDENTIFIER_RE.match(name):
+        print(f"ERROR: Invalid graph name '{name}'. Must match [a-zA-Z_][a-zA-Z0-9_]*")
+        sys.exit(1)
+    if len(name) > 63:  # PostgreSQL identifier length limit
+        print(f"ERROR: Graph name too long ({len(name)} chars, max 63)")
+        sys.exit(1)
+    return name
 
 
 def sanitize_label(raw: str) -> str:
@@ -126,7 +143,10 @@ def init_age(cursor):
 
 
 def ensure_graph(cursor, graph_name: str, dry_run: bool) -> bool:
-    """Create the graph if it doesn't exist. Returns True if created."""
+    """Create the graph if it doesn't exist. Returns True if created.
+
+    graph_name must be pre-validated via validate_graph_name().
+    """
     cursor.execute(
         "SELECT count(*) FROM ag_catalog.ag_graph WHERE name = %s", (graph_name,)
     )
@@ -137,13 +157,20 @@ def ensure_graph(cursor, graph_name: str, dry_run: bool) -> bool:
     if dry_run:
         print(f"  [DRY RUN] Would create graph '{graph_name}'")
         return False
-    cursor.execute(f"SELECT create_graph('{graph_name}')")
+    # graph_name is validated as a safe identifier by validate_graph_name()
+    cursor.execute("SELECT create_graph(%s)", (graph_name,))
     print(f"  Created graph '{graph_name}'")
     return True
 
 
 def count_graph(cursor, graph_name: str):
-    """Count vertices and edges in the graph."""
+    """Count vertices and edges in the graph.
+
+    graph_name must be pre-validated via validate_graph_name().
+    AGE's cypher() function requires the graph name as a literal in the SQL
+    string (it does not accept parameterized graph names). The graph name is
+    validated as a strict identifier before reaching this point.
+    """
     try:
         cursor.execute(
             f"SELECT * FROM cypher('{graph_name}', $$MATCH (n) RETURN count(n)$$) AS (c agtype)"
@@ -340,6 +367,9 @@ def main():
         "--graph-name", default=GRAPH_NAME, help="AGE graph name to create/populate"
     )
     args = parser.parse_args()
+
+    # Validate graph name early — rejects anything that isn't a safe identifier
+    args.graph_name = validate_graph_name(args.graph_name)
 
     dry_run = not args.execute
     mode = "DRY RUN" if dry_run else "LIVE"
