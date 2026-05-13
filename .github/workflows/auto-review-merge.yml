@@ -105,16 +105,36 @@ jobs:
         run: |
           gh pr comment ${{ github.event.pull_request.number }} --body-file /tmp/review_body.txt
 
+      - name: Check for authority-file changes
+        id: authority_check
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          if git diff --name-only "$BASE_SHA".."$HEAD_SHA" | grep -q '^00_authority/'; then
+            echo "touches_authority=true" >> "$GITHUB_OUTPUT"
+            echo "⚠️ PR touches 00_authority/ — auto-merge BLOCKED. Requires manual review."
+          else
+            echo "touches_authority=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Approve PR
-        if: steps.review.outputs.verdict == 'approved'
+        if: steps.review.outputs.verdict == 'approved' && steps.authority_check.outputs.touches_authority == 'false'
         env:
           GH_TOKEN: ${{ secrets.AUTO_MERGE_PAT }}
         run: |
           gh pr review ${{ github.event.pull_request.number }} --approve --body "AI review passed. Auto-approved."
 
       - name: Enable auto-merge
-        if: steps.review.outputs.verdict == 'approved'
+        if: steps.review.outputs.verdict == 'approved' && steps.authority_check.outputs.touches_authority == 'false'
         env:
           GH_TOKEN: ${{ secrets.AUTO_MERGE_PAT }}
         run: |
           gh pr merge ${{ github.event.pull_request.number }} --auto --squash
+
+      - name: Block authority changes
+        if: steps.authority_check.outputs.touches_authority == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.AUTO_MERGE_PAT }}
+        run: |
+          gh pr comment ${{ github.event.pull_request.number }} --body "⚠️ **Authority file change detected.** This PR touches \`00_authority/\` and cannot be auto-merged. Manual review required per governance rules."
