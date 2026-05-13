@@ -1,7 +1,7 @@
 ---
 title: Governed workspace manifest (authoritative inventory)
-date: 2026-05-10
-version: 56
+date: 2026-05-13
+version: 57
 status: draft
 ---
 
@@ -116,6 +116,8 @@ not the GitHub slug. Do not guess another pattern under this org for this lane.
 - `00_authority/AGENT_ROUTING.md` `[LOGIC TO BE CONFIRMED]` (agent-layer routing — which agent runs which task; stacks on top of `cost-tools/token_proxy.py` model-layer routing; eight rules; AMP-28; status: candidate — pending Ewan review per `DECISION_LOG.md`)
 - `01_truth/interfaces/` `[LOGIC TO BE CONFIRMED]` (API contracts to be populated)
   - `01_truth/interfaces/README.md` `[LOGIC TO BE CONFIRMED]` (folder purpose stub)
+- `01_truth/audits/` `[LOGIC TO BE CONFIRMED]` (measured infrastructure audits with live-queried data; AMP-330)
+  - `01_truth/audits/2026-05-13_falkordb-dump-audit_AMP-330.md` `[LOGIC TO BE CONFIRMED]` (FalkorDB 220 MB dump audit — measured node/edge counts, Postgres comparison, decommission verdict; AMP-330)
 - `01_truth/research/` `[LOGIC TO BE CONFIRMED]` (truth-tier research evidence; promotion target for shadow research)
   - `01_truth/research/validations/README.md` `[LOGIC TO BE CONFIRMED]` (promotion target for `03_shadow/validators/` verdicts once human-reviewed)
 - `01_truth/SYSTEMS-AND-API-REGISTER.md` `[LOGIC TO BE CONFIRMED]` (single register of all APIs, MCP servers, telephony systems, code modules, and their locations across all Amplified Partners repos)
@@ -176,6 +178,12 @@ not the GitHub slug. Do not guess another pattern under this org for this lane.
     - `P10-kill-switch-master-reference.md` `[NON-AUTHORITATIVE]` (510 lines — binary shutdown architecture)
 
 ## Changelog
+
+### v57 — 2026-05-13
+
+- AMP-330: Added `01_truth/audits/` directory and FalkorDB dump audit (`01_truth/audits/2026-05-13_falkordb-dump-audit_AMP-330.md`). Measured live data from `falkordb-temp` container on Beast (4 graphs, 58,216 nodes, 98,986 edges) and compared against Postgres `amplified_brain` legacy tables. Verdict: decommission cleanly — data is fully duplicated in Postgres with richer properties. (Renumbered from v56 → v57 due to version collision with epistemic status PR #85.)
+
+Signed-by: Devon-62d8 | 2026-05-13 | session devin-62d8792c6c3e4b238311ebf93263b04b
 
 ### v56 — 2026-05-10
 
