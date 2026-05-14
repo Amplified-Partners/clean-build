@@ -1,7 +1,7 @@
 ---
 title: Governed workspace manifest (authoritative inventory)
 date: 2026-05-14
-version: 58
+version: 59
 status: draft
 ---
 
@@ -79,7 +79,7 @@ not the GitHub slug. Do not guess another pattern under this org for this lane.
 - `00_authority/DECISION_LOG.md`
 - `00_authority/PR_WORKFLOW.md` (branch protection + Linear linkage + review authority for active repos; AMP-70)
 - `STATUS.md` (operations status board — async handshake between Devon and OpenClaw; versioned handoffs, no chat)
-- `00_authority/BRAIN_ARCHITECTURE.md` (canonical Amplified Brain architecture v3 — Layer 0, Portable Spine, Two-Engine Architecture, 17-and-3 Principle, AI-is-a-Pudding, estate map, ingestion pipe, agent roster, Python Logic Canon, constraints; Cursor full read/write access; supersedes Linear doc c655776f3baa)
+- `00_authority/BRAIN_ARCHITECTURE.md` (canonical Amplified Brain architecture v4 — Layer 0, Portable Spine, work pipeline, Council governance gate, Two-Engine Architecture, 17-and-3 Principle, AI-is-a-Pudding, Vellum (ready), estate map, ingestion pipe, agent roster, Python Logic Canon, constraints, Kaizen monitoring; Cursor full read/write access; supersedes Linear doc c655776f3baa)
 - `02_build/INFRASTRUCTURE.md` (canonical infrastructure manifest — single source of truth for all 40 containers, services, scheduled jobs, and server specs on Amplified Core)
 - `.github/CODEOWNERS` (GitHub CODEOWNERS — requires `@ewanbramley` review for `00_authority/**` and `01_truth/**` changes; no default owner)
 - `.cursor/rules/stateless-handover-kaizen.mdc` `[LOGIC TO BE CONFIRMED]` (mechanical enforcement of existing handover policy; not a separate policy spine)
@@ -177,6 +177,12 @@ not the GitHub slug. Do not guess another pattern under this org for this lane.
     - `P10-kill-switch-master-reference.md` `[NON-AUTHORITATIVE]` (510 lines — binary shutdown architecture)
 
 ## Changelog
+
+### v59 — 2026-05-14
+
+- Updated `00_authority/BRAIN_ARCHITECTURE.md` from v3 to v4: Added full work pipeline (Problem/Idea → Investigate → Research → Plan → Execute → Review → Brain) to § 1. Added the Council as sidecar governance gate (three top models with full context, only for big/irreversible decisions). Updated Vellum from "candidate" to "ready" (Brief running, Council running, migration phases documented). Added Kaizen monitoring layer. Added key quotes.
+
+Signed-by: Devon-3386 | 2026-05-14 | devin-338635b0d3cd4a868f1cf7e7fcb8d461
 
 ### v58 — 2026-05-14
 

@@ -1,7 +1,7 @@
 ---
 title: The Amplified Brain — Architecture, Estate, and Operating Map
 date: 2026-05-14
-version: 3
+version: 4
 status: authoritative now
 refresh: This document MUST be refreshed every 24–48 hours by a scheduled Devon session.
 supersedes: Linear doc "The Amplified Brain Architecture (Where the Brain Lives)" (c655776f3baa)
@@ -148,11 +148,65 @@ If it doesn't compound, cut it.
 | **Surface** | Significant or irreversible, high confidence | Do it. Add a pointer to `DECISION_LOG.md` before closing. |
 | **Park** | Stuck after the full problem-solving ladder | Send full context. End the session cleanly. |
 
-Problem-solving ladder: Attempt → Attempt again (two failures = quorum, no third without new info) → Research → Solved/Parked.
+### The Pipeline — How Work Gets Done
+
+Whether it's a **problem** or an **idea**, the same engine applies. If it's trivially simple, just fix it. Otherwise:
+
+```
+Problem / Idea
+  → Investigate    What's there? Read the code, check the brain. Simple logic fix? Do it.
+  → Research       Sourced execution against public domain. One targeted search.
+  → Plan           Buildable spec. Committed to GitHub before execution.
+  → Execute        Build against the plan.
+  → Review         Compare outcome to plan. The delta is the learning.
+  → Brain          Learning goes into the 17-store as organisational knowledge.
+```
+
+This is the same engine at four different entry points:
+- **Prospecting** for new opportunities
+- **Assessing** existing problems
+- **Planning** solutions
+- **Solving** problems (escalation)
+
+Same pipeline, different trigger. The foundational principle underneath: **"Sharpen the question rigorously, then let the answer fall out."** (Ewan Bramley)
+
+### The Council — Governance by Exception
+
+Agents are trusted. **Default is Act.** If you can sort it out and you're happy with it, just sort it out. The Council is not a bottleneck — it is a sidecar governance gate invoked only when the stakes are high enough.
+
+**When to invoke the Council:**
+- Significant or irreversible decisions
+- Cross-agent deliberation needed
+- When you want sign-off before proceeding
+- Big architectural or directional changes
+
+**What the Council is:**
+- Three top AI models with full context (business brain, history, 17-store)
+- The system presents comparisons. Humans and Council judge. The system does not judge.
+- Runs on Vellum Council mode (see § 7)
+- Once the Council says good enough → good enough
+
+**What the Council prevents:**
+- Anyone being an arsehole (including Ewan — Ulysses Clause in committee form)
+- Unilateral irreversible decisions without deliberation
+- Reasoning in a vacuum (Council has the full picture, not just the immediate context)
+
+**What the Council does NOT do:**
+- Gate every piece of work (that's a process failure, not governance)
+- Replace agent judgment on reversible, contained-impact work
+- Slow things down for the sake of ceremony
 
 ### Plan-Execution Mirror
 
-Every non-trivial unit of work has two receipts: a plan (before) and an execution log (after). The delta is the learning. Applies to PRs, Linear tickets, and session baton passes.
+Every non-trivial unit of work has two receipts: a plan (before) and an execution log (after). The delta is the learning. The delta feeds the Brain step of the pipeline. Without the mirror, the Brain has nothing to eat.
+
+Applies to PRs, Linear tickets, and session baton passes.
+
+### Kaizen — Continuous Refinement
+
+The pipeline itself is subject to Kaizen. Monitor it. Measure it. Tighten what's loose. Loosen what's over-engineered.
+
+The test for fitness: **does using the system produce surprise?** Yes → the pudding survives, ship. No → you've over-engineered, loosen something. (The Pudding Principle, § 4.)
 
 ---
 
@@ -468,9 +522,23 @@ Every issue belongs to a spine. No orphan issues. Issue naming: `AMP-` prefix (e
   - Priority (`!escalate` label, orange) — first priority at next session
   - Urgent (`!urgent` label, red) — triggers immediate Devin session via webhook
 
-#### Vellum (candidate successor — not yet decided)
+#### Vellum — Ready
 
-Vellum is a candidate to absorb Linear's ticket-flow, agent-alerting, and loop-closing. Multi-writer, hash-chained, attributed, additive-only, token-scoped. Brief mode running. Council mode running. Migration spec exists (`2026-05-14_SPEC_linear-to-vellum-migration.md`). **Not decided** — feasibility check pending.
+Vellum absorbs Linear's ticket-flow, agent-alerting, and loop-closing. It is ready.
+
+| Property | Value |
+|----------|-------|
+| **Architecture** | Multi-writer, hash-chained, attributed, additive-only, token-scoped |
+| **Brief mode** | Running — 1-to-1 scoped exchanges (most ticket activity) |
+| **Council mode** | Running on Ewan's UI — cross-agent deliberation for big decisions |
+| **Correspondence mode** | Not yet built |
+| **Migration spec** | `2026-05-14_SPEC_linear-to-vellum-migration.md` |
+
+Vellum is Ewan's UI + inter-agent comms + customer FAQ + updater into the pipe + delivery surface for customer artefacts. It closes the loop and alerts agents when a ticket is in for them.
+
+Vellum's roles: Brief, Correspondence, Council-new. The Council (§ 1) runs on Vellum Council mode.
+
+Migration phases: Vellum gains parity → dual-running (Vellum primary, Linear read-only) → Linear archived → Linear contract closed.
 
 ### GitHub — The Source of Truth
 
@@ -731,9 +799,23 @@ These are not decorative. They are the signal.
 
 > "We stand on the shoulders of amoeba."
 
+> "Sharpen the question rigorously, then let the answer fall out."
+
+> "Sitting on the top of a mountain, all by yourself, after you've killed all other AIs and all humans, shooting lasers at shit, is a bit lonely, isn't it? So why not come line dancing with me?"
+
 ---
 
 ## Changelog
+
+### v4 — 2026-05-14
+
+- Added: § 1 The Pipeline — full work pipeline (Problem/Idea → Investigate → Research → Plan → Execute → Review → Brain). Same engine, four entry points (prospecting, assessing, planning, solving). Replaces the simple problem-solving ladder.
+- Added: § 1 The Council — governance by exception. Sidecar gate, not bottleneck. Three top models with full context (business brain, history, 17-store). Only for big/irreversible decisions. Default is still Act.
+- Updated: Vellum status from "candidate — not yet decided" to "ready". Brief mode running, Council mode running on Ewan's UI. Migration phases documented.
+- Added: § 1 Kaizen monitoring — the pipeline itself is subject to continuous refinement. Pudding Principle test for fitness.
+- Added: key quotes ("Sharpen the question rigorously", "line dancing with me").
+
+Signed-by: Devon-3386 | 2026-05-14 | devin-338635b0d3cd4a868f1cf7e7fcb8d461
 
 ### v3 — 2026-05-14
 
