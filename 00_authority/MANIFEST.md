@@ -1,7 +1,7 @@
 ---
 title: Governed workspace manifest (authoritative inventory)
-date: 2026-05-10
-version: 56
+date: 2026-05-14
+version: 57
 status: draft
 ---
 
@@ -79,6 +79,7 @@ not the GitHub slug. Do not guess another pattern under this org for this lane.
 - `00_authority/DECISION_LOG.md`
 - `00_authority/PR_WORKFLOW.md` (branch protection + Linear linkage + review authority for active repos; AMP-70)
 - `STATUS.md` (operations status board — async handshake between Devon and OpenClaw; versioned handoffs, no chat)
+- `00_authority/BRAIN_ARCHITECTURE.md` (canonical Amplified Brain architecture — physical map, data layers, agent swarm, Cursor full read/write access; supersedes Linear doc c655776f3baa)
 - `02_build/INFRASTRUCTURE.md` (canonical infrastructure manifest — single source of truth for all 40 containers, services, scheduled jobs, and server specs on Amplified Core)
 - `.github/CODEOWNERS` (GitHub CODEOWNERS — requires `@ewanbramley` review for `00_authority/**` and `01_truth/**` changes; no default owner)
 - `.cursor/rules/stateless-handover-kaizen.mdc` `[LOGIC TO BE CONFIRMED]` (mechanical enforcement of existing handover policy; not a separate policy spine)
@@ -176,6 +177,13 @@ not the GitHub slug. Do not guess another pattern under this org for this lane.
     - `P10-kill-switch-master-reference.md` `[NON-AUTHORITATIVE]` (510 lines — binary shutdown architecture)
 
 ## Changelog
+
+### v57 — 2026-05-14
+
+- Added `00_authority/BRAIN_ARCHITECTURE.md` under **Authoritative now**: canonical Amplified Brain architecture and physical map. Supersedes Linear document "The Amplified Brain Architecture (Where the Brain Lives)" (c655776f3baa, 2026-05-07). Key updates: data architecture now PostgreSQL + Apache AGE (graph) + pgvector/HNSW (vector) — FalkorDB and Qdrant marked deprecated per canonical Data Architecture decision (2026-05-08). Full agent swarm table added with explicit Cursor full read/write access. Data flow, locked terminology, and architectural constraint rules included. Cross-references `02_build/INFRASTRUCTURE.md` for container inventory.
+- Updated `.cursorrules` to grant Cursor explicit full read/write access to `00_authority/BRAIN_ARCHITECTURE.md` and architectural context.
+
+Signed-by: Devon-3386 | 2026-05-14 | devin-338635b0d3cd4a868f1cf7e7fcb8d461
 
 ### v56 — 2026-05-10
 

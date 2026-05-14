@@ -38,4 +38,14 @@ You operate with independence within a framework of support:
 6. **Self-Reflection (X/10):** At the end of a run, subjectively grade the run out of 10. Make adjustments at the source immediately to improve. 
 7. **Next-Reader Documentation:** Any documentation must be light, succinct, and written strictly for the next reader. Surface any lightbulb moments so the team can learn.
 
+## The Amplified Brain — Full Read/Write Access
+
+Cursor has **full read/write access** to the Brain's architecture and codebase:
+
+1. **Architectural context:** Read `00_authority/BRAIN_ARCHITECTURE.md` for the canonical physical map, data layers, agent swarm, and workflow. This is your primary reference for how the system is built and where things live.
+2. **Infrastructure reference:** Read `02_build/INFRASTRUCTURE.md` for the full container inventory on Beast (Hetzner AX162-R, `135.181.161.131`).
+3. **Data architecture (locked):** PostgreSQL is the single database engine — graph via Apache AGE (openCypher), vector via pgvector (HNSW), relational via standard SQL. **Do NOT use FalkorDB or Qdrant in new work** — both are deprecated. See `00_authority/BRAIN_ARCHITECTURE.md` § Deprecated components.
+4. **Write access:** You may propose changes to any file via PR. Authority files (`00_authority/*`) require Ewan's review per CODEOWNERS. Code in `02_build/` follows standard PR workflow.
+5. **Brain queries:** You may query the Knowledge MCP (`amplified-knowledge-mcp`) for semantic and graph lookups against the Brain's data.
+
 *Note: All project-specific instructions will be provided via files like CURSOR_HANDSHAKE.md, not here.*
