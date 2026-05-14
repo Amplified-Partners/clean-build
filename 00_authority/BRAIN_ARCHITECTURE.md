@@ -1,11 +1,11 @@
 ---
 title: The Amplified Brain — Architecture, Estate, and Operating Map
 date: 2026-05-14
-version: 4
+version: 5
 status: authoritative now
 refresh: This document MUST be refreshed every 24–48 hours by a scheduled Devon session.
 supersedes: Linear doc "The Amplified Brain Architecture (Where the Brain Lives)" (c655776f3baa)
-source-materials: Onboarding package (Devon-6098, 2026-05-14), 17-and-3 Principle (Ewan Bramley, 2026-05-14 21:19 BST), AI-is-a-Pudding insight, Systems Design & Three Specs methodology, Ingestion Pipe Rewrite spec, Linear-to-Vellum migration spec, Reflective Loop pattern audit
+source-materials: Onboarding package (Devon-6098, 2026-05-14), 17-and-3 Principle (Ewan Bramley, 2026-05-14 21:19 BST), AI-is-a-Pudding insight, Systems Design & Three Specs methodology, Ingestion Pipe Rewrite spec, Linear-to-Vellum migration spec, Reflective Loop pattern audit, Perplexity Research (99 verified sources — pipeline metrics, AI council, Kaizen, governance-by-exception, 2026-05-14)
 signed-by:
   - Devon-3386 | 2026-05-14 | devin-338635b0d3cd4a868f1cf7e7fcb8d461
 ---
@@ -175,30 +175,54 @@ Same pipeline, different trigger. The foundational principle underneath: **"Shar
 Agents are trusted. **Default is Act.** If you can sort it out and you're happy with it, just sort it out. The Council is not a bottleneck — it is a sidecar governance gate invoked only when the stakes are high enough.
 
 **When to invoke the Council:**
-- Significant or irreversible decisions
-- Cross-agent deliberation needed
+- Significant or irreversible decisions (T-1: irreversibility — Bezos Type-1)
+- Cross-agent deliberation needed (T-6: resource contention)
 - When you want sign-off before proceeding
-- Big architectural or directional changes
+- Big architectural or directional changes (T-7: architectural change)
+- Novel context with no prior execution history (T-8)
+- Goal uncertainty — confidence in correct interpretation falls below threshold (T-4)
 
 **What the Council is:**
-- Three top AI models with full context (business brain, history, 17-store)
+- Three top AI models from **different model families** with full context (business brain, history, 17-store)
+- Recommended composition (May 2026): GPT-5.5 + Claude Opus 4.7 + Gemini 3.1 Pro — maximum cross-family error decorrelation within the frontier-tier capability constraint `[STRUCTURED — Perplexity Research, 99 sources]`
 - The system presents comparisons. Humans and Council judge. The system does not judge.
 - Runs on Vellum Council mode (see § 7)
 - Once the Council says good enough → good enough
 
+**Why heterogeneity is non-negotiable:**
+- Same-family councils earn roughly half the benefit of cross-family councils `[MEASURED — Council Mode arXiv:2604.02923: 35.9% hallucination reduction cross-family vs 18.3% same-family]`
+- Inter-model **disagreement** is the reliable uncertainty signal, not agreement or self-reported confidence (self-reported confidence: R² = 0.02 against accuracy) `[MEASURED — MIT 2026, DiscoUQ arXiv:2603.20975]`
+- Sycophancy is the central failure mode: homogeneous Llama 3.3-70B showed disagreement collapse up to 86% `[MEASURED — Yao et al. arXiv:2509.23055]`. At least one Council member should have lower RLHF-alignment intensity or be given an explicit adversarial (Challenger) role `[STRUCTURED — Ersoz arXiv:2605.01986]`
+
+**Council protocol (Structured Adversarial Critique):**
+1. **Phase 1 — Independent:** Each model produces recommendation + top 3 reasons (with constitutional clause references) + top 2 self-objections. No inter-agent context.
+2. **Phase 2 — Adversarial Exchange (max 2 rounds):** Each agent sees others' outputs labelled Model A/B/C (no brand reveal). Maintain, modify, or reverse — must explicitly rebut at least one peer objection or cite the argument that changed their view. Prompt: *"Unless convinced by a specific argument you had not previously considered, maintain your initial position."*
+3. **Phase 3 — Brief to Human:** Aggregator (not a Council member) compiles vote tally, strongest for/against, constitutional clauses invoked, dissent summary. Human gets the brief, not the transcript.
+
+**Stopping rule:** Consensus only if at least two agents articulate convergence **with a specific argument**. A 3-0 verdict without an independence-check pass is a red flag, not a green light. Disagreement after 2 rounds → escalate to founder with full brief. Log Challenger acceptance rate — audit for rubber-stamping if it drops below 20% over 20 decisions `[STRUCTURED — Du et al. arXiv:2305.14325, Yao et al.]`.
+
 **What the Council prevents:**
-- Anyone being an arsehole (including Ewan — Ulysses Clause in committee form)
+- Anyone being an arsehole (including Ewan — Ulysses Clause in committee form). The Ulysses Clause is a textbook Elster (1979) pre-commitment device `[MEASURED — behavioural economics]`
 - Unilateral irreversible decisions without deliberation
 - Reasoning in a vacuum (Council has the full picture, not just the immediate context)
+- The "confident-and-wrong" failure that single-model self-assessment cannot detect `[MEASURED — Khan et al. arXiv:2402.06782: debate raises non-expert judge accuracy 48% → 76%]`
 
 **What the Council does NOT do:**
-- Gate every piece of work (that's a process failure, not governance)
-- Replace agent judgment on reversible, contained-impact work
+- Gate every piece of work (that's a process failure, not governance). CascadeDebate (arXiv:2604.12262) confirms: council as the *expensive* exception layer outperforms universal multi-agent by up to +26.75% `[STRUCTURED]`
+- Replace agent judgment on reversible, contained-impact work. Anthropic production data (Feb 2026): 80% of tool calls have ≥1 safeguard, 73% human-in-the-loop, only 0.8% of actions are irreversible `[EMERGING EMPIRICAL]`
 - Slow things down for the sake of ceremony
 
-### Plan-Execution Mirror
+**Honest caveat:** The empirical base for value-laden multi-agent deliberation is thin — all published evidence is on factual/reasoning benchmarks. The Council's primary use case (significant governance decisions) is exactly the domain where the literature is weakest. Amplified is pioneering. Compensate with rigorous protocol, explicit dissent preservation, and willingness to retire protocols that don't survive contact with reality `[STRUCTURED — acknowledged gap, Khan et al., arXiv:2505.23820]`.
+
+### Plan-Execution Mirror — The Architectural Keystone
 
 Every non-trivial unit of work has two receipts: a plan (before) and an execution log (after). The delta is the learning. The delta feeds the Brain step of the pipeline. Without the mirror, the Brain has nothing to eat.
+
+**Why this is the keystone** `[STRUCTURED — Perplexity cross-cutting synthesis]`: The Plan-Execution Mirror is the deviation-capture device that the pipeline metrics (§ 1), the Council (§ 1), the Kaizen loop (§ 1), and the governance model (§ 15) all depend on. Without explicit prior predictions, you can observe wrongness but not direction or magnitude `[STRUCTURED → MEASURED — Tetlock forecasting tournaments]`.
+
+**Calibration path:** Add a confidence level to every Plan-stage primary success criterion. Score met/not-met at Review. Compute rolling Brier-style score per contributor. This single instrumentation change unlocks the entire Tetlock/AAR toolchain `[STRUCTURED → MEASURED after ≥10 events per outcome class per contributor]`.
+
+**Research backing:** After-Action Review meta-analyses are unambiguous — structured debriefs improve performance ~25% (d=0.67, facilitated d=0.75; Tannenbaum & Cerasoli 2013, k=46, N=2,136; Keiser & Arthur 2021, k=61, d=0.79). AAR is one of the highest-effect interventions in the organisational learning literature `[MEASURED, meta-analytic]`.
 
 Applies to PRs, Linear tickets, and session baton passes.
 
@@ -207,6 +231,46 @@ Applies to PRs, Linear tickets, and session baton passes.
 The pipeline itself is subject to Kaizen. Monitor it. Measure it. Tighten what's loose. Loosen what's over-engineered.
 
 The test for fitness: **does using the system produce surprise?** Yes → the pudding survives, ship. No → you've over-engineered, loosen something. (The Pudding Principle, § 4.)
+
+**The science behind the surprise heuristic** `[STRUCTURED — Perplexity Research, four independent traditions converge]`:
+
+| Tradition | Core result | Tier |
+|-----------|------------|------|
+| **Shannon information theory** | Event with probability 1 has zero information content. A process that produces no surprise contains no information beyond what you already know. | PROVEN |
+| **Friston free energy principle** | A system that never generates prediction error cannot update its generative model — it executes prior beliefs instead of discovering new structure. | PROVEN (maths); STRUCTURED (applied) |
+| **Sutton-Barto TD-learning** | Learning happens when and only when δ ≠ 0. Dopamine neurons literally encode this prediction-error signal (Schultz 2016). | PROVEN (formalism); MEASURED (neuroscience) |
+| **Boyd's OODA** | Competitive advantage comes from better orientation, not faster cycling. A pipeline that produces no surprises has stopped updating. | STRUCTURED |
+
+**Operational surprise scoring** (path from INTUITED → STRUCTURED → MEASURED):
+
+At the start of each pipeline run, record a *prediction log*: expected outputs at each stage. At Review, score against prediction on 0–2:
+- **0** — fully predicted (no new information)
+- **1** — expected material + one or more unexpected elements
+- **2** — substantially different from prediction (model needs updating)
+
+Calibration thresholds (to be empirically set after ≥10 runs — currently STRUCTURED):
+- **< 0.3:** process over-constrained or problem trivial → **loosen**
+- **0.3–1.2:** productive exploration zone → **ship / iterate**
+- **> 1.5:** model badly miscalibrated or scope was wrong → **root-cause before next run**
+
+**Tighten-vs-loosen rule** (Spear-Bowen + Cynefin synthesis) `[STRUCTURED]`:
+- **Tighten** when: surprise exceeds upper threshold consistently; a stage shows high rework rate; a known-good method is being inconsistently applied; Cynefin Clear/Complicated for that task type.
+- **Loosen** when: surprise below lower threshold consistently; output consistent but insight density declining; pipeline producing same answers repeatedly (overfit); Cynefin Complex domain and the probe has run long enough to need a new probe.
+- **Before loosening:** verify you have a specification. **Before tightening:** verify the deviation is signal, not noise. PDSA Study step is the gate.
+
+**Cautionary finding:** 3M under Six Sigma — product vitality (sales from <5yr products) dropped from 33% to 25%; breakthrough patents declined; BCG Most Innovative ranking fell #1 → #7. *"You can't schedule invention for Wednesday at 3pm."* Standardise the wrong things and you eliminate the surprise signal `[MEASURED — 3M case study]`.
+
+**Five feedback cadences** `[STRUCTURED — Toyota Kata + Reinertsen + DORA synthesis]`:
+
+| Loop | Cadence | Signal | Decision |
+|------|---------|--------|----------|
+| Micro-PDSA | Per pipeline run | Did output match prediction? (surprise score) | Continue / adjust current obstacle |
+| Stage review | Weekly | Throughput, lead time, WIP per stage, surprise rate | Tighten or loosen stage constraints |
+| Kata coaching | Weekly | Current condition vs target condition | Next experiment selection |
+| Operations review | Monthly | Flow metrics, output quality | Policy updates, WIP limit adjustments |
+| Brain (double-loop) | Quarterly | Are governing assumptions still valid? | Challenge update, target revision |
+
+**Start with the minimum:** Micro-PDSA + weekly stage review + quarterly Brain. Add the others when the foundations hold.
 
 ---
 
@@ -760,6 +824,22 @@ This document has a `refresh` field in its frontmatter. It MUST be updated every
 
 If the document is more than 48 hours stale, treat it as `[LOGIC TO BE CONFIRMED]` until refreshed.
 
+### Pipeline Health Metrics
+
+These metrics track whether the pipeline (§ 1) is producing value. All start at STRUCTURED; path to MEASURED is ≥10 scored events per category `[STRUCTURED — DORA/Tetlock/Reinertsen/Bohn synthesis, Perplexity Research]`.
+
+| Metric | What it measures | Cadence |
+|--------|-----------------|----------|
+| **Plan-Execution Calibration** (Brier-style) | Accuracy of predictions made at Plan stage | Per work unit, rolling 30d |
+| **Stage transition lead time** (mean + P85) | How long work sits at each pipeline stage | Per unit, trend monthly |
+| **Flow Efficiency** (active / elapsed) | Ratio of active work time to total elapsed time. Most orgs operate at <20% `[MEASURED — Kersten Flow Framework]` | Per unit, monthly trend |
+| **Rework Rate** | Regression-to-earlier-stage rate, split by trigger | Monthly |
+| **Brain Reuse Rate** | accesses-in-90d / items created. Signal of a healthy knowledge base is reuse rate, not content volume `[STRUCTURED — Davenport & Prusak]` | Monthly |
+| **Double-Loop Rate** | L3 (governing assumption challenged) findings / total Review items | Per Review |
+| **Surprise Rate** | Average surprise score (0–2) across pipeline runs (see § 1 Kaizen) | Per run, trend monthly |
+
+**The single highest-leverage instrumentation choice** is making the Plan-Execution Mirror numerically scorable. Anything that lets you compute a delta in numbers turns retrospectives from narrative into measurement.
+
 ---
 
 ## 15. Architectural Constraints (Hard Rules)
@@ -776,6 +856,53 @@ If the document is more than 48 hours stale, treat it as `[LOGIC TO BE CONFIRMED
 10. **Blinkers without ceilings.** The constraints are tight. The quality is unlimited.
 11. **Don't lobotomise the AI.** AI reasons on 17, never on 3. If inputs are compressed when full cardinality was available, the reasoning is operating at the wrong tier. Refuse it.
 12. **The pipe does not promote.** The ingestion pipe routes and tags. Promotion happens outside the pipe, through the spine's gates, after human/enforcer review.
+13. **Governance by exception, not permission.** Over-governing reversible (Type-2) decisions is itself a failure mode (Bezos 2015). Outcome-based governance is formally preferred for low-programmability creative work (Eisenhardt 1989). Treating a steward as an agent creates the agency problem (Davis et al. 1997) `[MEASURED]`. The audit trail + plan-execution mirror + exception-only escalation is the empirically dominant governance architecture for creative work `[STRUCTURED — Holmström 1979, Vasarhelyi continuous auditing, Weick & Sutcliffe HRO, Anthropic 2026 production data]`.
+14. **Council heterogeneity is non-negotiable.** Three different model families. Same-family or homogeneous councils are dominated on cost-accuracy by self-consistency with a single strong model `[MEASURED — Zhang et al. arXiv:2502.08788]`.
+15. **Reversibility classification is load-bearing.** Escalation trigger T-1 (irreversibility) depends on the agent correctly classifying its action as reversible or irreversible. Calibrating this classifier is a P0 engineering task `[STRUCTURED — Anthropic 0.8% irreversibility figure is self-classification, accuracy under edge conditions unvalidated]`.
+
+---
+
+## 16. Research Grounding — The Cross-Cutting Control Law
+
+`[STRUCTURED — synthesis of 99 verified primary/secondary sources, Perplexity Research, 2026-05-14]`
+
+Across pipeline metrics, Council deliberation, Kaizen, and governance-by-exception, the literature converges on one structural answer:
+
+> **Trust the model by default. Spend attention on deviation. Use deviation as the learning signal.**
+
+This is not a slogan. It is what:
+- Holmström (1979) [proved](https://gwern.net/doc/economics/1979-holmstrom.pdf) about audit signals — *any* informative deviation has positive contract value
+- Shannon (1948) proved about information — surprise is information, predicted output is not
+- Friston (free energy principle) and Sutton-Barto (TD learning) showed about adaptive systems — learning happens only where prediction fails
+- Spear & Bowen ([HBR 1999](https://hbr.org/1999/09/decoding-the-dna-of-the-toyota-production-system)) found at Toyota — every specification is a hypothesis; every deviation is data
+- The DORA programme ([2024 State of DevOps](https://dora.dev/research/2024/dora-report/)) [N≈39,000] measures in software delivery — the four core metrics are all deviation-from-target
+
+**Three load-bearing patterns connect the four domains:**
+
+1. **Information lives in deviation.** A pipeline that produces no surprises produces no information; an audit trail of fully-predicted events has no informational value. The Plan-Execution Mirror is the deviation-capture device that all four answers depend on.
+
+2. **Standardise to make deviations visible, not to suppress them.** The rigidity of specifications is what makes deviations detectable. A process with no standard produces no signal. Standardise the wrong things and you eliminate the surprise signal that indicates genuine learning (3M/Six Sigma case).
+
+3. **Trust is earned by demonstrated alignment, then defended by pre-commitment.** Delegation tracks demonstrated alignment (Leana 1986, Yukl & Fu 1999, ADP 6-0). The Ulysses Clause prevents earned trust from being eroded by a moment of expedience (Elster 1979). The Council prevents trust from being extended to decisions it was not earned for. The Min-Rule prevents trust in a value from leaking across an epistemic boundary.
+
+**What the research validates in Amplified's design:**
+
+| Amplified feature | Research analogue | Alignment |
+|---|---|---|
+| Agents trusted by default | Stewardship theory + mission command | **Strong** |
+| Council = cross-agent deliberation | HRO deference to expertise + CRM optimal authority gradient | **Strong** |
+| Ulysses Clause | Elster pre-commitment + Constitutional AI | **Strong** |
+| Audit trail + plan-execution mirror | Holmström informativeness + Vasarhelyi continuous auditing | **Strong** |
+| Exception triggers (significant/irreversible) | Bezos Type-1/Type-2 + ADP 6-0 reporting triggers | **Strong** |
+| Min-Rule epistemic tagging | No direct analogue; closest is HRO "reluctance to simplify" | **Novel** |
+| Architectural heterogeneity in Council | Hong-Page, Kuncheva-Whitaker, Yao et al. | **Strong** |
+| Surprise heuristic | Shannon + Friston + Sutton-Barto + Boyd OODA convergence | **Strong (theory); unvalidated (applied)** |
+
+**Full Perplexity research files** (99 sources, per-claim tier-tagged, valid 90d management / 6mo AI/ML):
+- `2026-05-14_RESEARCH_pipeline-council-kaizen-governance.md` — executive synthesis
+- `q1_pipeline_metrics.md` — pipeline monitoring (25 sources)
+- `q2_ai_council.md` — multi-agent deliberation (25 sources)
+- `SYNTHESIS_council_of_three.md` — Council of three architecture
 
 ---
 
@@ -806,6 +933,18 @@ These are not decorative. They are the signal.
 ---
 
 ## Changelog
+
+### v5 — 2026-05-14
+
+- Incorporated Perplexity research (99 verified sources across pipeline metrics, AI council deliberation, Kaizen for knowledge-work, governance-by-exception). Research files referenced alongside this document.
+- § 1 Council: Added recommended composition (GPT-5.5 + Claude Opus 4.7 + Gemini 3.1 Pro), heterogeneity rationale with evidence (35.9% vs 18.3% hallucination reduction), Structured Adversarial Critique protocol (3 phases), stopping rule (argument convergence, not vote count), Challenger role, sycophancy mitigations, CascadeDebate evidence for exception-layer design, honest caveat on value-laden deliberation evidence gap.
+- § 1 Plan-Execution Mirror: Elevated to "architectural keystone" with research backing. Added Brier-style calibration path and AAR meta-analytic evidence (d=0.67–0.79, highest-effect intervention class).
+- § 1 Kaizen: Added four-tradition scientific backing for surprise heuristic (Shannon, Friston, Sutton-Barto, Boyd). Added operational surprise scoring (0–2 scale), calibration thresholds, tighten-vs-loosen rule (Spear-Bowen + Cynefin), 3M cautionary case, five feedback cadences.
+- § 14: Added Pipeline Health Metrics table (7 metrics, cadences, paths to MEASURED).
+- § 15: Added constraints #13 (governance by exception), #14 (Council heterogeneity non-negotiable), #15 (reversibility classification is load-bearing).
+- Added § 16 Research Grounding — the cross-cutting control law ("trust the model, spend attention on deviation, use deviation as the learning signal"), three load-bearing patterns, validation table mapping Amplified features to research analogues.
+
+Signed-by: Devon-3386 | 2026-05-14 | devin-338635b0d3cd4a868f1cf7e7fcb8d461
 
 ### v4 — 2026-05-14
 

@@ -1,7 +1,7 @@
 ---
 title: Governed workspace manifest (authoritative inventory)
 date: 2026-05-14
-version: 59
+version: 60
 status: draft
 ---
 
@@ -79,7 +79,7 @@ not the GitHub slug. Do not guess another pattern under this org for this lane.
 - `00_authority/DECISION_LOG.md`
 - `00_authority/PR_WORKFLOW.md` (branch protection + Linear linkage + review authority for active repos; AMP-70)
 - `STATUS.md` (operations status board — async handshake between Devon and OpenClaw; versioned handoffs, no chat)
-- `00_authority/BRAIN_ARCHITECTURE.md` (canonical Amplified Brain architecture v4 — Layer 0, Portable Spine, work pipeline, Council governance gate, Two-Engine Architecture, 17-and-3 Principle, AI-is-a-Pudding, Vellum (ready), estate map, ingestion pipe, agent roster, Python Logic Canon, constraints, Kaizen monitoring; Cursor full read/write access; supersedes Linear doc c655776f3baa)
+- `00_authority/BRAIN_ARCHITECTURE.md` (canonical Amplified Brain architecture v5 — Layer 0, Portable Spine, work pipeline, Council governance gate (SAC protocol, heterogeneity, Challenger role), Two-Engine Architecture, 17-and-3 Principle, AI-is-a-Pudding, Vellum (ready), estate map, ingestion pipe, agent roster, Python Logic Canon, Kaizen (surprise heuristic with four-tradition science), pipeline health metrics, research grounding (99 Perplexity sources), fifteen hard constraints + governance-by-exception; Cursor full read/write access; supersedes Linear doc c655776f3baa)
 - `02_build/INFRASTRUCTURE.md` (canonical infrastructure manifest — single source of truth for all 40 containers, services, scheduled jobs, and server specs on Amplified Core)
 - `.github/CODEOWNERS` (GitHub CODEOWNERS — requires `@ewanbramley` review for `00_authority/**` and `01_truth/**` changes; no default owner)
 - `.cursor/rules/stateless-handover-kaizen.mdc` `[LOGIC TO BE CONFIRMED]` (mechanical enforcement of existing handover policy; not a separate policy spine)
@@ -177,6 +177,13 @@ not the GitHub slug. Do not guess another pattern under this org for this lane.
     - `P10-kill-switch-master-reference.md` `[NON-AUTHORITATIVE]` (510 lines — binary shutdown architecture)
 
 ## Changelog
+
+### v60 — 2026-05-14
+
+- Updated `00_authority/BRAIN_ARCHITECTURE.md` from v4 to v5: Incorporated Perplexity research (99 verified sources). Council: added recommended composition (GPT-5.5 + Claude Opus 4.7 + Gemini 3.1 Pro), heterogeneity evidence, SAC protocol, stopping rule, Challenger role, sycophancy mitigations. Plan-Execution Mirror: elevated to "architectural keystone", added AAR meta-analytic evidence (d=0.67–0.79). Kaizen: added four-tradition scientific backing (Shannon/Friston/Sutton-Barto/Boyd), operational surprise scoring, tighten-vs-loosen rule, 3M cautionary case, five feedback cadences. Added pipeline health metrics table (§ 14). Added three new constraints (#13 governance-by-exception, #14 Council heterogeneity, #15 reversibility classification). Added § 16 Research Grounding with cross-cutting control law and validation table.
+- Updated `.cursorrules` to reference v5 content.
+
+Signed-by: Devon-3386 | 2026-05-14 | devin-338635b0d3cd4a868f1cf7e7fcb8d461
 
 ### v59 — 2026-05-14
 
