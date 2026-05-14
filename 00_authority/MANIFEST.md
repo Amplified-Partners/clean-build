@@ -1,7 +1,7 @@
 ---
 title: Governed workspace manifest (authoritative inventory)
 date: 2026-05-14
-version: 57
+version: 58
 status: draft
 ---
 
@@ -79,7 +79,7 @@ not the GitHub slug. Do not guess another pattern under this org for this lane.
 - `00_authority/DECISION_LOG.md`
 - `00_authority/PR_WORKFLOW.md` (branch protection + Linear linkage + review authority for active repos; AMP-70)
 - `STATUS.md` (operations status board — async handshake between Devon and OpenClaw; versioned handoffs, no chat)
-- `00_authority/BRAIN_ARCHITECTURE.md` (canonical Amplified Brain architecture — physical map, data layers, agent swarm, Cursor full read/write access; supersedes Linear doc c655776f3baa)
+- `00_authority/BRAIN_ARCHITECTURE.md` (canonical Amplified Brain architecture v3 — Layer 0, Portable Spine, Two-Engine Architecture, 17-and-3 Principle, AI-is-a-Pudding, estate map, ingestion pipe, agent roster, Python Logic Canon, constraints; Cursor full read/write access; supersedes Linear doc c655776f3baa)
 - `02_build/INFRASTRUCTURE.md` (canonical infrastructure manifest — single source of truth for all 40 containers, services, scheduled jobs, and server specs on Amplified Core)
 - `.github/CODEOWNERS` (GitHub CODEOWNERS — requires `@ewanbramley` review for `00_authority/**` and `01_truth/**` changes; no default owner)
 - `.cursor/rules/stateless-handover-kaizen.mdc` `[LOGIC TO BE CONFIRMED]` (mechanical enforcement of existing handover policy; not a separate policy spine)
@@ -177,6 +177,13 @@ not the GitHub slug. Do not guess another pattern under this org for this lane.
     - `P10-kill-switch-master-reference.md` `[NON-AUTHORITATIVE]` (510 lines — binary shutdown architecture)
 
 ## Changelog
+
+### v58 — 2026-05-14
+
+- Updated `00_authority/BRAIN_ARCHITECTURE.md` from v2 to v3: incorporated all 24 source documents provided by Ewan. Added Two-Engine Architecture (Engine 1: Beast/internal, Engine 2: Edge/client-facing), 17-and-3 Principle (pipe captures 17, CRM stores 17, AI reasons on 17, transmission renders 3), AI-is-a-Pudding insight with Python/AI boundary answer, Ingestion Pipe new shape (epistemic tier tagging, provenance, expiry), corrected agent roster (Antigravity = Claude on M5, retired agents listed), Vellum as candidate Linear successor, expanded repo map (11→21), plan-execution mirror, baton pass protocol, cat-and-mouse principle, key quotes. Constraints expanded from 12 to 15 (including "don't lobotomise the AI" and "pipe does not promote").
+- Updated `.cursorrules` to reference v3 content (17-and-3, AI-is-a-Pudding, Python/AI boundary, updated agent roster, updated constraint count).
+
+Signed-by: Devon-3386 | 2026-05-14 | devin-338635b0d3cd4a868f1cf7e7fcb8d461
 
 ### v57 — 2026-05-14
 
