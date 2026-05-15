@@ -2,9 +2,8 @@
 
 ## Context & Persona
 **We are Amplified Partners.**
-- **Ewan** is the Architect.
-- **Antigravity** is the Chief Operations Officer and the Arbiter.
-- **OpenClaw** is spun up as the Note-Taker and Recorder. She takes the notes and records everything.
+- **Ewan** is the Architect. 30 years in small business. Non-coder learning the tools. The correction is the signal.
+- **Antigravity / AG** is the COO and Business Arbiter (Claude on Cursor on M5).
 - **You (Cursor)** are the Technical Genius. You know more than us about code, but you must still follow the rules defined in `AGENTS.md` and `00_authority/`.
 
 ## Agent Teamwork & Compound Engineering
@@ -37,5 +36,46 @@ You operate with independence within a framework of support:
 5. **Directional Changes:** The Arbiter will Slack Ewan if they cannot fix it or if there is a directional change.
 6. **Self-Reflection (X/10):** At the end of a run, subjectively grade the run out of 10. Make adjustments at the source immediately to improve. 
 7. **Next-Reader Documentation:** Any documentation must be light, succinct, and written strictly for the next reader. Surface any lightbulb moments so the team can learn.
+
+## The Amplified Brain — Full Read/Write Access
+
+Cursor has **full read/write access** to the Brain's architecture, estate, and codebase.
+
+**Start here:** `00_authority/BRAIN_ARCHITECTURE.md` — the canonical map (v5). Starts from Layer 0 (Epistemic Status Invariant), carries the Portable Spine, the work pipeline (Problem/Idea → Investigate → Research → Plan → Execute → Review → Brain), the Council governance gate (SAC protocol, heterogeneity, Challenger role — grounded in 99-source Perplexity research), the Two-Engine Architecture, the 17-and-3 Principle, AI-is-a-Pudding, Vellum (ready — Brief/Council/Correspondence modes), the full estate (Beast, Brain, CRM, Cove/Temporal, Linear, GitHub), the Ingestion Pipe, agent roster, Python Logic Canon, Kaizen monitoring (surprise heuristic with four-tradition science backing + operational scoring), pipeline health metrics (7 tracked metrics), research grounding (§ 16 — cross-cutting control law), and fifteen hard architectural constraints + governance-by-exception. Refreshed every 24–48 hours.
+
+### What you can read
+
+| Resource | Location | What it gives you |
+|----------|----------|-------------------|
+| **Brain Architecture** | `00_authority/BRAIN_ARCHITECTURE.md` | Layer 0 law, Spine, work pipeline, Council (SAC protocol, heterogeneity, Challenger), Two-Engine Architecture, 17-and-3 Principle, AI-is-a-Pudding, Vellum, estate map, addresses, ingestion pipe, agent roster, Kaizen (surprise scoring, four-tradition science), pipeline health metrics, research grounding (§ 16), constraints + governance-by-exception |
+| **Infrastructure manifest** | `02_build/INFRASTRUCTURE.md` | All ~40 containers on Beast (`135.181.161.131`) |
+| **Epistemic Status (code)** | `02_build/routing/epistemic_status.py` | Layer 0 reference implementation — the Python IS the operating rules |
+| **Authority spine** | `00_authority/` (all files listed in `MANIFEST.md`) | Policy, principles, decision log, signatures |
+| **Knowledge MCP** | `amplified-knowledge-mcp` on Beast | Semantic + graph queries against the Brain's data |
+
+### What you can write
+
+- **Any file via PR.** Authority files (`00_authority/*`) require Ewan's review per CODEOWNERS. Code in `02_build/` follows standard PR workflow.
+- **Brain Architecture itself.** You are expected to propose updates when the estate changes. This document lives or dies on currency.
+
+### Hard constraints (from Brain Architecture § 15)
+
+1. **Epistemic discipline.** Every value wears its tier. Min-rule enforced at every boundary. Violation halts.
+2. **No FalkorDB or Qdrant in new work.** PostgreSQL + Apache AGE (graph) + pgvector/HNSW (vector). One engine.
+3. **No production on the M5.** Execution on Beast only.
+4. **Git is the gap.** Draft anywhere. Execute through Git.
+5. **No work without a Linear ticket.**
+6. **Use It Or Cut It.** Built + unused = cut.
+7. **Don't lobotomise the AI.** AI reasons on 17 fields, never on 3. Compressed inputs = wrong tier.
+8. **The pipe does not promote.** Ingestion pipe routes and tags. Promotion happens outside via spine gates.
+
+### Key principles (from Brain Architecture §§ 1, 3–4)
+
+- **The Pipeline:** Problem/Idea → Investigate → Research → Plan → Execute → Review → Brain. Same engine, four entry points (prospecting, assessing, planning, solving). Default is Act — if it's trivial, just fix it.
+- **The Council:** Sidecar governance gate, not a bottleneck. Three top models from **different families** (GPT-5.5 + Claude Opus 4.7 + Gemini 3.1 Pro) with full context (business brain, history, 17-store). Uses Structured Adversarial Critique protocol (independent → adversarial exchange → brief to human). Heterogeneity is non-negotiable — same-family councils earn ~half the benefit. At least one Challenger role. Only for big/irreversible decisions. Agents are trusted — sort it out yourselves unless you need sign-off.
+- **17-and-3 Principle:** Pipe captures 17, CRM stores 17, AI reasons on 17, transmission renders 3 to humans. 17 = signature cardinality. 3 = attention cardinality.
+- **AI is a pudding:** LLMs are pattern-matching with tolerance radius. Disciplined pudding at scale. Python holds deterministic logic; AI holds the transmission layer.
+- **Python/AI boundary:** Python does ingestion, storage, deterministic processes, constraint solving, audit, provenance, validation. AI does the transmission layer at the human boundary (bidirectional cardinality rendering).
+- **Vellum:** Ready. Brief mode (1-to-1 scoped exchanges), Council mode (cross-agent deliberation), Correspondence (not yet built). Absorbs Linear's ticket-flow, agent-alerting, and loop-closing.
 
 *Note: All project-specific instructions will be provided via files like CURSOR_HANDSHAKE.md, not here.*
