@@ -1,8 +1,13 @@
 ---
 title: Governed workspace manifest (authoritative inventory)
-date: 2026-05-10
-version: 56
+date: 2026-05-14
+version: 57
 status: draft
+changelog:
+  - version: 57
+    date: 2026-05-14
+    change: "Added DATA_ARCHITECTURE.md (authoritative) + AI_CONTEXT_SCHEMA.md (candidate)"
+    signed_by: Devon-4c30
 ---
 
 <!-- markdownlint-disable-file MD013 -->
@@ -78,6 +83,7 @@ not the GitHub slug. Do not guess another pattern under this org for this lane.
 - `00_authority/BUILD_LOOP.md`
 - `00_authority/DECISION_LOG.md`
 - `00_authority/PR_WORKFLOW.md` (branch protection + Linear linkage + review authority for active repos; AMP-70)
+- `00_authority/DATA_ARCHITECTURE.md` (canonical data layer: PostgreSQL + Apache AGE + pgvector/HNSW; supersedes all FalkorDB/Qdrant references)
 - `STATUS.md` (operations status board — async handshake between Devon and OpenClaw; versioned handoffs, no chat)
 - `02_build/INFRASTRUCTURE.md` (canonical infrastructure manifest — single source of truth for all 40 containers, services, scheduled jobs, and server specs on Amplified Core)
 - `.github/CODEOWNERS` (GitHub CODEOWNERS — requires `@ewanbramley` review for `00_authority/**` and `01_truth/**` changes; no default owner)
@@ -111,6 +117,7 @@ not the GitHub slug. Do not guess another pattern under this org for this lane.
   - `01_truth/processes/2026-03_sops-slas-business-process-documentation_v1.md` `[LOGIC TO BE CONFIRMED]` (872 lines — world-class SOP design framework, SLA architecture, AI-assisted SOP engine; source: Perplexity process corpus; AMP-183)
 - `01_truth/schemas/` `[LOGIC TO BE CONFIRMED]` (schema contracts to be populated)
   - `01_truth/schemas/README.md` `[LOGIC TO BE CONFIRMED]` (folder purpose stub)
+  - `01_truth/schemas/AI_CONTEXT_SCHEMA.md` `[LOGIC TO BE CONFIRMED]` (19-field AI context schema — 7 clusters, hard ceiling 20, every field has declared drop_breaks; source: Ewan Bramley, 2026-05-14)
   - `01_truth/schemas/2026-03_framework-resolution_apqc-pdca-bpmn_v1.md` `[LOGIC TO BE CONFIRMED]` (canonical framework stack decision: APQC PCF → BPMN → DMN → CMMN → PDCA/DMAIC → ISO 9001; source: Perplexity process corpus; AMP-183)
   - `01_truth/schemas/2026-05_public-data-validation_v1.md` `[LOGIC TO BE CONFIRMED]` (public-data verdict schema: 3-band PROVEN/PLAUSIBLE/DISPROVEN + BLOCKED gap-marker; additive `VALIDATION:` field on catalogue; reference impl at `02_build/validators/`)
 - `00_authority/AGENT_ROUTING.md` `[LOGIC TO BE CONFIRMED]` (agent-layer routing — which agent runs which task; stacks on top of `cost-tools/token_proxy.py` model-layer routing; eight rules; AMP-28; status: candidate — pending Ewan review per `DECISION_LOG.md`)
