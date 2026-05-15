@@ -1,7 +1,7 @@
 ---
 title: Governed workspace manifest (authoritative inventory)
-date: 2026-05-14
-version: 60
+date: 2026-05-15
+version: 61
 status: draft
 ---
 
@@ -85,6 +85,8 @@ not the GitHub slug. Do not guess another pattern under this org for this lane.
 - `.cursor/rules/stateless-handover-kaizen.mdc` `[LOGIC TO BE CONFIRMED]` (mechanical enforcement of existing handover policy; not a separate policy spine)
 - `.cursor/hooks.json` `[LOGIC TO BE CONFIRMED]` (**No hooks** — `"hooks": {}`. **TESTING NEED:** reinstatement gate → `.cursor/HOOKS_TESTING_NEED.md`; history → `03_shadow/2026-04-16_stop-hook_followup-checklist-loop_bug-report.md` § Final resolution)
 - `.cursor/hooks/stateless-handover-stop.py` `[LOGIC TO BE CONFIRMED]` (**Dormant / testing only** — **not invoked** while `hooks` is empty; do not treat as enforcement)
+
+- `00_authority/DIGITAL-MARKETING-AUTOMATION-VIDEO-REMOTION-COMPLETE-GUIDE-2026-05-15.md` `[LOGIC TO BE CONFIRMED]` (consolidated reference — digital marketing suite, full stack marketing, automation frameworks, video production, Remotion pipeline, 14-agent marketing engine, integration points; synthesised from 8 source docs with citations [77-cite-0] through [77-cite-6]; status: draft, pending Ewan review)
 
 ## Candidate authority (logic to be confirmed)
 
