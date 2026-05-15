@@ -56,6 +56,13 @@ These rules apply to ALL code review (Copilot, DeepSeek, human). Flag violations
 - PR title or body MUST reference a Linear ticket (AMP-XXX)
 - Plan-Execution Mirror: PR description = what you planned + what actually happened + the delta
 
+## Data Architecture (canonical)
+
+- **One engine, three capabilities:** PostgreSQL + Apache AGE (graph) + pgvector/HNSW (vector).
+- Do NOT introduce FalkorDB or Qdrant dependencies in new work — both are deprecated.
+- Existing FalkorDB/Qdrant code is legacy — mark it, migrate it, or flag it.
+- Source of truth: `clean-build/00_authority/DATA_ARCHITECTURE.md`
+
 ## Compound Engineering Check
 
 Every PR should make the next unit of work easier, not harder. Ask:
@@ -64,4 +71,4 @@ Every PR should make the next unit of work easier, not harder. Ask:
 - Is there a reusable pattern here that should be extracted?
 
 ---
-*Amplified Partners | Maintained by Devon | Last updated 2026-05-12*
+*Amplified Partners | Maintained by Devon | Last updated 2026-05-14*
