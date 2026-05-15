@@ -180,11 +180,14 @@ PostgreSQL (cove-postgres:5432)
 
 ### Migration Scope
 
+**Note:** AMP-302 (2026-05-11) already completed bulk data migration to relational tables. See `02_build/brain-migration/README.md` for what was migrated. The scripts in `02_build/scripts/` target the next step: Apache AGE graph format + pgvector HNSW verification.
+
 | Source | Target | Records | Status |
 |--------|--------|---------|--------|
-| FalkorDB → Apache AGE | 4 graphs, 9,000 nodes | **Planned** |
-| Qdrant → pgvector | 57,434 embeddings (384-dim) | **Planned** |
-| Qdrant `llm_cache` → pgvector table | Unknown count | **Planned** |
+| FalkorDB → relational tables | `entities`, `episodes`, `relationships`, `episode_entities` | 53,959 + 4,257 + 34,488 + 59,192 | **Completed** (AMP-302) |
+| Qdrant → `knowledge_vectors` | pgvector table | 57,434 | **Completed** (AMP-302) |
+| FalkorDB relational → Apache AGE graphs | openCypher graph format | 9,000 nodes | **Planned** (new script) |
+| Qdrant `llm_cache` → `semantic_cache` | pgvector HNSW table | Unknown count | **Planned** (new script) |
 
 ---
 

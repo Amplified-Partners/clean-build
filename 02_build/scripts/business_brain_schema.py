@@ -515,7 +515,7 @@ class BusinessBrainContextCreate(BaseModel):
     @classmethod
     def validate_pudding(cls, v: str) -> str:
         import re
-        if not re.match(r"^[1-7]\\.[1-7]\\.[1-7]\\.[1-6]$", v):
+        if not re.match(r"^[1-7]\.[1-7]\.[1-7]\.[1-6]$", v):
             raise ValueError("pudding_label must be X.X.X.X (1-7.1-7.1-7.1-6)")
         return v
 
