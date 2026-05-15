@@ -211,9 +211,9 @@ jobs:
           GH_TOKEN: ${{ secrets.AUTO_MERGE_PAT }}
         run: |
           if [ "${{ steps.authority_check.outputs.touches_authority }}" == "true" ]; then
-            gh pr review ${{ github.event.pull_request.number }} --approve --body "Five Rods Authority Review: PASSED. All five principles intact. Auto-approved."
+            gh pr review ${{ github.event.pull_request.number }} --approve --body "Five Rods Authority Review: PASSED. All five principles intact. Auto-approved." || echo "::notice::Self-approval failed (GitHub blocks approving your own PR). Review content was posted as comment. Manual merge required."
           else
-            gh pr review ${{ github.event.pull_request.number }} --approve --body "Five Rods Review: PASSED. Auto-approved."
+            gh pr review ${{ github.event.pull_request.number }} --approve --body "Five Rods Review: PASSED. Auto-approved." || echo "::notice::Self-approval failed (GitHub blocks approving your own PR). Review content was posted as comment. Manual merge required."
           fi
 
       - name: Enable auto-merge
@@ -221,7 +221,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.AUTO_MERGE_PAT }}
         run: |
-          gh pr merge ${{ github.event.pull_request.number }} --auto --squash
+          gh pr merge ${{ github.event.pull_request.number }} --auto --squash || echo "::notice::Auto-merge could not be enabled (likely missing required approval). Merge manually."
 
       - name: Block on Five Rods violation
         if: steps.review.outputs.verdict == 'changes_requested'
