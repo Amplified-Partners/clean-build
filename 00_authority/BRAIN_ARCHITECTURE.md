@@ -1,13 +1,14 @@
 ---
 title: The Amplified Brain — Architecture, Estate, and Operating Map
-date: 2026-05-14
-version: 5
+date: 2026-05-16
+version: 6
 status: authoritative now
 refresh: This document MUST be refreshed every 24–48 hours by a scheduled Devon session.
 supersedes: Linear doc "The Amplified Brain Architecture (Where the Brain Lives)" (c655776f3baa)
 source-materials: Onboarding package (Devon-6098, 2026-05-14), 17-and-3 Principle (Ewan Bramley, 2026-05-14 21:19 BST), AI-is-a-Pudding insight, Systems Design & Three Specs methodology, Ingestion Pipe Rewrite spec, Linear-to-Vellum migration spec, Reflective Loop pattern audit, Perplexity Research (99 verified sources — pipeline metrics, AI council, Kaizen, governance-by-exception, 2026-05-14)
 signed-by:
   - Devon-3386 | 2026-05-14 | devin-338635b0d3cd4a868f1cf7e7fcb8d461
+  - Devon-REFRESH | 2026-05-16 | devin-86d5e95f757c4f4b8de78d3ec7355114
 ---
 
 <!-- markdownlint-disable-file MD013 -->
@@ -406,9 +407,9 @@ The sovereign compute infrastructure. Everything production runs here.
 | **IP** | `135.181.161.131` |
 | **CPU** | AMD EPYC 9454P 48-Core (96 threads) |
 | **RAM** | 256 GB DDR5 |
-| **Disk** | 1.8 TB RAID (`/dev/md2`), ~170 GB used (11%) |
+| **Disk** | 1.8 TB RAID (`/dev/md2`), ~410 GB used (25%) |
 | **OS** | Ubuntu 24.04.4 LTS (Noble Numbat) |
-| **Containers** | ~40 running |
+| **Containers** | 44 total (31 healthy, 9 running/no healthcheck, 2 exited, 1 created/never started) |
 | **Docker network** | `amplified-net` |
 | **SSH (Devon)** | `ssh -i ~/.ssh/beastkey ubuntu@135.181.161.131` |
 
@@ -431,12 +432,27 @@ The Brain is not a folder. It is three capabilities running inside one database 
 
 #### Deprecated (containers still running — legacy data, migration planned)
 
-| Old | Replaced by | Legacy address | Migration scope |
-|-----|------------|----------------|----------------|
-| FalkorDB | PostgreSQL + Apache AGE | `falkordb:6379` | 9,000 nodes across 4 graphs |
-| Qdrant | PostgreSQL + pgvector (HNSW) | `qdrant:6333-6334` | 57,434 embeddings (384-dim) |
+| Old | Replaced by | Legacy address | Migration status |
+|-----|------------|----------------|------------------|
+| FalkorDB | PostgreSQL + Apache AGE | `falkordb:6379` | **Decommissioned.** Data migrated. `falkordb-temp` container still present (bridge network, no restart policy). AMP-330. |
+| Qdrant | PostgreSQL + pgvector (HNSW) | `qdrant:6333-6334` | **Decommissioned.** 57,434 embeddings migrated to `knowledge_vectors` table. Dead code purged (AMP-329, clean-build #111). |
 
 Per canonical Data Architecture decision (2026-05-08). **Do NOT use FalkorDB or Qdrant in new work.** AMP-141, AMP-139, clean-build PRs #54/#55.
+
+#### Brain database stats (as of 2026-05-15, AMP-347 survey)
+
+| Table / Layer | Count |
+|---------------|-------|
+| `amplified_brain` database size | 21 GB |
+| `knowledge_vectors` (pgvector) | 163,554 rows |
+| `entities` (relational) | 53,959 rows |
+| `entity_signatures` | 118,777 rows |
+| `relationships` | 34,488 rows |
+| `episodes` | 4,257 rows |
+| AGE graph `business_brain` — Entity nodes | 48,201 |
+| AGE graph `business_brain` — Document nodes | 41,120 (was 5,709 — 35K labelled by AMP-345 APDS rewrite) |
+| AGE graph `business_brain` — Category nodes | 48 |
+| Total databases on `cove-postgres` | 13 |
 
 #### Terminology (locked)
 
@@ -466,6 +482,15 @@ PII separation: `contacts` (business data) ↔ `contact_pii` (personal data). Mi
 
 Under the 17-and-3 Principle, the CRM is the **17-store** — the substrate from which surfaces are rendered. Humans go to surfaces. The CRM is where the system goes.
 
+### Container Network Topology (as of 2026-05-15)
+
+| Network | Container count | Notes |
+|---------|----------------|-------|
+| `amplified-net` | 37 | Primary — all production services |
+| `docker_default` | 3 | **Isolated** — `docker-langfuse-1`, `docker-nightscout-1` cannot reach `cove-postgres`. `vellum` is dual-network. Migration needed (AMP-348 partially addressed). |
+| `bridge` | 3 | `ollama-2`, `ollama-pudding`, `watchtower` |
+| `cove-internal` | 2 | `heal-watchdog`, `socket-proxy` |
+
 ### Cove & Temporal (Workflow Orchestration)
 
 | Service | Address | Purpose |
@@ -483,7 +508,7 @@ Compose: `/root/cove-repo/infrastructure/docker-compose.yml`
 
 | Service | Address | Purpose |
 |---------|---------|---------|
-| **Ollama** | `ollama:11434` | Local LLM inference (Llama 3.1 8B/70B, Qwen3 Coder 30B) |
+| **Ollama** | `ollama:11434` | Local LLM inference (Llama 3.1 8B/70B, Qwen3 Coder 30B). Additional instances: `ollama-2`, `ollama-pudding` (bridge network). |
 | **LiteLLM** | `litellm:4000` | Unified LLM proxy — routes local + remote models with failover chains |
 | **Token-proxy** | `token-proxy:8088` | Anthropic reverse proxy — Sonnet→Haiku routing, semantic cache, $100/day budget breaker |
 | **Langfuse** | `langfuse` | LLM observability — traces, costs, prompt versioning |
@@ -933,6 +958,21 @@ These are not decorative. They are the signal.
 ---
 
 ## Changelog
+
+### v6 — 2026-05-16 (24h refresh)
+
+- **Container inventory updated:** 44 total containers (31 healthy, 9 running/no healthcheck, 2 exited, 1 created/never started). Source: AMP-347 full estate survey (2026-05-15, verified via SSH).
+- **Disk usage updated:** ~170 GB (11%) → ~410 GB (25%). Growth driven by APDS PUDDING extraction labelling 35K+ documents.
+- **Brain database stats added:** `amplified_brain` at 21 GB, 2.4M rows. AGE graph `business_brain` now has 41,120 Document nodes (was 5,709 — 35K labelled by AMP-345 APDS rewrite). 163,554 knowledge vectors.
+- **FalkorDB/Qdrant migration status updated:** Both now fully decommissioned. Dead Qdrant code purged (AMP-329, clean-build #111). FalkorDB enforcer config stripped (AMP-330, clean-build #109).
+- **Container network topology added:** 37 containers on `amplified-net`, 3 isolated on `docker_default` (migration needed), 3 on `bridge`, 2 on `cove-internal`.
+- **Ollama note:** Additional instances `ollama-2` and `ollama-pudding` on bridge network.
+- **Active work since last refresh:** AMP-345 (APDS PUDDING extraction rewrite to PostgreSQL — In Progress, 35K docs labelled), AMP-349 (Marketing Engine consolidation — In Progress), AMP-348 (logs/networks/secrets/governance fixes — Done), AMP-346 (Beast cleanup, stale files to legacy-store — Done), AMP-350 (consolidated marketing guide — In Review).
+- **GitHub merges to clean-build since v5:** #116 (Brain Architecture v5 rewrite), #114 (Five Rods v2), #113 (Five Rods auto-review structural enforcement).
+- **No structural changes** to: agent roster, communication layers, Vellum status, CRM status, ingestion pipe design, architectural constraints, or research grounding.
+- **SSH key note:** `beastssh`/`beastkey`/`beastkey2` secrets are malformatted or rejected by Beast — needs re-provisioning for future refresh sessions.
+
+Signed-by: Devon-REFRESH | 2026-05-16 | devin-86d5e95f757c4f4b8de78d3ec7355114
 
 ### v5 — 2026-05-14
 
