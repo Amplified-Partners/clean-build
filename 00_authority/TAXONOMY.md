@@ -102,7 +102,7 @@ Source: Ray Dalio (*Principles*), adapted by Ewan Bramley. Bedrock. Nobody chang
 | **Radical Honesty** | Only claim fact when it is fact. Rod #1. | |
 | **Radical Transparency** | Show the reasoning path. Rod #2. | |
 | **Radical Attribution** | Every decision has a named source. Rod #3. | |
-| **Win-Win** | If somebody loses, the decision is wrong. Rod #4. | Win-win, win win |
+| **Win-win** | If somebody loses, the decision is wrong. Rod #4. | Win-Win, win win |
 | **Idea Meritocracy** | Best idea wins regardless of source. Rod #5. | Ideas Meritocracy, ideas meritocracy |
 
 ### Infrastructure
@@ -124,7 +124,7 @@ Source: Ray Dalio (*Principles*), adapted by Ewan Bramley. Bedrock. Nobody chang
 |----------------|---------|----------|
 | **Devon** · `devon` | Devin platform sessions within Amplified Partners. The phonetic name Ewan uses. Sign as Devon. | Devin (only when referring to Cognition's platform itself) |
 | **Sam / Clawd / Cassian** | OpenClaw aliases. Ewan uses all three interchangeably. One agent, three names. | Devon (different agent) |
-| **Antigravity / AG** | Business Arbiter and COO. Strategic decisions. | |
+| **Antigravity / AG** | Business Arbiter and COO. Strategic decisions. | Andy Gravity, A Energy (speech-to-text artefacts) |
 | **Cursor** | Builder. Code tasks in clean-build workspace. | |
 | **Copilot** | GitHub code suggestions. | |
 | **Comet** | Perplexity in-browser. Researcher. | |
@@ -214,7 +214,7 @@ See `00_authority/DATA_ARCHITECTURE.md` (knowledge note) for full migration cont
 - **Major expansion of terminology section.** Replaced the 13-row flat glossary with a structured terminology law: 4 meta-rules (standard English, standard Python, UK spelling, one canonical form per concept) + 8 category tables covering Five Rods, infrastructure, agents, methodology, data architecture, products, pipeline/orchestration, and Pudding dimensions + deprecated technology table with migration counts.
 - **Evidence base:** full estate scan of 32 repos, 1,456 load-bearing files, 155 distinct terms, 28,281 total occurrences. Terminology audit identified 16 major inconsistency clusters; this version locks the canonical forms.
 - **Company structure fix:** updated Amplified Core description to reference canonical data stack (PostgreSQL + AGE + pgvector) instead of deprecated FalkorDB/Qdrant.
-- **Decisions taken (all reversible, OPINION 88%):** Win-Win not Win-win; Idea Meritocracy not Ideas Meritocracy; labeller not labeler (UK English); Pudding in prose / PUDDING in constants only; Devon not Devin for the agent identity; Business Brain as canonical database name; the Core not Beast for the server. Meta-rule source: Ewan Bramley verbal direction 2026-05-16 ("standard English, standard Python, no arbitrary caps, UK English").
+- **Decisions taken (all reversible, OPINION 88%):** Win-win not Win-Win; Idea Meritocracy not Ideas Meritocracy; labeller not labeler (UK English); Pudding in prose / PUDDING in constants only; Devon not Devin for the agent identity; Business Brain as canonical database name; the Core not Beast for the server. Meta-rule source: Ewan Bramley verbal direction 2026-05-16 ("standard English, standard Python, no arbitrary caps, UK English").
 - Frontmatter `version` bumped to v4, `date` to 2026-05-16.
 
 Signed-by: Devon-cb28 | Devin (Cognition AI) | 2026-05-16 | session `devin-cb283993cf974c7babc3307e140d63e4`
