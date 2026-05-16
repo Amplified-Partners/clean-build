@@ -37,7 +37,12 @@ $$;
 REVOKE ALL ON ALL TABLES IN SCHEMA public FROM PUBLIC;
 REVOKE ALL ON ALL SEQUENCES IN SCHEMA public FROM PUBLIC;
 
--- Revoke default privileges so future tables are also locked down
+-- Revoke default privileges so future tables created by THIS role are locked.
+-- NOTE: ALTER DEFAULT PRIVILEGES without FOR ROLE only applies to objects
+-- created by the role running this migration.  All migrations on Beast are
+-- run as the postgres superuser, so this covers the normal path.  If a
+-- different role ever creates tables, re-run this migration as that role
+-- or add an explicit FOR ROLE clause.
 ALTER DEFAULT PRIVILEGES IN SCHEMA public
     REVOKE ALL ON TABLES FROM PUBLIC;
 ALTER DEFAULT PRIVILEGES IN SCHEMA public
@@ -47,7 +52,12 @@ ALTER DEFAULT PRIVILEGES IN SCHEMA public
 -- 3. brain_reader: SELECT only on all current + future tables
 -- ═══════════════════════════════════════════════════════════════════════
 
-GRANT CONNECT ON DATABASE amplified_brain TO brain_reader;
+-- Use current_database() so the migration works regardless of DB name
+DO $$
+BEGIN
+    EXECUTE format('GRANT CONNECT ON DATABASE %I TO brain_reader', current_database());
+END
+$$;
 GRANT USAGE ON SCHEMA public TO brain_reader;
 GRANT SELECT ON ALL TABLES IN SCHEMA public TO brain_reader;
 ALTER DEFAULT PRIVILEGES IN SCHEMA public
@@ -58,7 +68,11 @@ ALTER DEFAULT PRIVILEGES IN SCHEMA public
 --    NO DELETE for anyone except superuser (append-only ingestion)
 -- ═══════════════════════════════════════════════════════════════════════
 
-GRANT CONNECT ON DATABASE amplified_brain TO brain_writer;
+DO $$
+BEGIN
+    EXECUTE format('GRANT CONNECT ON DATABASE %I TO brain_writer', current_database());
+END
+$$;
 GRANT USAGE ON SCHEMA public TO brain_writer;
 
 -- Writer can read everything
