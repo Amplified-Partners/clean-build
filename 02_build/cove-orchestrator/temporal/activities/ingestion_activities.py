@@ -1,17 +1,26 @@
-"""Temporal activities — the ingestion pipeline.
+"""Temporal activities — the ingestion pipeline v2.
 
-Wraps the unified ingestion pipeline + PUDDING extractor + memory store writer
-into Temporal activities that can be orchestrated by a workflow.
+v2 (AMP-356): Deterministic PUDDING labelling + 20-field packet.
 
-These activities run on Beast (triggered via the worker container) and connect
-to the local Ollama fleet and the amplified_brain PostgreSQL database
-(pgvector/HNSW for vectors, entities+relationships tables for graph).
+- Replaces Haiku extraction with deterministic keyword-based labeller
+  (pudding_labeler.py) for the 5-char PUDDING label.
+- Keeps AI only where it adds value: confidence scoring, canonical_summary,
+  claim_type classification, evidence_summary generation.
+- Writes full 20-field packet to pudding_packets table.
+- Writes to AGE business_brain graph for relationship traversal.
+- Exposes all 5 PUDDING dimensions as separate queryable fields.
+- Adds recurrence_count (spiral detection) and bridge_terms (Swanson joins).
 
-Canonical data layer: PostgreSQL + pgvector (HNSW) + relational graph.
+Pipe shape:
+  drop file → deduplicate → label (Python/deterministic) → classify (AI/light)
+  → score confidence (AI) → generate summary (AI) → build 20-field packet
+  → write to AGE business_brain → audit log → receipt
+
+Canonical data layer: PostgreSQL + pgvector (HNSW) + Apache AGE.
 FalkorDB and Qdrant are deprecated — see 00_authority/DATA_ARCHITECTURE.md.
 
-Signed-by: Devon-c329 | 2026-05-09 | devin-c3297c6e5f464d8fb6d912403b7cc3e6
-Based-on: Devon-a4e2 | devin-a4e23461f626488aaf493c55d0c87924
+Signed-by: Devon-cb28 | 2026-05-16 | devin-cb283993cf974c7babc3307e140d63e4
+Based-on: Devon-c329 | devin-c3297c6e5f464d8fb6d912403b7cc3e6
 """
 
 from __future__ import annotations
@@ -20,10 +29,8 @@ import hashlib
 import json
 import logging
 import os
-import subprocess
-import sys
 import uuid as _uuid
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -36,10 +43,10 @@ logger = logging.getLogger("cove.ingestion")
 ARCHIVE_DIR = Path("/opt/amplified/archive")
 STORE_B_CLEAN = ARCHIVE_DIR / "store_b_clean"
 RAW_DIR = Path("/opt/amplified/raw-mac-dumps")
-PUDDING_EXTRACTOR = Path("/opt/amplified/pudding_extractor.py")
-PRE_INGESTION_V2 = Path("/opt/amplified/pre_ingestion_pipe_v2.py")
-MEMORY_STORE_WRITER = Path("/opt/amplified/memory_store_writer.py")
 SEEN_HASHES = STORE_B_CLEAN / "seen_hashes.json"
+
+# Pipeline version tag for provenance
+PIPELINE_VERSION = "v2-deterministic"
 
 # ── Ollama (Beast internal) ─────────────────────────────────────────
 OLLAMA_URL = os.getenv("OLLAMA_URL", "http://172.18.0.3:11434/api/generate")
@@ -80,21 +87,23 @@ class IngestionResult:
 
 @dataclass
 class PuddingInput:
-    """Input for the PUDDING extraction stage."""
+    """Input for the deterministic PUDDING labelling stage (v2)."""
     target_dir: str = str(STORE_B_CLEAN)
-    ollama_url: str = OLLAMA_URL
-    model: str = OLLAMA_MODEL
     max_workers: int = 4
     limit: int = 0  # 0 = unlimited
+    ai_enrich: bool = True  # enable AI enrichment (confidence, summary, claim_type)
 
 
 @dataclass
 class PuddingResult:
-    """Result from the PUDDING extraction stage."""
+    """Result from the PUDDING labelling + packet write stage (v2)."""
     success: bool
     labelled: int = 0
     skipped: int = 0
     errors: int = 0
+    packets_written: int = 0
+    ai_enriched: int = 0
+    bridge_terms_found: int = 0
     error: str | None = None
 
 
@@ -126,6 +135,7 @@ class PipelineRun:
     memory_store: MemoryStoreResult | None = None
     completed_at: str | None = None
     status: str = "running"
+    pipeline_version: str = PIPELINE_VERSION
 
 
 # ═════════════════════════════════════════════════════════════════════
@@ -274,23 +284,270 @@ async def run_unified_ingestion(input: IngestionInput) -> IngestionResult:
 
 
 # ═════════════════════════════════════════════════════════════════════
-# Activity: PUDDING Extraction
+# Deterministic PUDDING Labeller (inlined from pudding_labeler.py)
+# ═════════════════════════════════════════════════════════════════════
+
+# PUDDING taxonomy reference — 5 dimensions
+WHAT_CODES = {
+    "E": "Entity", "R": "Relation", "P": "Process", "S": "State",
+    "C": "Constraint", "I": "Information", "M": "Meta",
+}
+HOW_CODES = {
+    "+": "Amplifying", "-": "Dampening", "~": "Oscillating",
+    ">": "Tipping", "=": "Stable", "!": "Disrupting", "?": "Emerging",
+}
+SCALE_CODES = {
+    "1": "Singular", "2": "Pair", "3": "Small group",
+    "4": "Network", "5": "System", "6": "Universal", "0": "Scale-free",
+}
+TIME_CODES = {
+    "i": "Instant", "s": "Short", "m": "Medium", "l": "Long",
+    "p": "Permanent", "inf": "Timeless", "v": "Variable",
+}
+PATTERN_CODES = {
+    "LOG-CAU": "Causal", "LOG-COR": "Correlative", "LOG-CON": "Conditional",
+    "LOG-TRA": "Transitive", "LOG-ANA": "Analogical", "LOG-ABD": "Abductive",
+    "MAT-LIN": "Linear", "MAT-EXG": "Exponential growth",
+    "MAT-EXD": "Exponential decay", "MAT-DIM": "Diminishing returns",
+    "MAT-SIG": "S-Curve", "MAT-PAR": "Power Law", "MAT-CYC": "Cyclical",
+    "MAT-TIP": "Threshold", "MAT-TRD": "Inverse/Trade-off",
+    "SYS-RFL": "Reinforcing feedback", "SYS-BFL": "Balancing feedback",
+    "SYS-CAS": "Cascade", "SYS-NET": "Network effect",
+    "SYS-BOT": "Bottleneck", "SYS-EMR": "Emergence",
+    "SYS-ENT": "Entropy/Decay", "SYS-ACC": "Accumulation",
+    "BEH-STA": "Status quo bias", "BEH-LOS": "Loss aversion",
+    "BEH-ANC": "Anchoring", "BEH-SUN": "Sunk cost",
+    "BEH-COM": "Compounding habits",
+    "STR-HUB": "Hub and spoke", "STR-HIE": "Hierarchy",
+    "STR-PIP": "Pipeline", "STR-PAR": "Parallel", "STR-LAY": "Layered",
+}
+
+# HOW symbol → compressed code mapping (for pudding_code generation)
+_HOW_COMPRESSED = {
+    "+": "A", "-": "D", "~": "O", ">": "T", "=": "S", "!": "X", "?": "E",
+}
+# TIME → compressed code mapping
+_TIME_COMPRESSED = {
+    "i": "I", "s": "S", "m": "M", "l": "L", "p": "P", "inf": "T", "v": "V",
+}
+
+
+def _detect_what(text: str) -> str:
+    t = text.lower()
+    scores: dict[str, int] = {"E": 0, "R": 0, "P": 0, "S": 0, "C": 0, "I": 0, "M": 0}
+    for w in ["agent", "server", "database", "tool", "platform", "software", "engine", "module", "component", "system"]:
+        scores["E"] += t.count(w)
+    for w in ["connect", "integrat", "depend", "link", "relationship", "between", "bridge", "maps to"]:
+        scores["R"] += t.count(w)
+    for w in ["pipeline", "workflow", "step", "phase", "process", "ingest", "extract", "transform", "build", "deploy", "execute"]:
+        scores["P"] += t.count(w)
+    for w in ["status", "current", "state", "snapshot", "healthy", "failed", "running", "complete"]:
+        scores["S"] += t.count(w)
+    for w in ["rule", "principle", "immutable", "non-negotiable", "must", "never", "constraint", "limit", "gdpr", "compliance"]:
+        scores["C"] += t.count(w)
+    for w in ["data", "insight", "metric", "report", "finding", "signal", "statistic", "number", "figure", "table"]:
+        scores["I"] += t.count(w)
+    for w in ["framework", "taxonomy", "model", "architecture", "spec", "design", "abstract", "meta", "rubric", "methodology", "schema", "ontology", "classification", "dimension", "category"]:
+        scores["M"] += t.count(w) * 2
+    return max(scores, key=scores.get) if max(scores.values()) > 0 else "I"
+
+
+def _detect_how(text: str) -> str:
+    t = text.lower()
+    scores: dict[str, int] = {"+": 0, "-": 0, "~": 0, ">": 0, "=": 0, "!": 0, "?": 0}
+    scores["+"] += sum(t.count(w) for w in ["grow", "amplif", "scale", "expand", "compound", "accelerat", "viral"])
+    scores["-"] += sum(t.count(w) for w in ["decay", "friction", "reduce", "decline", "deprecat", "legacy", "debt"])
+    scores["~"] += sum(t.count(w) for w in ["cycle", "recurring", "periodic", "seasonal", "oscillat", "wave"])
+    scores[">"] += sum(t.count(w) for w in ["threshold", "tipping", "breaking", "critical", "pivot", "transform"])
+    scores["="] += sum(t.count(w) for w in ["stable", "maintain", "standard", "consistent", "baseline", "equilibrium", "persist", "reference", "canonical", "definitive", "specification"])
+    scores["!"] += sum(t.count(w) for w in ["disrupt", "innovat", "revolution", "paradigm", "overhaul", "replace"])
+    scores["?"] += sum(t.count(w) for w in ["emerging", "prototype", "experiment", "explore", "potential", "uncertain", "mvp", "draft"])
+    return max(scores, key=scores.get) if max(scores.values()) > 0 else "="
+
+
+def _detect_scale(text: str) -> str:
+    t = text.lower()
+    scores: dict[str, int] = {"1": 0, "2": 0, "3": 0, "4": 0, "5": 0, "6": 0, "0": 0}
+    scores["1"] += sum(t.count(w) for w in ["individual", "single", "personal", "one person", "sole"])
+    scores["2"] += sum(t.count(w) for w in ["pair", "bilateral", "dialogue", "two ", "both"])
+    scores["3"] += sum(t.count(w) for w in ["team", "small group", "department", "squad", "crew"])
+    scores["4"] += sum(t.count(w) for w in ["organisation", "organization", "company", "network", "ecosystem", "community", "smb", "business"])
+    scores["5"] += sum(t.count(w) for w in ["market", "industry", "sector", "economy", "society", "uk smb"])
+    scores["6"] += sum(t.count(w) for w in ["universal", "fundamental", "law", "constant", "archetype", "human nature"])
+    scores["0"] += sum(t.count(w) for w in ["fractal", "scale-free", "any level", "recursive", "self-similar"])
+    return max(scores, key=scores.get) if max(scores.values()) > 0 else "4"
+
+
+def _detect_time(text: str) -> str:
+    t = text.lower()
+    scores: dict[str, int] = {"i": 0, "s": 0, "m": 0, "l": 0, "p": 0, "inf": 0, "v": 0}
+    scores["i"] += sum(t.count(w) for w in ["instant", "immediate", "real-time", "millisecond", "alert", "trigger"])
+    scores["s"] += sum(t.count(w) for w in ["daily", "today", "this week", "sprint", "quick", "urgent"])
+    scores["m"] += sum(t.count(w) for w in ["quarter", "monthly", "phase", "milestone", "weeks", "iteration"])
+    scores["l"] += sum(t.count(w) for w in ["year", "annual", "long-term", "vision", "strategy", "multi-year", "roadmap"])
+    scores["p"] += sum(t.count(w) for w in ["permanent", "forever", "lifetime", "enduring"])
+    scores["inf"] += sum(t.count(w) for w in ["timeless", "always true", "universal", "principle", "immutable", "eternal", "non-negotiable", "fundamental", "taxonomy", "canonical", "reference", "definitive"])
+    scores["v"] += sum(t.count(w) for w in ["depends", "variable", "context-dependent", "varies"])
+    return max(scores, key=scores.get) if max(scores.values()) > 0 else "m"
+
+
+def _detect_patterns(text: str) -> list[str]:
+    t = text.lower()
+    scores: dict[str, int] = {}
+    kw_map = {
+        "LOG-CAU": ["cause", "causes", "because", "therefore", "leads to", "results in"],
+        "LOG-COR": ["correlat", "moves together", "linked to", "associated"],
+        "LOG-CON": ["if ", "then ", "conditional", "when ", "trigger"],
+        "LOG-TRA": ["chain", "transitive", "indirect"],
+        "LOG-ANA": ["analogy", "similar to", "like a", "as if", "metaphor"],
+        "MAT-LIN": ["proportional", "linear", "each additional", "per unit"],
+        "MAT-EXG": ["exponential", "viral", "compound", "snowball", "accelerat"],
+        "MAT-EXD": ["death spiral", "declining", "hemorrhaging", "losing"],
+        "MAT-DIM": ["diminishing", "plateau", "less effective", "saturat"],
+        "MAT-SIG": ["adoption curve", "s-curve", "penetration"],
+        "MAT-PAR": ["80/20", "pareto", "power law", "most of the"],
+        "MAT-CYC": ["seasonal", "quarterly", "cycle", "recurring", "periodic"],
+        "SYS-RFL": ["reinforc", "positive feedback", "virtuous", "flywheel", "success breeds"],
+        "SYS-BFL": ["self-correct", "balanc", "thermostat", "homeostasis"],
+        "SYS-CAS": ["cascade", "domino", "chain reaction", "ripple"],
+        "SYS-NET": ["network effect", "more users", "marketplace", "platform"],
+        "SYS-BOT": ["bottleneck", "single point", "constraint", "blocking"],
+        "SYS-EMR": ["emergence", "greater than the sum", "synergy", "holistic"],
+        "SYS-ACC": ["compound", "accumulate", "build over time", "1% daily"],
+        "BEH-STA": ["always done it", "status quo", "resistance to change"],
+        "BEH-LOS": ["loss aversion", "fear of", "risk averse", "won't switch"],
+        "STR-HUB": ["hub and spoke", "central", "owner who", "single point of contact"],
+        "STR-PIP": ["pipeline", "sequential", "step by step", "stage"],
+        "STR-PAR": ["parallel", "concurrent", "simultaneous", "multi-stream"],
+        "STR-LAY": ["layer", "stack", "tier", "built on top"],
+    }
+    for pattern, keywords in kw_map.items():
+        score = sum(t.count(kw) for kw in keywords)
+        if score > 0:
+            scores[pattern] = score
+    sorted_patterns = sorted(scores.items(), key=lambda x: x[1], reverse=True)
+    return [p[0] for p in sorted_patterns[:3]]
+
+
+def _extract_bridge_terms(text: str) -> list[str]:
+    """Extract candidate bridge terms for Swanson cross-domain joins.
+
+    Bridge terms are nouns/phrases that appear in multiple domain contexts —
+    they are the B in A→B→C discovery. We use a keyword heuristic to find
+    terms that signal cross-domain connectivity.
+    """
+    t = text.lower()
+    candidates: list[str] = []
+    bridge_signals = [
+        "feedback", "threshold", "network", "constraint", "bottleneck",
+        "compound", "decay", "cycle", "emergence", "signal",
+        "pattern", "rhythm", "cascade", "equilibrium", "resilience",
+        "amplif", "friction", "leverage", "momentum", "inertia",
+        "saturation", "tipping", "contagion", "diffusion", "adaptation",
+    ]
+    for term in bridge_signals:
+        if term in t:
+            candidates.append(term)
+    return candidates[:10]
+
+
+def _label_content(content: str, filepath: str) -> dict[str, Any]:
+    """Deterministic PUDDING labelling — no LLM, pure keyword heuristics."""
+    what = _detect_what(content)
+    how = _detect_how(content)
+    scale = _detect_scale(content)
+    time_val = _detect_time(content)
+    patterns = _detect_patterns(content)
+
+    time_display = "∞" if time_val == "inf" else time_val
+    base_label = f"{what}.{how}.{scale}.{time_display}"
+    full_label = base_label
+    if patterns:
+        full_label += f".{patterns[0]}"
+
+    # Compressed 4-char code (per PUDDING Code Specification v1)
+    compressed = (
+        what
+        + _HOW_COMPRESSED.get(how, "S")
+        + scale
+        + _TIME_COMPRESSED.get(time_val, "M")
+    )
+
+    return {
+        "pudding_label": full_label,
+        "pudding_code": compressed,
+        "dim_what": what,
+        "dim_how": how,
+        "dim_scale": scale,
+        "dim_time": time_val,
+        "dim_pattern": patterns[0] if patterns else None,
+        "patterns_all": patterns,
+        "bridge_terms": _extract_bridge_terms(content),
+        "word_count": len(content.split()),
+    }
+
+
+# ═════════════════════════════════════════════════════════════════════
+# AI Enrichment (light pass — confidence, summary, claim_type)
+# ═════════════════════════════════════════════════════════════════════
+
+_AI_ENRICHMENT_PROMPT = (
+    "You are classifying a document for a knowledge base. Given the text below, "
+    "return ONLY a JSON object with these fields:\n"
+    '  "confidence": float 0.0-1.0 (how confident are you in the classification),\n'
+    '  "canonical_summary": string (one sentence summarising the document),\n'
+    '  "claim_type": string (one of: principle, framework, sop, technique, '
+    "case_study, hypothesis, recipe, content_asset, business_logic, raw_notes),\n"
+    '  "evidence_summary": string (one sentence describing the evidence basis)\n'
+    "Return ONLY valid JSON. No markdown, no explanation."
+)
+
+
+async def _ai_enrich(content: str, client: Any, sem: Any) -> dict[str, Any] | None:
+    """Light AI pass for fields that need semantic understanding."""
+    try:
+        async with sem:
+            response = await client.messages.create(
+                model="claude-haiku-4-5-20251001",
+                max_tokens=300,
+                system=_AI_ENRICHMENT_PROMPT,
+                messages=[{"role": "user", "content": content[:3000]}],
+                temperature=0.0,
+            )
+            raw = response.content[0].text.strip()
+            # Strip markdown fences if present
+            if raw.startswith("```"):
+                raw = raw.split("\n", 1)[1] if "\n" in raw else raw[3:]
+            if raw.endswith("```"):
+                raw = raw[:-3]
+            return json.loads(raw.strip())
+    except Exception as e:
+        logger.warning(f"AI enrichment failed: {e}")
+        return None
+
+
+# ═════════════════════════════════════════════════════════════════════
+# Activity: PUDDING Extraction v2 (Deterministic + Light AI)
 # ═════════════════════════════════════════════════════════════════════
 
 @activity.defn(name="run_pudding_extraction")
 async def run_pudding_extraction(input: PuddingInput) -> PuddingResult:
-    """Run the PUDDING extractor against clean vault files.
+    """Run the PUDDING labeller v2 against clean vault files.
 
-    Hits Anthropic Claude Haiku for taxonomy labelling
-    and injects PUDDING 2026 Taxonomy frontmatter into each file.
+    v2 pipe (AMP-356):
+    1. Deterministic keyword labelling (Python — zero LLM cost)
+    2. Optional light AI enrichment (confidence, summary, claim_type)
+    3. Build 20-field packet
+    4. Write packet to pudding_packets table
+    5. Write to AGE business_brain graph
+    6. Audit log + receipt
     """
-    import os
-    import yaml
     import asyncio
-    from anthropic import AsyncAnthropic
+    import asyncpg
 
+    run_id = f"pudding-v2-{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S')}-{_uuid.uuid4().hex[:8]}"
     activity.logger.info(
-        f"PUDDING extraction (Async Haiku): dir={input.target_dir}"
+        f"PUDDING v2 (deterministic): dir={input.target_dir}, run_id={run_id}"
     )
 
     target = Path(input.target_dir)
@@ -311,114 +568,251 @@ async def run_pudding_extraction(input: PuddingInput) -> PuddingResult:
 
     activity.logger.info(f"Eligible files: {len(files)}")
 
+    if not files:
+        return PuddingResult(success=True, labelled=0, skipped=0)
+
+    # ── Set up AI client (optional) ───────────────────────────────
+    ai_client = None
+    ai_sem = asyncio.Semaphore(input.max_workers)
+    if input.ai_enrich:
+        api_key = os.environ.get("ANTHROPIC_API_KEY")
+        if api_key:
+            try:
+                from anthropic import AsyncAnthropic
+                ai_client = AsyncAnthropic(api_key=api_key)
+            except ImportError:
+                activity.logger.warning(
+                    "anthropic package not installed — AI enrichment disabled"
+                )
+
+    # ── Connect to amplified_brain ────────────────────────────────
+    dsn = os.getenv("BRAIN_DSN", BRAIN_DSN)
+    try:
+        conn = await asyncpg.connect(dsn)
+    except Exception as e:
+        return PuddingResult(
+            success=False,
+            error=f"PostgreSQL connection failed: {e}",
+        )
+
     labelled = 0
     skipped = 0
     errors = 0
-    
-    api_key = os.environ.get("ANTHROPIC_API_KEY")
-    if not api_key:
-        return PuddingResult(success=False, error="ANTHROPIC_API_KEY environment variable not set")
-        
-    client = AsyncAnthropic(api_key=api_key)
+    packets_written = 0
+    ai_enriched = 0
+    bridge_terms_found = 0
 
-    # ── System prompt ─────────────────────────────────────────────
-    system_prompt = (
-        "You are the PUDDING GATE (Amplified Pudding Discovery System - APDS).\n"
-        "Your sole function is to take raw, unstructured text and extract scientific hypotheses, "
-        "methodologies, business logic, and content themes into a strictly formatted YAML taxonomy.\n"
-        "DO NOT output any conversational text. DO NOT output markdown blocks. ONLY output raw YAML.\n\n"
-        "Required YAML Structure:\n"
-        "taxonomy_version: PUDDING_2026\n"
-        "concepts:\n"
-        "  - name: <Concept Name>\n"
-        "    pudding_code: <4-character WHAT.HOW.SCALE.TIME code>\n"
-        "    description: <Brief description>\n"
-        "    confidence: 0.95\n"
-        "sources:\n"
-        "  - name: <Source Name>\n"
-        "    source_type: <T1, T2, T3, or T4>\n"
-        "recipes:\n"
-        "  - name: <Falsifiable hypothesis, recipe, or content angle>\n"
-        "    description: <What needs to be tested or created>\n"
-        "signals:\n"
-        "  - name: <Signal Name>\n"
-        "    signal_type: <anomaly, drift, spike, weak signal, convergence, or co-occurrence>\n"
-        "domains:\n"
-        "  - name: <Domain/Vertical Name>\n"
-        "type: <principle|framework|sop|technique|case_study|hypothesis|recipe|content_asset|business_logic|raw_notes>\n"
-    )
+    try:
+        # ── Initialise AGE for this connection ────────────────────
+        await conn.execute("LOAD 'age'")
+        await conn.execute(
+            "SET search_path = ag_catalog, \"$user\", public"
+        )
 
-    sem = asyncio.Semaphore(input.max_workers)
+        for fp in files:
+            try:
+                content = fp.read_text(encoding="utf-8", errors="ignore")
 
-    async def process_one(fp: Path) -> None:
-        nonlocal labelled, skipped, errors
-        try:
-            content = fp.read_text(encoding="utf-8", errors="ignore")
-
-            # Skip already-processed files
-            if "lbd_attribution" in content and "PUDDING" in content:
-                skipped += 1
-                return
-
-            # ── Call Haiku ────────────────────────────────────
-            async with sem:
-                prompt = f"RAW DATA TO PROCESS:\n{content[:4000]}"
-                response = await client.messages.create(
-                    model="claude-haiku-4-5-20251001",
-                    max_tokens=1500,
-                    system=system_prompt,
-                    messages=[{"role": "user", "content": prompt}],
-                    temperature=0.0
-                )
-                
-                yaml_output = response.content[0].text
-                
-                if "taxonomy_version:" in yaml_output:
-                    start_idx = yaml_output.find("taxonomy_version:")
-                    yaml_output = yaml_output[start_idx:]
-                if yaml_output.startswith("```yaml"):
-                    yaml_output = yaml_output[7:]
-                if yaml_output.startswith("```"):
-                    yaml_output = yaml_output[3:]
-                if yaml_output.endswith("```"):
-                    yaml_output = yaml_output[:-3]
-                    
-                yaml_output = yaml_output.strip()
-
-                # Basic validation
-                parsed_yaml = yaml.safe_load(yaml_output)
-                if not isinstance(parsed_yaml, dict):
-                    raise ValueError("Parsed YAML is not a dictionary.")
-
-                # ── Inject frontmatter ─────────────────────────────
-                if content.startswith("---"):
-                    parts = content.split("---", 2)
-                    if len(parts) >= 3:
-                        fm = parts[1]
-                        body = parts[2]
-                        
-                        # Add attribution to new YAML
-                        parsed_yaml["lbd_attribution"] = "PUDDING 2026 Taxonomy (Amplified Partners)"
-                        
-                        # Convert dict to nicely formatted yaml string
-                        new_yaml = yaml.dump(parsed_yaml, sort_keys=False)
-                        
-                        final = f"---{fm}\n{new_yaml}---{body}"
-                        fp.write_text(final, encoding="utf-8")
-                        labelled += 1
-                else:
+                # Skip empty files
+                if not content.strip():
                     skipped += 1
+                    continue
 
-        except Exception as e:
-            errors += 1
-            activity.logger.warning(f"PUDDING failed for {fp.name}: {e}")
+                file_hash = hashlib.sha256(content.encode("utf-8")).hexdigest()
 
-    # ── Execute fleet ─────────────────────────────────────────────
-    tasks = [process_one(fp) for fp in files]
-    await asyncio.gather(*tasks)
+                # Skip already-processed files (dedup by hash)
+                existing = await conn.fetchval(
+                    "SELECT 1 FROM pudding_packets WHERE file_hash = $1",
+                    file_hash,
+                )
+                if existing:
+                    # Update recurrence_count
+                    await conn.execute(
+                        "UPDATE pudding_packets SET recurrence_count = recurrence_count + 1, "
+                        "updated_at = now() WHERE file_hash = $1",
+                        file_hash,
+                    )
+                    skipped += 1
+                    continue
+
+                # ── Step 1: Deterministic labelling ───────────────
+                label_result = _label_content(content, str(fp))
+                labelled += 1
+
+                # ── Step 2: AI enrichment (optional) ──────────────
+                ai_fields: dict[str, Any] = {
+                    "confidence": None,
+                    "canonical_summary": None,
+                    "claim_type": None,
+                    "evidence_summary": None,
+                }
+                if ai_client is not None:
+                    enrichment = await _ai_enrich(content, ai_client, ai_sem)
+                    if enrichment:
+                        ai_fields["confidence"] = min(
+                            1.0, max(0.0, float(enrichment.get("confidence", 0.5)))
+                        )
+                        ai_fields["canonical_summary"] = str(
+                            enrichment.get("canonical_summary", "")
+                        )[:500]
+                        claim = str(enrichment.get("claim_type", "raw_notes"))
+                        valid_claims = {
+                            "principle", "framework", "sop", "technique",
+                            "case_study", "hypothesis", "recipe",
+                            "content_asset", "business_logic", "raw_notes",
+                        }
+                        ai_fields["claim_type"] = (
+                            claim if claim in valid_claims else "raw_notes"
+                        )
+                        ai_fields["evidence_summary"] = str(
+                            enrichment.get("evidence_summary", "")
+                        )[:500]
+                        ai_enriched += 1
+
+                bridge_terms = label_result["bridge_terms"]
+                if bridge_terms:
+                    bridge_terms_found += len(bridge_terms)
+
+                # ── Step 3: Write 20-field packet ─────────────────
+                packet_id = _uuid.uuid4()
+                await conn.execute(
+                    """INSERT INTO pudding_packets (
+                        id, file_hash, file_path, filename,
+                        pudding_label, pudding_code,
+                        dim_what, dim_how, dim_scale, dim_time, dim_pattern,
+                        confidence, canonical_summary, claim_type, evidence_summary,
+                        bridge_terms, recurrence_count,
+                        word_count, source_agent, run_id, signed_by
+                    ) VALUES (
+                        $1, $2, $3, $4,
+                        $5, $6,
+                        $7, $8, $9, $10, $11,
+                        $12, $13, $14, $15,
+                        $16, $17,
+                        $18, $19, $20, $21
+                    )
+                    ON CONFLICT (file_hash) DO UPDATE SET
+                        pudding_label = EXCLUDED.pudding_label,
+                        pudding_code = EXCLUDED.pudding_code,
+                        dim_what = EXCLUDED.dim_what,
+                        dim_how = EXCLUDED.dim_how,
+                        dim_scale = EXCLUDED.dim_scale,
+                        dim_time = EXCLUDED.dim_time,
+                        dim_pattern = EXCLUDED.dim_pattern,
+                        confidence = EXCLUDED.confidence,
+                        canonical_summary = EXCLUDED.canonical_summary,
+                        claim_type = EXCLUDED.claim_type,
+                        evidence_summary = EXCLUDED.evidence_summary,
+                        bridge_terms = EXCLUDED.bridge_terms,
+                        recurrence_count = pudding_packets.recurrence_count + 1,
+                        updated_at = now()""",
+                    packet_id,
+                    file_hash,
+                    str(fp),
+                    fp.name,
+                    label_result["pudding_label"],
+                    label_result["pudding_code"],
+                    label_result["dim_what"],
+                    label_result["dim_how"],
+                    label_result["dim_scale"],
+                    label_result["dim_time"],
+                    label_result["dim_pattern"],
+                    ai_fields["confidence"],
+                    ai_fields["canonical_summary"],
+                    ai_fields["claim_type"],
+                    ai_fields["evidence_summary"],
+                    bridge_terms,
+                    1,  # recurrence_count starts at 1
+                    label_result["word_count"],
+                    "deterministic-labeler-v2",
+                    run_id,
+                    f"Devon-cb28 | {datetime.now(timezone.utc).date().isoformat()} | devin-cb283993cf974c7babc3307e140d63e4",
+                )
+                packets_written += 1
+
+                # ── Step 4: Write to AGE business_brain graph ─────
+                safe_name = fp.name.replace("'", "''")
+                safe_label = label_result["pudding_label"].replace("'", "''")
+                safe_code = label_result["pudding_code"].replace("'", "''")
+                safe_hash = file_hash[:16]
+
+                # Create Document vertex
+                await conn.execute(
+                    f"""SELECT * FROM cypher('business_brain', $$
+                        MERGE (d:Document {{file_hash: '{safe_hash}'}})
+                        SET d.name = '{safe_name}',
+                            d.pudding_label = '{safe_label}',
+                            d.pudding_code = '{safe_code}',
+                            d.dim_what = '{label_result["dim_what"]}',
+                            d.dim_how = '{label_result["dim_how"]}',
+                            d.dim_scale = '{label_result["dim_scale"]}',
+                            d.dim_time = '{label_result["dim_time"]}'
+                        RETURN d
+                    $$) AS (v agtype)"""
+                )
+
+                # Create Pattern vertex + edge if pattern detected
+                if label_result["dim_pattern"]:
+                    safe_pattern = label_result["dim_pattern"].replace("'", "''")
+                    await conn.execute(
+                        f"""SELECT * FROM cypher('business_brain', $$
+                            MERGE (p:Pattern {{code: '{safe_pattern}'}})
+                            SET p.name = '{PATTERN_CODES.get(label_result["dim_pattern"], label_result["dim_pattern"]).replace("'", "''")}'
+                            WITH p
+                            MATCH (d:Document {{file_hash: '{safe_hash}'}})
+                            MERGE (d)-[:EXHIBITS_PATTERN]->(p)
+                            RETURN p
+                        $$) AS (v agtype)"""
+                    )
+
+                # Create bridge term edges
+                for term in bridge_terms[:5]:
+                    safe_term = term.replace("'", "''")
+                    await conn.execute(
+                        f"""SELECT * FROM cypher('business_brain', $$
+                            MERGE (c:Concept {{name: '{safe_term}'}})
+                            WITH c
+                            MATCH (d:Document {{file_hash: '{safe_hash}'}})
+                            MERGE (d)-[:HAS_CONCEPT]->(c)
+                            RETURN c
+                        $$) AS (v agtype)"""
+                    )
+
+                # ── Step 5: Audit log ─────────────────────────────
+                await conn.execute(
+                    """INSERT INTO audit_log (event_type, event_data, agent)
+                    VALUES ($1, $2::jsonb, $3)""",
+                    "pudding_packet_written",
+                    json.dumps({
+                        "file": fp.name,
+                        "file_hash": file_hash[:16],
+                        "pudding_label": label_result["pudding_label"],
+                        "pudding_code": label_result["pudding_code"],
+                        "ai_enriched": ai_client is not None and ai_fields["confidence"] is not None,
+                        "bridge_terms_count": len(bridge_terms),
+                        "run_id": run_id,
+                    }),
+                    "deterministic-labeler-v2",
+                )
+
+                # Progress logging
+                if labelled % 100 == 0:
+                    activity.logger.info(
+                        f"Progress: {labelled} labelled, {packets_written} written, "
+                        f"{errors} errors"
+                    )
+
+            except Exception as e:
+                errors += 1
+                activity.logger.warning(f"PUDDING v2 failed for {fp.name}: {e}")
+
+    finally:
+        await conn.close()
 
     activity.logger.info(
-        f"PUDDING complete: {labelled} labelled, {skipped} skipped, {errors} errors"
+        f"PUDDING v2 complete: {labelled} labelled, {packets_written} packets, "
+        f"{ai_enriched} AI-enriched, {bridge_terms_found} bridge terms, "
+        f"{skipped} skipped, {errors} errors"
     )
 
     return PuddingResult(
@@ -426,7 +820,10 @@ async def run_pudding_extraction(input: PuddingInput) -> PuddingResult:
         labelled=labelled,
         skipped=skipped,
         errors=errors,
-        error=f"{errors} extraction failures" if errors else None,
+        packets_written=packets_written,
+        ai_enriched=ai_enriched,
+        bridge_terms_found=bridge_terms_found,
+        error=f"{errors} labelling failures" if errors else None,
     )
 
 
@@ -626,7 +1023,11 @@ async def write_to_memory_stores(input: MemoryStoreInput) -> MemoryStoreResult:
 
 @activity.defn(name="log_pipeline_run")
 async def log_pipeline_run(run: PipelineRun) -> None:
-    """Log a pipeline run to PostgreSQL for observability."""
+    """Log a pipeline run to PostgreSQL for observability.
+
+    v2: includes pudding_packets_written, pudding_ai_enriched,
+    pudding_bridge_terms_found, and pipeline_version.
+    """
     import asyncpg
 
     dsn = os.getenv("BRAIN_DSN", BRAIN_DSN)
@@ -637,10 +1038,14 @@ async def log_pipeline_run(run: PipelineRun) -> None:
             (run_id, started_at, ingestion_new_files, ingestion_total_unique,
              ingestion_elapsed, pudding_labelled, pudding_skipped, pudding_errors,
              memory_pg_vectors, memory_pg_entities, memory_errors,
-             completed_at, status)
-            VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)
+             completed_at, status,
+             pudding_packets_written, pudding_ai_enriched,
+             pudding_bridge_terms_found, pipeline_version)
+            VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17)
             ON CONFLICT (run_id) DO UPDATE SET
-              completed_at = $12, status = $13""",
+              completed_at = $12, status = $13,
+              pudding_packets_written = $14, pudding_ai_enriched = $15,
+              pudding_bridge_terms_found = $16, pipeline_version = $17""",
             run.run_id,
             run.started_at,
             run.ingestion.new_files if run.ingestion else 0,
@@ -654,6 +1059,10 @@ async def log_pipeline_run(run: PipelineRun) -> None:
             run.memory_store.errors if run.memory_store else 0,
             run.completed_at,
             run.status,
+            run.pudding.packets_written if run.pudding else 0,
+            run.pudding.ai_enriched if run.pudding else 0,
+            run.pudding.bridge_terms_found if run.pudding else 0,
+            run.pipeline_version,
         )
     finally:
         await conn.close()
