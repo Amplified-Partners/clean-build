@@ -12,10 +12,10 @@ canonical `knowledge_vectors` table must have a manifest line.
 ## Architecture overview
 
 ```
-disk (store_b_clean)
+disk (ingest-inbox)
         │
    ┌────▼────┐
-   │ Stage 1  │  run_unified_ingestion — dedup raw → store_b_clean
+   │ Stage 1  │  run_unified_ingestion — dedup ingest-inbox → store_b_clean
    └────┬────┘
    ┌────▼────┐
    │ Stage 2  │  run_pudding_extraction — PUDDING taxonomy labelling
@@ -47,7 +47,8 @@ disk (store_b_clean)
 | Migrations 001–007 | Applied in order. 001 creates `audit_log`, 004 creates `pipeline_runs`, 007 creates canonical tables |
 | Roles | `brain_writer` (INSERT/UPDATE), `brain_reader` (SELECT) — created in migration 005, extended in 007 |
 | Extensions | `vector` (pgvector), `uuid-ossp` — created by migration 007 |
-| Source root | `/opt/amplified/vault/store_b_clean` (markdown files) |
+| Drop zone | `/opt/amplified/ingest-inbox/` (agent collaboration drop zone, AMP-351) |
+| Source root | `/opt/amplified/vault/store_b_clean` (clean archive after dedup) |
 | Manifest dir | `/opt/amplified/vault/manifests` |
 | Temporal | Worker running on `cove-build-queue` |
 | Env var | `BRAIN_DSN` — connection string for `brain_writer` role (falls back to `postgresql://brain_writer@cove-postgres:5432/amplified_brain`) |
@@ -468,3 +469,4 @@ All new data ingestion goes through the canonical pipeline (Stages 3–4).
 ---
 
 Devon-be18-child-docs | 2026-05-11 | devin-29211adbdded4a8885ddb658655fb538
+Devon-0546 | 2026-05-16 | AMP-351 — ingest-inbox drop zone, updated pipeline input path

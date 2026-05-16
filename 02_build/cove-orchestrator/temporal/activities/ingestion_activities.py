@@ -36,6 +36,11 @@ logger = logging.getLogger("cove.ingestion")
 ARCHIVE_DIR = Path("/opt/amplified/archive")
 STORE_B_CLEAN = ARCHIVE_DIR / "store_b_clean"
 RAW_DIR = Path("/opt/amplified/raw-mac-dumps")
+
+# ── Collaboration drop zone (AMP-351) ──────────────────────────────
+# Single folder where all agents write files via SCP/SFTP/SSH or direct
+# filesystem access. The pipeline scans this every 10 minutes.
+INGEST_INBOX = Path("/opt/amplified/ingest-inbox")
 PUDDING_EXTRACTOR = Path("/opt/amplified/pudding_extractor.py")
 PRE_INGESTION_V2 = Path("/opt/amplified/pre_ingestion_pipe_v2.py")
 MEMORY_STORE_WRITER = Path("/opt/amplified/memory_store_writer.py")
@@ -61,7 +66,7 @@ BRAIN_DSN = os.getenv(
 @dataclass
 class IngestionInput:
     """Input for the unified ingestion stage."""
-    raw_dir: str = str(RAW_DIR)
+    raw_dir: str = str(INGEST_INBOX)
     clean_archive: str = str(STORE_B_CLEAN)
     full_rebuild: bool = False
     max_workers: int = 8
@@ -80,7 +85,12 @@ class IngestionResult:
 
 @dataclass
 class PuddingInput:
-    """Input for the PUDDING extraction stage."""
+    """Input for the PUDDING extraction stage.
+
+    target_dir defaults to STORE_B_CLEAN (the clean archive output from
+    unified ingestion). The pipeline flow is:
+      ingest-inbox → dedup → store_b_clean → PUDDING label → DB
+    """
     target_dir: str = str(STORE_B_CLEAN)
     ollama_url: str = OLLAMA_URL
     model: str = OLLAMA_MODEL
