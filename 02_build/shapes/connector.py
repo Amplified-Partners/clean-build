@@ -14,11 +14,13 @@ import logging
 from typing import Any, ClassVar
 
 from ._base import ShapeBase
+from ._decorators import spine
 from ._types import ConnectorError, HandoffProtocol, ShapeKind
 
 log = logging.getLogger("amplified.shapes.connector")
 
 
+@spine("narrow_handoff", "privacy_first")
 class ConnectorBase(ShapeBase):
     """Base class for all connector shapes.
 

@@ -749,3 +749,40 @@ def metric(
             "buckets": buckets,
         },
     )
+
+
+# ---------------------------------------------------------------------------
+# @spine — declares which Portable Spine principles a shape enforces
+# ---------------------------------------------------------------------------
+
+
+def spine(*principles: str) -> Any:
+    """Declares which Portable Spine principles this shape structurally enforces.
+
+    The nine principles are the boss. Not Ewan. Not any agent. Not any client.
+    Every shape must declare at least one. Every principle must be covered
+    by at least one shape. The registry verifies both at verification time.
+
+    Usage:
+        @spine("radical_honesty", "radical_transparency")
+        class MyService(ServiceBase):
+            ...
+    """
+    from ._types import SpinePrinciple
+
+    resolved: tuple[SpinePrinciple, ...] = tuple(
+        SpinePrinciple(p) for p in principles
+    )
+    if not resolved:
+        from ._types import SpineViolation
+
+        raise SpineViolation(
+            "A shape with @spine() must declare at least one principle.",
+            violation_type="empty_declaration",
+        )
+
+    def decorator(cls: type) -> type:
+        cls._spine_principles = resolved  # type: ignore[attr-defined]
+        return cls
+
+    return decorator

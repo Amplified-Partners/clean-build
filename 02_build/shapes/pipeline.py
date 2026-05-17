@@ -16,11 +16,13 @@ import logging
 from typing import Any, ClassVar
 
 from ._base import ShapeBase
+from ._decorators import spine
 from ._types import HandoffProtocol, PipelineError, ShapeKind
 
 log = logging.getLogger("amplified.shapes.pipeline")
 
 
+@spine("radical_transparency", "deterministic_first")
 class PipelineBase(ShapeBase):
     """Base class for all pipeline shapes.
 

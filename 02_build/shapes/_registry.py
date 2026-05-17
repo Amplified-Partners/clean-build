@@ -13,7 +13,7 @@ import logging
 import threading
 from typing import Any
 
-from ._types import ShapeKind
+from ._types import ShapeKind, SpinePrinciple, SpineViolation
 
 log = logging.getLogger("amplified.shapes.registry")
 
@@ -39,6 +39,7 @@ class ShapeRegistry:
             "module": cls.__module__,
             "qualname": cls.__qualname__,
             "doc": (cls.__doc__ or "").strip(),
+            "_cls_ref": cls,
         }
         with self._lock:
             self._classes[cls.__qualname__] = entry
@@ -75,6 +76,59 @@ class ShapeRegistry:
                 kind = entry["kind"]
                 counts[kind] = counts.get(kind, 0) + 1
         return counts
+
+    def verify_spine_coverage(self) -> dict[str, Any]:
+        """Verify that every spine principle is covered by at least one shape
+        and every shape declares at least one spine principle.
+
+        Returns a coverage report. Raises SpineViolation if any principle
+        is uncovered — that's a dead principle, structural drift.
+        """
+        all_principles = set(SpinePrinciple)
+        covered_principles: dict[SpinePrinciple, list[str]] = {p: [] for p in all_principles}
+        unmoored_shapes: list[str] = []
+
+        with self._lock:
+            for qualname, entry in self._classes.items():
+                # Look up the actual class to check _spine_principles
+                # We store qualname, so we search by matching
+                cls = entry.get("_cls_ref")
+                spine_principles = getattr(cls, "_spine_principles", None) if cls else None
+
+                if spine_principles is None:
+                    # Try to find via the module system
+                    spine_principles = None
+
+                if spine_principles:
+                    for p in spine_principles:
+                        if p in covered_principles:
+                            covered_principles[p].append(qualname)
+                else:
+                    unmoored_shapes.append(qualname)
+
+        uncovered = [p for p, shapes in covered_principles.items() if not shapes]
+
+        report = {
+            "all_covered": len(uncovered) == 0,
+            "all_moored": len(unmoored_shapes) == 0,
+            "coverage": {
+                p.value: [s for s in shapes]
+                for p, shapes in covered_principles.items()
+            },
+            "uncovered_principles": [p.value for p in uncovered],
+            "unmoored_shapes": unmoored_shapes,
+        }
+
+        if uncovered:
+            names = ", ".join(p.label() for p in uncovered)
+            raise SpineViolation(
+                f"Dead principles — no shape enforces: {names}. "
+                "Every principle must be structurally represented.",
+                violation_type="uncovered_principle",
+                principle=names,
+            )
+
+        return report
 
 
 REGISTRY = ShapeRegistry()

@@ -13,11 +13,13 @@ import logging
 from typing import Any, ClassVar
 
 from ._base import ShapeBase
+from ._decorators import spine
 from ._types import HandoffProtocol, ShapeKind, WorkerResult
 
 log = logging.getLogger("amplified.shapes.worker")
 
 
+@spine("deterministic_first", "radical_transparency")
 class WorkerBase(ShapeBase):
     """Base class for all worker shapes.
 

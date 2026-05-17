@@ -15,11 +15,13 @@ import os
 from typing import Any, ClassVar
 
 from ._base import ShapeBase
+from ._decorators import spine
 from ._types import ConfigError, ShapeKind
 
 log = logging.getLogger("amplified.shapes.config")
 
 
+@spine("congruence", "privacy_first")
 class ConfigBase(ShapeBase):
     """Base class for all config shapes.
 

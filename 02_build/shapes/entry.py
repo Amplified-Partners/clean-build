@@ -14,6 +14,7 @@ import logging
 from typing import Any, ClassVar
 
 from ._base import ShapeBase
+from ._decorators import spine
 from ._types import (
     EntryError,
     HandoffProtocol,
@@ -24,6 +25,7 @@ from ._types import (
 log = logging.getLogger("amplified.shapes.entry")
 
 
+@spine("narrow_handoff", "privacy_first")
 class EntryBase(ShapeBase):
     """Base class for all entry shapes.
 

@@ -15,11 +15,13 @@ import logging
 from typing import Any, ClassVar
 
 from ._base import ShapeBase
+from ._decorators import spine
 from ._types import HandoffProtocol, ShapeKind
 
 log = logging.getLogger("amplified.shapes.glue")
 
 
+@spine("narrow_handoff", "congruence", "win_win")
 class GlueBase(ShapeBase):
     """Base class for all glue shapes.
 

@@ -16,11 +16,13 @@ import logging
 from typing import Any, ClassVar
 
 from ._base import ShapeBase
+from ._decorators import spine
 from ._types import AgentError, HandoffProtocol, ShapeKind
 
 log = logging.getLogger("amplified.shapes.agent")
 
 
+@spine("radical_honesty", "radical_attribution", "shadow_first")
 class AgentBase(ShapeBase):
     """Base class for all agent shapes.
 

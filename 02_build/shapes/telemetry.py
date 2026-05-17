@@ -15,11 +15,13 @@ from collections import defaultdict
 from typing import Any, ClassVar
 
 from ._base import ShapeBase
+from ._decorators import spine
 from ._types import ShapeKind, SignalClassification, TelemetryError, TrafficLight
 
 log = logging.getLogger("amplified.shapes.telemetry")
 
 
+@spine("radical_transparency", "shadow_first")
 class TelemetryBase(ShapeBase):
     """Base class for all telemetry shapes.
 

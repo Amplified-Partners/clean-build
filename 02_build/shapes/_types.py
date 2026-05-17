@@ -118,6 +118,33 @@ class EscalationFlag(enum.Enum):
 
 
 # ---------------------------------------------------------------------------
+# 5b. Portable Spine — the nine principles, baked into the code
+# ---------------------------------------------------------------------------
+
+
+class SpinePrinciple(enum.Enum):
+    """The nine immutable principles from the Portable Spine.
+
+    Source: 00_authority/PORTABLE-SPINE.md
+    These override everything. Not Ewan. Not any agent. Not any client.
+    The Ulysses Clause: if Ewan overrides these, the system flags it.
+    """
+
+    RADICAL_HONESTY = "radical_honesty"
+    RADICAL_TRANSPARENCY = "radical_transparency"
+    RADICAL_ATTRIBUTION = "radical_attribution"
+    WIN_WIN = "win_win"
+    DETERMINISTIC_FIRST = "deterministic_first"
+    CONGRUENCE = "congruence"
+    NARROW_HANDOFF = "narrow_handoff"
+    SHADOW_FIRST = "shadow_first"
+    PRIVACY_FIRST = "privacy_first"
+
+    def label(self) -> str:
+        return self.value.replace("_", " ").title()
+
+
+# ---------------------------------------------------------------------------
 # 6. Core data structures
 # ---------------------------------------------------------------------------
 
@@ -313,6 +340,30 @@ class TelemetryError(ShapeError):
 
     def __init__(self, message: str, **kwargs: Any) -> None:
         super().__init__(message, shape_kind="telemetry", **kwargs)
+
+
+class SpineViolation(ShapeError):
+    """Spine principle structurally violated — the system caught itself drifting.
+
+    Raised when:
+    - A shape has no spine principles declared (unmoored shape)
+    - A spine principle has no shape enforcing it (dead principle)
+    - Spine coverage verification fails
+    """
+
+    def __init__(
+        self,
+        message: str,
+        *,
+        principle: str = "",
+        shape_name: str = "",
+        violation_type: str = "",
+        **kwargs: Any,
+    ) -> None:
+        super().__init__(message, shape_kind="spine", **kwargs)
+        self.principle = principle
+        self.shape_name = shape_name
+        self.violation_type = violation_type
 
 
 class EpistemicViolation(ShapeError):

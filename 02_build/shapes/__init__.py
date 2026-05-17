@@ -20,6 +20,8 @@ from ._types import (
     EntryError,
     EpistemicViolation,
     EscalationFlag,
+    SpinePrinciple,
+    SpineViolation,
     GuardHalt,
     HandoffProtocol,
     PipelineError,
@@ -56,6 +58,7 @@ from ._decorators import (
     secret,
     setting,
     signal_classifier,
+    spine,
     step,
     tracked,
     transactional,
@@ -126,6 +129,8 @@ __all__ = [
     "AgentError",
     "TelemetryError",
     "EpistemicViolation",
+    "SpinePrinciple",
+    "SpineViolation",
     # Epistemic
     "EpistemicTier",
     "PreconditionCheck",
@@ -154,6 +159,7 @@ __all__ = [
     "setting",
     "secret",
     "metric",
+    "spine",
     # Registry
     "REGISTRY",
     "ShapeRegistry",

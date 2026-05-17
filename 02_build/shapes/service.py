@@ -14,11 +14,13 @@ import logging
 from typing import Any, ClassVar
 
 from ._base import ShapeBase
+from ._decorators import spine
 from ._types import HandoffProtocol, ShapeKind
 
 log = logging.getLogger("amplified.shapes.service")
 
 
+@spine("radical_honesty", "radical_attribution")
 class ServiceBase(ShapeBase):
     """Base class for all service shapes.
 

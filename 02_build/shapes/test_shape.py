@@ -14,11 +14,13 @@ import unittest
 from typing import Any, ClassVar
 
 from ._base import ShapeBase
+from ._decorators import spine
 from ._types import ShapeKind
 
 log = logging.getLogger("amplified.shapes.test")
 
 
+@spine("radical_honesty", "radical_transparency")
 class TestBase(ShapeBase):
     """Base class for all test shapes.
 

@@ -14,11 +14,13 @@ import logging
 from typing import Any, ClassVar
 
 from ._base import ShapeBase
+from ._decorators import spine
 from ._types import HandoffProtocol, ShapeKind, TrafficLight
 
 log = logging.getLogger("amplified.shapes.scorer")
 
 
+@spine("radical_transparency", "deterministic_first")
 class ScorerBase(ShapeBase):
     """Base class for all scorer shapes.
 

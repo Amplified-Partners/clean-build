@@ -14,11 +14,13 @@ import logging
 from typing import Any, ClassVar
 
 from ._base import ShapeBase
+from ._decorators import spine
 from ._types import ShapeKind
 
 log = logging.getLogger("amplified.shapes.model")
 
 
+@spine("deterministic_first", "congruence")
 class ModelBase(ShapeBase):
     """Base class for all model shapes.
 

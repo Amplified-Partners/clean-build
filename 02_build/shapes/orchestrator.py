@@ -14,6 +14,7 @@ import logging
 from typing import Any, ClassVar
 
 from ._base import ShapeBase
+from ._decorators import spine
 from ._types import (
     HandoffProtocol,
     ShapeKind,
@@ -24,6 +25,7 @@ from ._types import (
 log = logging.getLogger("amplified.shapes.orchestrator")
 
 
+@spine("radical_attribution", "narrow_handoff")
 class OrchestratorBase(ShapeBase):
     """Base class for all orchestrator shapes.
 

@@ -14,6 +14,7 @@ import logging
 from typing import Any, ClassVar
 
 from ._base import ShapeBase
+from ._decorators import spine
 from ._types import (
     GuardHalt,
     HandoffProtocol,
@@ -26,6 +27,7 @@ from ._types import (
 log = logging.getLogger("amplified.shapes.guard")
 
 
+@spine("radical_honesty", "congruence")
 class GuardBase(ShapeBase):
     """Base class for all guard shapes.
 
