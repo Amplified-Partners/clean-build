@@ -16,9 +16,8 @@ import sys
 import time
 import unicodedata
 from collections import defaultdict
-from dataclasses import dataclass, field, asdict
+from dataclasses import dataclass, field
 from datetime import datetime, timezone
-from pathlib import Path
 from typing import Optional
 
 import numpy as np
@@ -98,6 +97,7 @@ class Artefact:
     is_chaptered: bool = False
     has_ocr_damage: bool = False
     retrieval_usefulness: float = 0.0
+    component_type: str = "glue"
     # Cluster assignment
     cluster_id: Optional[str] = None
     cluster_type: Optional[str] = None
@@ -232,7 +232,7 @@ def detect_ocr_damage(content: str) -> bool:
                 if alnum / len(stripped) < 0.3:
                     damage_count += 1
 
-    non_blank = sum(1 for l in sampled_lines if l.strip())
+    non_blank = sum(1 for line in sampled_lines if line.strip())
     if non_blank == 0:
         return False
     return (damage_count / non_blank) > 0.25
@@ -320,6 +320,275 @@ def compute_retrieval_usefulness(artefact: Artefact) -> float:
     return max(0.0, min(1.0, score))
 
 
+# ---------------------------------------------------------------------------
+# Component Type Classification (15-type standard)
+# ---------------------------------------------------------------------------
+
+COMPONENT_TYPES = [
+    "entry", "service", "worker", "connector", "model", "store",
+    "pipeline", "orchestrator", "guard", "scorer", "agent", "test",
+    "config", "telemetry", "glue",
+]
+
+# Priority-ordered rules: first match wins.
+# Each rule is (component_type, match_function).
+# match_function receives (relative_path_lower, filename_lower, stem_lower,
+#                          yaml_data_or_none, first_500_lower)
+
+def _ct_match_telemetry(rp: str, fn: str, stem: str,
+                        yd: Optional[dict], head: str) -> bool:
+    """Transcripts, voice notes, session logs, monitoring output."""
+    if any(d in rp for d in [
+        "transcripts", "_inbox-voice", "voice-",
+        "vault-monitor-runs", "sessions/",
+    ]):
+        return True
+    if fn.startswith("voice-"):
+        return True
+    if any(kw in fn for kw in [
+        "session-log", "session-notes", "health-check",
+        "daily-report", "monitor",
+    ]):
+        return True
+    return False
+
+
+def _ct_match_guard(rp: str, fn: str, stem: str,
+                    yd: Optional[dict], head: str) -> bool:
+    """Authority, governance, validation, enforcement, security."""
+    if any(d in rp for d in [
+        "00_authority/", "security/", "_system/",
+    ]):
+        return True
+    if any(kw in fn for kw in [
+        "lockdown", "checklist", "principles", "manifest",
+        "governance", "ulysses", "enforcement", "signatures",
+        "access-rules", "codeowners", "promotion-gate",
+        "opinion-confidence", "use-it-or-cut-it",
+    ]):
+        return True
+    return False
+
+
+def _ct_match_agent(rp: str, fn: str, stem: str,
+                    yd: Optional[dict], head: str) -> bool:
+    """Agent definitions, personas, capability profiles, skills."""
+    if "skills/" in rp:
+        return True
+    if any(kw in fn for kw in [
+        "agents", "agent-", "soul", "persona", "skill",
+        "remit", "routing", "roster",
+    ]):
+        return True
+    if fn == "agents.md":
+        return True
+    return False
+
+
+def _ct_match_entry(rp: str, fn: str, stem: str,
+                    yd: Optional[dict], head: str) -> bool:
+    """Entry points, READMEs, onboarding, landing pages."""
+    if fn in ("readme.md", "onboarding.md", "index.md",
+              "getting-started.md", "quick-start.md"):
+        return True
+    return False
+
+
+def _ct_match_model(rp: str, fn: str, stem: str,
+                    yd: Optional[dict], head: str) -> bool:
+    """Schemas, data models, type definitions, entity structures."""
+    if "schemas/" in rp:
+        return True
+    if any(kw in fn for kw in [
+        "schema", "model", "ontology", "entity",
+        "taxonomy", "terminology", "data-dictionary",
+    ]):
+        return True
+    return False
+
+
+def _ct_match_config(rp: str, fn: str, stem: str,
+                     yd: Optional[dict], head: str) -> bool:
+    """Configuration, settings, environment, parameters."""
+    if any(kw in fn for kw in [
+        "config", "settings", "environment", ".env",
+        "parameters", "copilot-instructions", "copilot-review",
+        "cursorrules", "handshake",
+    ]):
+        return True
+    return False
+
+
+def _ct_match_pipeline(rp: str, fn: str, stem: str,
+                       yd: Optional[dict], head: str) -> bool:
+    """Multi-step processing chains, workflows, build pipelines."""
+    if any(d in rp for d in [
+        "workflows/", "pipeline",
+    ]):
+        return True
+    if any(kw in fn for kw in [
+        "pipeline", "workflow", "ingestion", "build-loop",
+        "ci-cd", "pr-workflow",
+    ]):
+        return True
+    return False
+
+
+def _ct_match_orchestrator(rp: str, fn: str, stem: str,
+                           yd: Optional[dict], head: str) -> bool:
+    """Coordination, routing, agent management, task distribution."""
+    if "cove-orchestrator/" in rp:
+        return True
+    if any(kw in fn for kw in [
+        "orchestrat", "shared-board", "routing",
+        "coordination", "fleet", "arbiter",
+    ]):
+        return True
+    return False
+
+
+def _ct_match_service(rp: str, fn: str, stem: str,
+                      yd: Optional[dict], head: str) -> bool:
+    """Running services, APIs, servers, daemon definitions."""
+    if any(kw in fn for kw in [
+        "api", "server", "service", "endpoint",
+        "mcp-server", "mcp_server", "enforcer",
+        "infrastructure", "systems-and-api",
+    ]):
+        return True
+    if "interfaces/" in rp:
+        return True
+    return False
+
+
+def _ct_match_worker(rp: str, fn: str, stem: str,
+                     yd: Optional[dict], head: str) -> bool:
+    """Background processors, batch jobs, cron tasks."""
+    if any(kw in fn for kw in [
+        "worker", "cron", "batch", "job-wrapup",
+        "scheduled", "processor",
+    ]):
+        return True
+    if "job-wrapups/" in rp:
+        return True
+    return False
+
+
+def _ct_match_connector(rp: str, fn: str, stem: str,
+                        yd: Optional[dict], head: str) -> bool:
+    """Integrations, bridges, adapters, sync mechanisms."""
+    if "evolution-api/" in rp:
+        return True
+    if any(kw in fn for kw in [
+        "connector", "integration", "bridge", "sync",
+        "adapter", "webhook", "migration",
+    ]):
+        return True
+    if "brain-migration/" in rp:
+        return True
+    return False
+
+
+def _ct_match_store(rp: str, fn: str, stem: str,
+                    yd: Optional[dict], head: str) -> bool:
+    """Storage, database config, vault structure, archive layout."""
+    if any(kw in fn for kw in [
+        "vault-map", "archive", "store", "storage",
+        "database", "qdrant", "falkordb",
+        "brain-architecture",
+    ]):
+        return True
+    if "knowledge-qdrant/" in rp:
+        return True
+    return False
+
+
+def _ct_match_scorer(rp: str, fn: str, stem: str,
+                     yd: Optional[dict], head: str) -> bool:
+    """Evaluation, ranking, rubrics, quality assessment."""
+    if any(kw in fn for kw in [
+        "scorer", "rubric", "scoring", "pudding",
+        "visual-polish", "evaluation", "quality",
+        "methodology",
+    ]):
+        return True
+    if "validators/" in rp:
+        return True
+    return False
+
+
+def _ct_match_test(rp: str, fn: str, stem: str,
+                   yd: Optional[dict], head: str) -> bool:
+    """Tests, validation results, QA, verification."""
+    if any(kw in fn for kw in [
+        "test", "validation-result", "qa-report",
+        "verification", "hooks-testing",
+    ]):
+        return True
+    return False
+
+
+def _ct_match_research(rp: str, fn: str, stem: str,
+                       yd: Optional[dict], head: str) -> bool:
+    """Research, synthesis — maps to glue with research tag."""
+    if "research/" in rp or "_staging/" in rp:
+        return True
+    return False
+
+
+# Ordered classifier chain — first match wins
+_CLASSIFIER_CHAIN = [
+    ("telemetry", _ct_match_telemetry),
+    ("guard", _ct_match_guard),
+    ("agent", _ct_match_agent),
+    ("entry", _ct_match_entry),
+    ("model", _ct_match_model),
+    ("config", _ct_match_config),
+    ("pipeline", _ct_match_pipeline),
+    ("orchestrator", _ct_match_orchestrator),
+    ("service", _ct_match_service),
+    ("worker", _ct_match_worker),
+    ("connector", _ct_match_connector),
+    ("store", _ct_match_store),
+    ("scorer", _ct_match_scorer),
+    ("test", _ct_match_test),
+]
+
+
+def classify_component_type(relative_path: str, filename: str,
+                            yaml_data: Optional[dict],
+                            content: str) -> str:
+    """Classify an artefact into one of 15 component types.
+    Uses path, filename, YAML, and content signals. First match wins.
+    Falls back to 'glue'."""
+    rp = relative_path.lower()
+    fn = filename.lower()
+    stem = filename_stem_for_grouping(filename)
+    head = content[:500].lower() if content else ""
+
+    for comp_type, match_fn in _CLASSIFIER_CHAIN:
+        if match_fn(rp, fn, stem, yaml_data, head):
+            return comp_type
+
+    # Inbox items → glue
+    if any(d in rp for d in ["_inbox", "inbox", "03_shadow/notes"]):
+        return "glue"
+
+    # Archive items → store
+    if "90_archive/" in rp and "vault-monitor" not in rp:
+        return "store"
+
+    # Imported business docs → telemetry (raw signal)
+    if "imported-business-docs/" in rp:
+        return "telemetry"
+
+    # Work / covered-ai → glue
+    if any(d in rp for d in ["work/", "work-covered-ai/"]):
+        return "glue"
+
+    return "glue"
+
+
 def filename_stem_for_grouping(filename: str) -> str:
     """Extract the base stem for version/hash grouping."""
     name = filename
@@ -358,8 +627,8 @@ def scan_repos(repo_paths: dict[str, str]) -> list[Artefact]:
     print(f"[SCAN] Found {len(quarantine_dirs)} quarantine zone(s):")
     for qd in quarantine_dirs:
         print(f"  - {qd}")
-    print(f"  (Note: quarantine markers at repo root exclude ONLY files in")
-    print(f"   the root directory itself, not subdirectories)")
+    print("  (Note: quarantine markers at repo root exclude ONLY files in")
+    print("   the root directory itself, not subdirectories)")
 
     # Second pass: collect artefacts
     artifact_counter = 0
@@ -416,9 +685,7 @@ def scan_repos(repo_paths: dict[str, str]) -> list[Artefact]:
                 yaml_present = yaml_data is not None
                 yaml_fields_present = []
                 yaml_fields_missing = list(REQUIRED_YAML_FIELDS)
-                yaml_raw = {}
                 if yaml_present and yaml_data:
-                    yaml_raw = yaml_data
                     yaml_fields_present = [
                         field_name for field_name in REQUIRED_YAML_FIELDS
                         if field_name in yaml_data
@@ -508,10 +775,14 @@ def scan_repos(repo_paths: dict[str, str]) -> list[Artefact]:
                     is_chaptered=is_chaptered,
                     has_ocr_damage=has_ocr,
                     retrieval_usefulness=0.0,
+                    component_type="glue",
                 )
                 # Computed scores that depend on fields above
                 art.source_path_quality = compute_source_path_quality(art)
                 art.retrieval_usefulness = compute_retrieval_usefulness(art)
+                art.component_type = classify_component_type(
+                    relative, f, yaml_data, content
+                )
 
                 artefacts.append(art)
 
@@ -979,6 +1250,7 @@ def artefact_to_decision_row(art: Artefact) -> dict:
         "is_chaptered": art.is_chaptered,
         "has_ocr_damage": art.has_ocr_damage,
         "retrieval_usefulness": round(art.retrieval_usefulness, 4),
+        "component_type": art.component_type,
         "cluster_id": art.cluster_id,
         "cluster_type": art.cluster_type,
         "proposed_status": art.proposed_status,
@@ -1137,6 +1409,11 @@ def build_summary_report(artefacts: list[Artefact],
         sum(a.confidence for a in artefacts) / total if total else 0
     )
 
+    # Component type distribution
+    comp_type_counts = defaultdict(int)
+    for a in artefacts:
+        comp_type_counts[a.component_type] += 1
+
     # Retrieval usefulness distribution
     ru_bins = {"0.0-0.2": 0, "0.2-0.4": 0, "0.4-0.6": 0, "0.6-0.8": 0, "0.8-1.0": 0}
     for a in artefacts:
@@ -1187,7 +1464,7 @@ def build_summary_report(artefacts: list[Artefact],
     for ct, count in sorted(cluster_type_counts.items()):
         report += f"| {ct} | {count} |\n"
 
-    report += f"""
+    report += """
 ## 3. Proposed Decisions
 
 | Status | Count |
@@ -1224,7 +1501,18 @@ def build_summary_report(artefacts: list[Artefact],
 | Average decision confidence | {avg_confidence:.3f} |
 | Needs human review | {human_review_count} ({human_review_count/total*100:.1f}%) |
 
-## 7. Retrieval Usefulness Distribution
+## 7. Component Type Distribution (15-type standard)
+
+| Type | Count | % |
+|------|-------|---|
+"""
+    for ct in COMPONENT_TYPES:
+        c = comp_type_counts.get(ct, 0)
+        pct = c / total * 100 if total else 0
+        report += f"| {ct} | {c} | {pct:.1f}% |\n"
+
+    report += """
+## 8. Retrieval Usefulness Distribution
 
 | Range | Count |
 |-------|-------|
@@ -1233,7 +1521,7 @@ def build_summary_report(artefacts: list[Artefact],
         report += f"| {rng} | {count} |\n"
 
     report += f"""
-## 8. Methodology
+## 9. Methodology
 
 ### Scanning
 - Recursive scan of `.md` files in vault, clean-build, ground-truth
