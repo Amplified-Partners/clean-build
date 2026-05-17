@@ -54,7 +54,12 @@ class OrchestratorBase(ShapeBase):
         self._steps_completed = 0
 
     def run(self, context: Any) -> WorkflowResult:
-        """Execute the workflow. Subclass implements."""
+        """Execute the workflow. Subclass implements.
+
+        State is reset at the start of each run so instances are reusable.
+        """
+        self._step_log = []
+        self._steps_completed = 0
         raise NotImplementedError(
             f"{type(self).__name__}.run() not implemented. "
             "Orchestrator shapes MUST implement run()."

@@ -512,6 +512,10 @@ class TestGuardShape(unittest.TestCase):
         with self.assertRaises(GuardHalt):
             SampleGuard(bypass=True)
 
+    def test_no_bypass_allows_false(self):
+        guard = SampleGuard(skip_validation=False)
+        self.assertIsNotNone(guard)
+
 
 class TestScorerShape(unittest.TestCase):
     def test_score_high(self):

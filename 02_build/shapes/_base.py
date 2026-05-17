@@ -43,6 +43,14 @@ class ShapeBase:
     def __init__(self) -> None:
         REGISTRY.register_instance(self)
 
+    def __post_init__(self) -> None:
+        """Hook for dataclass-based shapes (ModelBase, ConfigBase).
+
+        @dataclass generates __init__ that skips ShapeBase.__init__,
+        so we register the instance here instead.
+        """
+        REGISTRY.register_instance(self)
+
     @staticmethod
     def generate_id() -> str:
         """Generate a tracking ID."""

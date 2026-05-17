@@ -277,12 +277,12 @@ def no_bypass(cls: type) -> type:
     original_init = cls.__init__ if hasattr(cls, "__init__") else None
 
     def guarded_init(self: Any, *args: Any, **kwargs: Any) -> None:
-        if kwargs.pop("skip_validation", None) is not None:
+        if kwargs.pop("skip_validation", False):
             raise GuardHalt(
                 f"{cls.__name__}: @no_bypass — skip_validation is forbidden. "
                 "There is no admin mode. There is no debug flag.",
             )
-        if kwargs.pop("bypass", None) is not None:
+        if kwargs.pop("bypass", False):
             raise GuardHalt(
                 f"{cls.__name__}: @no_bypass — bypass is forbidden.",
             )
