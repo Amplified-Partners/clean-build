@@ -12,6 +12,7 @@ from uuid import uuid4
 from pydantic import BaseModel, Field
 
 SheetMode = Literal["brief", "correspondence", "council"]
+EpistemicTier = Literal["INTUITED", "STRUCTURED", "MEASURED", "PROVEN"]
 
 
 class SheetMeta(BaseModel):
@@ -23,6 +24,7 @@ class SheetMeta(BaseModel):
     mode: SheetMode = "brief"
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     created_by: str = ""
+    epistemic_tier: EpistemicTier = "INTUITED"
 
 
 class Sheet(BaseModel):

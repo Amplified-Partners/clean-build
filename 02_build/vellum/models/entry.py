@@ -30,6 +30,9 @@ EntryType = Literal[
 ]
 
 
+EpistemicTier = Literal["INTUITED", "STRUCTURED", "MEASURED", "PROVEN"]
+
+
 class SheetEntry(BaseModel):
     """A single line on a Vellum sheet. Immutable once written."""
 
@@ -41,6 +44,7 @@ class SheetEntry(BaseModel):
     prev_hash: str = ""
     entry_hash: str = ""
     entry_type: EntryType = "agent_write"
+    epistemic_tier: EpistemicTier = "INTUITED"
     metadata: dict = Field(default_factory=dict)
 
     def compute_hash(self) -> str:
