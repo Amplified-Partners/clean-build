@@ -320,6 +320,9 @@ class CouncilMessage(BaseModel):
     speaker: str
     message: str
     epistemic_tier: str = "INTUITED"
+    communication_mode: str = "CONVERSATION"
+    model: str | None = None
+    knowledge_cutoff: str | None = None
 
 
 class CouncilMessageResponse(BaseModel):
@@ -330,6 +333,9 @@ class CouncilMessageResponse(BaseModel):
     message: str
     timestamp: str
     epistemic_tier: str
+    communication_mode: str = "CONVERSATION"
+    model: str | None = None
+    knowledge_cutoff: str | None = None
 
 
 class CouncilThreadResponse(BaseModel):
@@ -356,6 +362,9 @@ def council_speak(msg: CouncilMessage) -> CouncilMessageResponse:
         message=msg.message,
         timestamp=dt.datetime.now(dt.timezone.utc).isoformat(),
         epistemic_tier=msg.epistemic_tier.upper(),
+        communication_mode=msg.communication_mode.upper(),
+        model=msg.model,
+        knowledge_cutoff=msg.knowledge_cutoff,
     )
     _council_thread.append(entry.model_dump())
     _council_event.set()
@@ -397,6 +406,81 @@ async def council_stream() -> StreamingResponse:
 
 
 # ---------------------------------------------------------------------------
+# Baton Pass — automatic session context for Devon
+# ---------------------------------------------------------------------------
+
+_baton: dict[str, Any] = {
+    "session_id": None,
+    "updated_at": None,
+    "state": "idle",
+    "last_action": None,
+    "pending_tasks": [],
+    "decisions_made": [],
+    "mesh_cursor": 0,
+}
+
+
+class BatonWrite(BaseModel):
+    """Write a baton pass — what Devon was doing when it went to sleep."""
+
+    session_id: str
+    state: str = "idle"
+    last_action: str | None = None
+    pending_tasks: list[str] = Field(default_factory=list)
+    decisions_made: list[str] = Field(default_factory=list)
+    mesh_cursor: int = 0
+    context: dict[str, Any] = Field(default_factory=dict)
+
+
+@app.get("/api/v1/baton")
+def get_baton() -> dict[str, Any]:
+    """Read the baton — where was Devon when it last went to sleep?
+
+    Called at session start. Gives the fresh Devon exact context:
+    - What was I doing?
+    - What's pending?
+    - What decisions were made?
+    - How far into the mesh thread have I read?
+    - Breakdown by communication mode (what needs immediate attention?)
+    """
+    cursor = _baton.get("mesh_cursor", 0)
+    unread = _council_thread[cursor:]
+    mode_breakdown = {"CONVERSATION": 0, "ASYNC": 0, "OUTLET": 0}
+    for msg in unread:
+        mode = msg.get("communication_mode", "CONVERSATION")
+        if mode in mode_breakdown:
+            mode_breakdown[mode] += 1
+        else:
+            mode_breakdown[mode] = 1
+    return {
+        **_baton,
+        "council_messages_since": len(unread),
+        "mode_breakdown": mode_breakdown,
+        "unread_messages": unread,
+    }
+
+
+@app.post("/api/v1/baton")
+def write_baton(baton: BatonWrite) -> dict[str, Any]:
+    """Write the baton — Devon going to sleep, recording where it is.
+
+    Called at session end. Next Devon wakes up and reads this.
+    """
+    global _baton
+    _baton = {
+        "session_id": baton.session_id,
+        "updated_at": dt.datetime.now(dt.timezone.utc).isoformat(),
+        "state": baton.state,
+        "last_action": baton.last_action,
+        "pending_tasks": baton.pending_tasks,
+        "decisions_made": baton.decisions_made,
+        "mesh_cursor": baton.mesh_cursor,
+        "context": baton.context,
+    }
+    return {"status": "baton_written", "session_id": baton.session_id}
+
+
+# ---------------------------------------------------------------------------
 # Health
 # ---------------------------------------------------------------------------
 
@@ -411,5 +495,7 @@ def health() -> dict[str, Any]:
         "chain_head": _gate.previous_hash[:16] + "...",
         "registered_proformas": len(_registry),
         "council_messages": len(_council_thread),
+        "baton_state": _baton.get("state", "idle"),
+        "baton_session": _baton.get("session_id"),
         "timestamp": dt.datetime.now(dt.timezone.utc).isoformat(),
     }
