@@ -59,7 +59,7 @@ class SpineRegistration(BaseModel):
 
     agent_id: str
     agent_name: str = ""
-    tenant_id: str = "ewan"
+    tenant_id: str
     lens: str = ""
     role: str = ""
     behavioural_priors: list[dict] = Field(default_factory=list)
@@ -74,7 +74,7 @@ class SpineUpdateFromBaton(BaseModel):
     """Update a spine with learnings from a baton pass."""
 
     agent_id: str
-    tenant_id: str = "ewan"
+    tenant_id: str
     failed_paths: list[str] = Field(default_factory=list)
     if_then_lessons: list[str] = Field(default_factory=list)
     decision_log_refs: list[str] = Field(default_factory=list)
@@ -86,7 +86,7 @@ class ExtractRequest(BaseModel):
     """Request to extract memory candidates from a sheet."""
 
     sheet_id: str
-    tenant_id: str = "ewan"
+    tenant_id: str
 
 
 class IngestRequest(BaseModel):
@@ -101,7 +101,7 @@ class IngestRequest(BaseModel):
 
 
 @router.get("/spine")
-async def read_spine(agent_id: str, tenant_id: str = "ewan") -> dict:
+async def read_spine(agent_id: str, tenant_id: str) -> dict:
     """Read the portable spine for an agent.
 
     Served on agent wakeup. Contains: identity, lens, behavioural
@@ -118,7 +118,7 @@ async def read_spine(agent_id: str, tenant_id: str = "ewan") -> dict:
 
 
 @router.get("/spines")
-async def read_all_spines(tenant_id: str = "ewan") -> dict:
+async def read_all_spines(tenant_id: str) -> dict:
     """List all registered spines for a tenant."""
     spines = list_spines(tenant_id)
     return {
@@ -193,7 +193,7 @@ async def patch_spine_from_baton(body: SpineUpdateFromBaton) -> dict:
 @router.get("/context")
 async def read_context(
     agent_id: str,
-    tenant_id: str = "ewan",
+    tenant_id: str,
     max_recent: int = 20,
 ) -> dict:
     """Assemble the full context packet for an agent.

@@ -22,7 +22,7 @@ log = logging.getLogger("vellum.context")
 
 async def assemble_context_packet(
     agent_id: str,
-    tenant_id: str = "ewan",
+    tenant_id: str,
     max_recent_entries: int = 20,
 ) -> dict:
     """Assemble the full context packet for an agent.

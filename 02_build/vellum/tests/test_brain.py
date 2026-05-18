@@ -54,13 +54,13 @@ class TestSpineServer:
     """Test portable spine registration, reading, and baton updates."""
 
     @pytest.mark.asyncio
-    @pytest.mark.asyncio
     async def test_register_and_read_spine(self, client: AsyncClient):
         resp = await client.put(
             "/api/v1/brain/spine",
             json={
                 "agent_id": "devon-58ca",
                 "agent_name": "Devon",
+                "tenant_id": "test",
                 "lens": "infrastructure",
                 "role": "systems coordinator",
                 "procedural_constraints": ["no force push to main"],
@@ -73,7 +73,7 @@ class TestSpineServer:
         assert data["agent_id"] == "devon-58ca"
 
         resp2 = await client.get(
-            "/api/v1/brain/spine", params={"agent_id": "devon-58ca"}
+            "/api/v1/brain/spine", params={"agent_id": "devon-58ca", "tenant_id": "test"}
         )
         assert resp2.status_code == 200
         spine = resp2.json()["spine"]
@@ -85,7 +85,7 @@ class TestSpineServer:
     @pytest.mark.asyncio
     async def test_spine_not_found(self, client: AsyncClient):
         resp = await client.get(
-            "/api/v1/brain/spine", params={"agent_id": "nonexistent"}
+            "/api/v1/brain/spine", params={"agent_id": "nonexistent", "tenant_id": "test"}
         )
         assert resp.status_code == 404
 
@@ -93,13 +93,13 @@ class TestSpineServer:
     async def test_list_spines(self, client: AsyncClient):
         await client.put(
             "/api/v1/brain/spine",
-            json={"agent_id": "agent-a", "agent_name": "Alpha"},
+            json={"agent_id": "agent-a", "agent_name": "Alpha", "tenant_id": "test"},
         )
         await client.put(
             "/api/v1/brain/spine",
-            json={"agent_id": "agent-b", "agent_name": "Bravo"},
+            json={"agent_id": "agent-b", "agent_name": "Bravo", "tenant_id": "test"},
         )
-        resp = await client.get("/api/v1/brain/spines")
+        resp = await client.get("/api/v1/brain/spines", params={"tenant_id": "test"})
         assert resp.status_code == 200
         data = resp.json()
         assert data["count"] == 2
@@ -108,12 +108,13 @@ class TestSpineServer:
     async def test_patch_spine_from_baton(self, client: AsyncClient):
         await client.put(
             "/api/v1/brain/spine",
-            json={"agent_id": "devon-test", "agent_name": "Devon"},
+            json={"agent_id": "devon-test", "agent_name": "Devon", "tenant_id": "test"},
         )
         resp = await client.patch(
             "/api/v1/brain/spine",
             json={
                 "agent_id": "devon-test",
+                "tenant_id": "test",
                 "failed_paths": ["tried rsync, permission denied"],
                 "if_then_lessons": [
                     "IF Beast SSH fails THEN check tailscale first"
@@ -127,7 +128,7 @@ class TestSpineServer:
         assert data["if_then_lessons_count"] == 1
 
         resp2 = await client.get(
-            "/api/v1/brain/spine", params={"agent_id": "devon-test"}
+            "/api/v1/brain/spine", params={"agent_id": "devon-test", "tenant_id": "test"}
         )
         spine = resp2.json()["spine"]
         assert spine["experience_line"] == "wired cron + baton pass"
@@ -138,12 +139,13 @@ class TestSpineServer:
     async def test_patch_increments_failure_count(self, client: AsyncClient):
         await client.put(
             "/api/v1/brain/spine",
-            json={"agent_id": "devon-inc"},
+            json={"agent_id": "devon-inc", "tenant_id": "test"},
         )
         await client.patch(
             "/api/v1/brain/spine",
             json={
                 "agent_id": "devon-inc",
+                "tenant_id": "test",
                 "failed_paths": ["SSH timeout"],
             },
         )
@@ -151,11 +153,12 @@ class TestSpineServer:
             "/api/v1/brain/spine",
             json={
                 "agent_id": "devon-inc",
+                "tenant_id": "test",
                 "failed_paths": ["SSH timeout"],
             },
         )
         resp = await client.get(
-            "/api/v1/brain/spine", params={"agent_id": "devon-inc"}
+            "/api/v1/brain/spine", params={"agent_id": "devon-inc", "tenant_id": "test"}
         )
         spine = resp.json()["spine"]
         assert spine["failure_patterns"][0]["times_observed"] == 2
@@ -164,7 +167,7 @@ class TestSpineServer:
     async def test_patch_nonexistent_spine_404(self, client: AsyncClient):
         resp = await client.patch(
             "/api/v1/brain/spine",
-            json={"agent_id": "ghost", "failed_paths": ["x"]},
+            json={"agent_id": "ghost", "tenant_id": "test", "failed_paths": ["x"]},
         )
         assert resp.status_code == 404
 
@@ -181,10 +184,10 @@ class TestContextServer:
     async def test_context_packet_empty(self, client: AsyncClient):
         await client.put(
             "/api/v1/brain/spine",
-            json={"agent_id": "devon-ctx", "lens": "testing"},
+            json={"agent_id": "devon-ctx", "tenant_id": "test", "lens": "testing"},
         )
         resp = await client.get(
-            "/api/v1/brain/context", params={"agent_id": "devon-ctx"}
+            "/api/v1/brain/context", params={"agent_id": "devon-ctx", "tenant_id": "test"}
         )
         assert resp.status_code == 200
         data = resp.json()
@@ -199,7 +202,7 @@ class TestContextServer:
     @pytest.mark.asyncio
     async def test_context_packet_no_spine(self, client: AsyncClient):
         resp = await client.get(
-            "/api/v1/brain/context", params={"agent_id": "unknown-agent"}
+            "/api/v1/brain/context", params={"agent_id": "unknown-agent", "tenant_id": "test"}
         )
         assert resp.status_code == 200
         data = resp.json()
@@ -209,7 +212,7 @@ class TestContextServer:
     async def test_context_includes_entries(self, client: AsyncClient):
         gen = await client.post(
             "/api/v1/sheets/generate",
-            json={"title": "Test Brief", "content": "Initial content"},
+            json={"title": "Test Brief", "content": "Initial content", "tenant_id": "test"},
         )
         sheet_id = gen.json()["sheet_id"]
 
@@ -223,7 +226,7 @@ class TestContextServer:
         )
 
         resp = await client.get(
-            "/api/v1/brain/context", params={"agent_id": "devon-ctx2"}
+            "/api/v1/brain/context", params={"agent_id": "devon-ctx2", "tenant_id": "test"}
         )
         data = resp.json()
         assert data["counts"]["recent_entries"] >= 1
@@ -355,7 +358,7 @@ class TestMemoryExtractor:
 
         resp = await client.post(
             "/api/v1/brain/extract",
-            json={"sheet_id": sheet_id},
+            json={"sheet_id": sheet_id, "tenant_id": "test"},
         )
         assert resp.status_code == 200
         data = resp.json()
@@ -366,7 +369,7 @@ class TestMemoryExtractor:
     async def test_extract_sheet_not_found(self, client: AsyncClient):
         resp = await client.post(
             "/api/v1/brain/extract",
-            json={"sheet_id": "nonexistent"},
+            json={"sheet_id": "nonexistent", "tenant_id": "test"},
         )
         assert resp.status_code == 404
 
@@ -558,6 +561,7 @@ class TestMeasuredLoopIntegration:
             json={
                 "agent_id": "devon-loop",
                 "agent_name": "Devon Loop Test",
+                "tenant_id": "test",
                 "lens": "integration testing",
                 "role": "test agent",
             },
@@ -569,13 +573,14 @@ class TestMeasuredLoopIntegration:
             json={
                 "title": "Loop Test Brief",
                 "content": "Tried to deploy but it failed with timeout error. Lesson learned: always check Docker first",
+                "tenant_id": "test",
             },
         )
         sheet_id = gen.json()["sheet_id"]
 
         # Step 3: Get the context packet
         ctx = await client.get(
-            "/api/v1/brain/context", params={"agent_id": "devon-loop"}
+            "/api/v1/brain/context", params={"agent_id": "devon-loop", "tenant_id": "test"}
         )
         assert ctx.status_code == 200
         ctx_data = ctx.json()
@@ -585,7 +590,7 @@ class TestMeasuredLoopIntegration:
         # Step 4: Extract memory candidates
         extract = await client.post(
             "/api/v1/brain/extract",
-            json={"sheet_id": sheet_id},
+            json={"sheet_id": sheet_id, "tenant_id": "test"},
         )
         assert extract.status_code == 200
         candidates = extract.json()["candidates"]
@@ -606,6 +611,7 @@ class TestMeasuredLoopIntegration:
             "/api/v1/brain/spine",
             json={
                 "agent_id": "devon-loop",
+                "tenant_id": "test",
                 "failed_paths": ["deploy timeout"],
                 "if_then_lessons": ["IF deploy fails THEN check Docker first"],
             },
@@ -614,7 +620,7 @@ class TestMeasuredLoopIntegration:
 
         # Step 7: Verify spine has the learnings
         spine_resp = await client.get(
-            "/api/v1/brain/spine", params={"agent_id": "devon-loop"}
+            "/api/v1/brain/spine", params={"agent_id": "devon-loop", "tenant_id": "test"}
         )
         spine = spine_resp.json()["spine"]
         assert len(spine["failure_patterns"]) == 1

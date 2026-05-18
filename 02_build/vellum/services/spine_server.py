@@ -26,12 +26,12 @@ log = logging.getLogger("vellum.spine")
 _spines: dict[tuple[str, str], PortableSpine] = {}
 
 
-def get_spine(agent_id: str, tenant_id: str = "ewan") -> PortableSpine | None:
+def get_spine(agent_id: str, tenant_id: str) -> PortableSpine | None:
     """Read the portable spine for an agent. None if no spine registered."""
     return _spines.get((tenant_id, agent_id))
 
 
-def list_spines(tenant_id: str = "ewan") -> list[PortableSpine]:
+def list_spines(tenant_id: str) -> list[PortableSpine]:
     """List all spines for a tenant."""
     return [s for k, s in _spines.items() if k[0] == tenant_id]
 

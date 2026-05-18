@@ -41,7 +41,7 @@ class MemoryCandidate(BaseModel):
     source_entry_id: str
     source_sheet_id: str
     agent_id: str = ""
-    tenant_id: str = "ewan"
+    tenant_id: str = ""
     extracted_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
     kind: CandidateKind

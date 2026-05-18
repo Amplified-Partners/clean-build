@@ -49,7 +49,7 @@ class PortableSpine(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid4()))
     agent_id: str
     agent_name: str = ""
-    tenant_id: str = "ewan"
+    tenant_id: str
     updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
     lens: str = ""
