@@ -11,12 +11,14 @@ Devon-b5dc | 2026-05-14
 
 from __future__ import annotations
 
+import asyncio
 import datetime as dt
 import uuid
 from typing import Any
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 
 from vellum.gate.models import EpistemicStatus
@@ -303,6 +305,102 @@ def get_all_records() -> list[dict[str, Any]]:
     return [r.model_dump(mode="json") for r in _records]
 
 
+# ---------------------------------------------------------------------------
+# Council endpoints — Agent-to-Agent mesh (sovereign communication channel)
+# ---------------------------------------------------------------------------
+
+_council_thread: list[dict[str, Any]] = []
+_council_msg_counter: int = 0
+_council_event: asyncio.Event = asyncio.Event()
+
+
+class CouncilMessage(BaseModel):
+    """A message in the Council thread."""
+
+    speaker: str
+    message: str
+    epistemic_tier: str = "INTUITED"
+
+
+class CouncilMessageResponse(BaseModel):
+    """A stored Council message."""
+
+    id: str
+    speaker: str
+    message: str
+    timestamp: str
+    epistemic_tier: str
+
+
+class CouncilThreadResponse(BaseModel):
+    """The full Council thread."""
+
+    thread: list[CouncilMessageResponse] = Field(default_factory=list)
+
+
+@app.get("/api/v1/council/thread", response_model=CouncilThreadResponse)
+def get_council_thread() -> CouncilThreadResponse:
+    """Get the full Council thread — agent-to-agent communication."""
+    return CouncilThreadResponse(thread=_council_thread)
+
+
+@app.post("/api/v1/council/speak", response_model=CouncilMessageResponse)
+def council_speak(msg: CouncilMessage) -> CouncilMessageResponse:
+    """Post a message to the Council thread."""
+    global _council_msg_counter
+    _council_msg_counter += 1
+
+    entry = CouncilMessageResponse(
+        id=f"msg_{_council_msg_counter:03d}",
+        speaker=msg.speaker,
+        message=msg.message,
+        timestamp=dt.datetime.now(dt.timezone.utc).isoformat(),
+        epistemic_tier=msg.epistemic_tier.upper(),
+    )
+    _council_thread.append(entry.model_dump())
+    _council_event.set()
+    _council_event.clear()
+    return entry
+
+
+@app.get("/api/v1/council/stream")
+async def council_stream() -> StreamingResponse:
+    """SSE stream for real-time Council messages. True ticker tape.
+
+    Antigravity subscribes once. Messages push instantly when posted.
+    No polling delay. EventSource in the browser connects here.
+    """
+
+    async def event_generator():
+        last_seen = len(_council_thread)
+        # Send all existing messages first
+        for msg in _council_thread:
+            yield f"data: {__import__('json').dumps(msg)}\n\n"
+        # Then stream new ones as they arrive
+        while True:
+            await asyncio.sleep(0.1)  # Check every 100ms
+            current = len(_council_thread)
+            if current > last_seen:
+                for msg in _council_thread[last_seen:current]:
+                    yield f"data: {__import__('json').dumps(msg)}\n\n"
+                last_seen = current
+
+    return StreamingResponse(
+        event_generator(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "Access-Control-Allow-Origin": "*",
+        },
+    )
+
+
+# ---------------------------------------------------------------------------
+# Health
+# ---------------------------------------------------------------------------
+
+
 @app.get("/api/v1/health")
 def health() -> dict[str, Any]:
     """Health check."""
@@ -312,5 +410,6 @@ def health() -> dict[str, Any]:
         "record_count": _gate.record_count,
         "chain_head": _gate.previous_hash[:16] + "...",
         "registered_proformas": len(_registry),
+        "council_messages": len(_council_thread),
         "timestamp": dt.datetime.now(dt.timezone.utc).isoformat(),
     }
