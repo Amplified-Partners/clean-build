@@ -18,26 +18,20 @@ Devon-58ca | 2026-05-18
 from __future__ import annotations
 
 import logging
-from typing import Literal
 
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
-from vellum.models.entry import SheetEntry
-from vellum.models.memory import CandidateKind, GateDecision, MemoryCandidate
+from vellum.models.memory import MemoryCandidate
 from vellum.models.spine import (
     BehaviouralPrior,
     FailurePattern,
     PortableSpine,
 )
 from vellum.services.context_server import assemble_context_packet
-from vellum.services.ingestion_gate import evaluate_candidate, run_gate
-from vellum.services.memory_extractor import (
-    extract_candidates,
-    extract_from_sheet_entries,
-)
+from vellum.services.ingestion_gate import run_gate
+from vellum.services.memory_extractor import extract_from_sheet_entries
 from vellum.services.spine_server import (
-    clear_spines,
     get_spine,
     list_spines,
     register_spine,
