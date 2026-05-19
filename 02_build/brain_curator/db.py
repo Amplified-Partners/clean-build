@@ -15,23 +15,20 @@ from typing import Any
 log = logging.getLogger("brain_curator.db")
 
 # ---------------------------------------------------------------------------
-# DSN defaults (Beast internal)
+# DSN — required via environment variable. No default credentials.
+# On Beast these are set in the cove-orchestrator Docker env.
 # ---------------------------------------------------------------------------
 
-BRAIN_WRITER_DSN = os.getenv(
-    "BRAIN_WRITER_DSN",
-    "postgresql://brain_writer@cove-postgres:5432/amplified_brain",
-)
-BRAIN_READER_DSN = os.getenv(
-    "BRAIN_READER_DSN",
-    "postgresql://brain_reader@cove-postgres:5432/amplified_brain",
-)
+BRAIN_WRITER_DSN = os.environ.get("BRAIN_WRITER_DSN", "")
+BRAIN_READER_DSN = os.environ.get("BRAIN_READER_DSN", "")
 
 
 async def connect_writer() -> Any:
     """Connect as brain_writer (INSERT/UPDATE/DELETE on curation tables)."""
     import asyncpg
 
+    if not BRAIN_WRITER_DSN:
+        raise RuntimeError("BRAIN_WRITER_DSN environment variable not set")
     return await asyncpg.connect(BRAIN_WRITER_DSN)
 
 
@@ -39,6 +36,8 @@ async def connect_reader() -> Any:
     """Connect as brain_reader (SELECT only)."""
     import asyncpg
 
+    if not BRAIN_READER_DSN:
+        raise RuntimeError("BRAIN_READER_DSN environment variable not set")
     return await asyncpg.connect(BRAIN_READER_DSN)
 
 
@@ -112,13 +111,16 @@ async def start_curation_run(
     conn: Any,
     run_id: str,
     stage: str,
-    code_version: str = "brain-curator-v0.1",
+    code_version: str | None = None,
     config_hash: str | None = None,
     input_scope: dict[str, Any] | None = None,
 ) -> None:
     """Record the start of a curation stage run."""
     import json
 
+    from brain_curator.config import CODE_VERSION
+
+    _version = code_version or CODE_VERSION
     await conn.execute(
         """INSERT INTO brain_curation_runs
            (run_id, stage, code_version, config_hash, input_scope, status)
@@ -126,7 +128,7 @@ async def start_curation_run(
         ON CONFLICT (run_id) DO UPDATE SET status = 'running', started_at = now()""",
         run_id,
         stage,
-        code_version,
+        _version,
         config_hash,
         json.dumps(input_scope or {}),
     )
