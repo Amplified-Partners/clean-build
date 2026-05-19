@@ -50,6 +50,17 @@ class AuditLog:
         self._on_record: list[Callable[[StatusRecord], None]] = []
 
     def write(self, record: StatusRecord) -> None:
+        """Append a record and notify all subscribers.
+
+        Guarantees:
+        1. The record is always appended before hooks run.
+        2. ALL hooks are called, even if earlier hooks raise.
+        3. If any hook raises, the first exception is re-raised
+           after all hooks have been called.
+
+        This ensures the audit trail is never lost — not even for
+        the incident that caused the crash.
+        """
         with self._lock:
             self._records.append(record)
         log.debug(
@@ -58,8 +69,16 @@ class AuditLog:
             record.declared_status.label(),
             record.effective_status.label(),
         )
+        first_exc: Exception | None = None
         for hook in self._on_record:
-            hook(record)
+            try:
+                hook(record)
+            except Exception as exc:
+                log.error("Subscriber hook %s raised: %s", hook, exc)
+                if first_exc is None:
+                    first_exc = exc
+        if first_exc is not None:
+            raise first_exc
 
     def subscribe(self, hook: Callable[[StatusRecord], None]) -> None:
         """Register a callback for every new record."""

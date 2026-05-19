@@ -173,5 +173,53 @@ class TestDriftDetectorGreen(unittest.TestCase):
         self.assertEqual(detector.signal, DriftSignal.GREEN)
 
 
+class TestAuditLogHookIsolation(unittest.TestCase):
+    """Verify that AuditLog.write() calls ALL hooks even if one raises.
+
+    This is the fix for the Five Rods review: the audit trail must never
+    be lost, and downstream hooks must never be silently skipped.
+    """
+
+    def test_all_hooks_called_even_if_first_raises(self):
+        """If drift detector raises P0Incident, subsequent hooks still run."""
+        audit = AuditLog()
+        _detector = DriftDetector(audit)  # subscribes first — will raise on promotion
+
+        second_hook_called = []
+
+        def second_hook(record: StatusRecord) -> None:
+            second_hook_called.append(record)
+
+        audit.subscribe(second_hook)
+
+        rec = _record(
+            declared=EpistemicTier.INTUITED,
+            effective=EpistemicTier.STRUCTURED,
+        )
+        with self.assertRaises(P0Incident):
+            audit.write(rec)
+
+        # Second hook must have been called despite first hook raising
+        self.assertEqual(len(second_hook_called), 1)
+        self.assertEqual(second_hook_called[0].record_id, rec.record_id)
+
+    def test_record_written_before_hook_exception(self):
+        """The audit record is committed before any hook exception propagates."""
+        audit = AuditLog()
+        _detector = DriftDetector(audit)
+
+        rec = _record(
+            declared=EpistemicTier.INTUITED,
+            effective=EpistemicTier.STRUCTURED,
+        )
+        with self.assertRaises(P0Incident):
+            audit.write(rec)
+
+        # Record is in the log even though write() raised
+        records = audit.all()
+        self.assertEqual(len(records), 1)
+        self.assertEqual(records[0].record_id, rec.record_id)
+
+
 if __name__ == "__main__":
     unittest.main()
