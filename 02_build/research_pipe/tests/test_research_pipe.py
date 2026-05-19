@@ -260,27 +260,31 @@ class TestClosure:
 class TestPortableSpine:
     def test_generate_spine_includes(self) -> None:
         spine = generate_spine(
-            current_state="research_running",
-            evidence_refs=["ev-1", "ev-2"],
+            problem_id="prob-1",
+            task_summary="Research running",
+            agent_role_target="devon",
             constraints=["no FalkorDB"],
             allowed_tools=["grep", "git"],
-            open_questions=["What is X?"],
-            approval_tier="surface",
         )
-        assert spine.current_state == "research_running"
-        assert spine.evidence_refs == ["ev-1", "ev-2"]
-        assert spine.constraints == ["no FalkorDB"]
+        assert spine.task_summary == "Research running"
+        assert "no FalkorDB" in spine.constraints
         assert spine.allowed_tools == ["grep", "git"]
-        assert spine.open_questions == ["What is X?"]
-        assert spine.approval_tier == "surface"
+        # Five Rods always appended
+        assert "radical_honesty" in spine.constraints
 
     def test_spine_has_valid_until(self) -> None:
-        spine = generate_spine(current_state="test")
+        spine = generate_spine(
+            problem_id="prob-2",
+            task_summary="test",
+            agent_role_target="devon",
+        )
         assert spine.valid_until > datetime.now(timezone.utc)
 
     def test_spine_custom_ttl(self) -> None:
         spine = generate_spine(
-            current_state="test",
+            problem_id="prob-3",
+            task_summary="test",
+            agent_role_target="devon",
             ttl=timedelta(hours=1),
         )
         expected = datetime.now(timezone.utc) + timedelta(hours=1)
@@ -290,22 +294,34 @@ class TestPortableSpine:
     def test_spine_expiry_detection(self) -> None:
         spine = PortableSpine(
             valid_until=datetime.now(timezone.utc) - timedelta(hours=1),
-            current_state="expired",
+            problem_id="prob-4",
+            task_summary="expired",
+            agent_role_target="devon",
         )
         assert spine.is_expired
 
     def test_spine_not_expired(self) -> None:
-        spine = generate_spine(current_state="fresh")
+        spine = generate_spine(
+            problem_id="prob-5",
+            task_summary="fresh",
+            agent_role_target="devon",
+        )
         assert not spine.is_expired
 
     def test_default_excludes_present(self) -> None:
-        spine = generate_spine(current_state="test")
+        spine = generate_spine(
+            problem_id="prob-6",
+            task_summary="test",
+            agent_role_target="devon",
+        )
         for excl in DEFAULT_EXCLUDES:
             assert excl in spine.excluded
 
     def test_extra_excludes_appended(self) -> None:
         spine = generate_spine(
-            current_state="test",
+            problem_id="prob-7",
+            task_summary="test",
+            agent_role_target="devon",
             extra_excludes=["secret_data"],
         )
         assert "secret_data" in spine.excluded
@@ -313,16 +329,26 @@ class TestPortableSpine:
             assert excl in spine.excluded
 
     def test_excludes_contain_crm_records(self) -> None:
-        spine = generate_spine(current_state="test")
+        spine = generate_spine(
+            problem_id="prob-8",
+            task_summary="test",
+            agent_role_target="devon",
+        )
         assert "direct_crm_records" in spine.excluded
 
     def test_excludes_contain_raw_transcript(self) -> None:
-        spine = generate_spine(current_state="test")
+        spine = generate_spine(
+            problem_id="prob-9",
+            task_summary="test",
+            agent_role_target="devon",
+        )
         assert "raw_transcript" in spine.excluded
 
-    def test_sections_freeform(self) -> None:
+    def test_handoff_prompt(self) -> None:
         spine = generate_spine(
-            current_state="test",
-            sections={"five_rods": ["honesty", "transparency"]},
+            problem_id="prob-10",
+            task_summary="test",
+            agent_role_target="devon",
+            handoff_prompt="Fix the quarantine routing bug.",
         )
-        assert spine.sections["five_rods"] == ["honesty", "transparency"]
+        assert spine.handoff_prompt == "Fix the quarantine routing bug."

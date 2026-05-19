@@ -58,6 +58,16 @@ from epistemic_core.vellum_emitter import (
     ReconcilerResult,
     reconcile,
 )
+from epistemic_core.vellum_query import (
+    VellumQuery,
+    VellumQueryResult,
+    query_events,
+    events_for_subject,
+    events_by_component,
+    events_by_type_prefix,
+    deletion_receipts,
+    state_transitions_for_subject,
+)
 
 # Backward compat alias — routing/ and vellum/ use EpistemicStatus
 EpistemicStatus = EpistemicTier
@@ -105,4 +115,13 @@ __all__ = [
     "JSONLBuffer",
     "ReconcilerResult",
     "reconcile",
+    # Vellum query surface (PR 9)
+    "VellumQuery",
+    "VellumQueryResult",
+    "query_events",
+    "events_for_subject",
+    "events_by_component",
+    "events_by_type_prefix",
+    "deletion_receipts",
+    "state_transitions_for_subject",
 ]
