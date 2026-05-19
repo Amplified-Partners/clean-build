@@ -97,6 +97,10 @@ class LiftResult(BaseModel):
     """Closure evidence for a research job.
 
     Without a LiftResult, a job cannot move to a terminal state.
+
+    The autonomous builder directive: when requires_python_shape_extraction
+    was True on the ResearchJob, the LiftResult carries proposed_python_shapes
+    that a builder agent can implement directly without human translation.
     """
 
     result_id: str = Field(default_factory=lambda: str(uuid4()))
@@ -108,6 +112,16 @@ class LiftResult(BaseModel):
     decided_by: str = ""
     decided_at: datetime = Field(
         default_factory=lambda: datetime.now(timezone.utc),
+    )
+
+    # Autonomous builder directive (from brain_schema.py prior art)
+    proposed_python_shapes: list[str] = Field(
+        default_factory=list,
+        description="Pydantic/Python logic shapes ready for the builder.",
+    )
+    business_wireframe_gaps_filled: list[str] = Field(
+        default_factory=list,
+        description="Which bald spots in the business architecture this resolves.",
     )
 
 
@@ -133,3 +147,7 @@ class ResearchJob(BaseModel):
         default_factory=lambda: datetime.now(timezone.utc),
     )
     metadata: dict[str, Any] = Field(default_factory=dict)
+
+    # Autonomous builder directive (from brain_schema.py prior art)
+    requires_python_shape_extraction: bool = False
+    target_python_domain: str = ""
