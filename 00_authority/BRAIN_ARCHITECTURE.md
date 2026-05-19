@@ -1,12 +1,13 @@
 ---
 title: The Amplified Brain — Architecture, Estate, and Operating Map
-date: 2026-05-18
-version: 7
+date: 2026-05-19
+version: 8
 status: authoritative now
 refresh: This document MUST be refreshed every 24–48 hours by a scheduled Devon session.
 supersedes: Linear doc "The Amplified Brain Architecture (Where the Brain Lives)" (c655776f3baa)
 source-materials: Onboarding package (Devon-6098, 2026-05-14), 17-and-3 Principle (Ewan Bramley, 2026-05-14 21:19 BST), AI-is-a-Pudding insight, Systems Design & Three Specs methodology, Ingestion Pipe Rewrite spec, Linear-to-Vellum migration spec, Reflective Loop pattern audit, Perplexity Research (99 verified sources — pipeline metrics, AI council, Kaizen, governance-by-exception, 2026-05-14)
 signed-by:
+  - Devon-de8a | 2026-05-19 | devin-de8a29f5e89746ea96d34f29ca1eec64
   - Devon-b27c | 2026-05-18 | devin-b27ce6b2b0674d08b7e553e843cc956a
   - Devon-9977 | 2026-05-17 | devin-9977948e4f1a4201823693be3bed5325
   - Devon-3386 | 2026-05-14 | devin-338635b0d3cd4a868f1cf7e7fcb8d461
@@ -507,7 +508,7 @@ Compose: `/root/cove-repo/infrastructure/docker-compose.yml`
 | **Brain MCP Writer** | `brain-mcp-writer` | Write-path MCP for Brain database |
 | **Brain MCP Readonly** | `brain-mcp-readonly:8090` | Read-only MCP for Brain queries |
 | **Brain Web** | `brain-web` | Brain web interface |
-| **Vellum** | `vellum:8400` | Contact surface — Brief + Council + Correspondence (unhealthy — investigating) |
+| **Vellum** | `vellum:8400` | Contact surface — Brief + Council + Correspondence + Ingestion Gate + Pattern Transfer Gate (unhealthy — investigating) |
 | **HUF HAUS Shapes** | `02_build/shapes/` (library, not container) | 15 base classes + 15 decorators — canonical code shape taxonomy, registry, and runtime invariants |
 | **Infisical** | `infisical:8403` | Secrets management |
 | **OpenClaw Agents** | `openclaw-agents:8100` | OpenClaw agent runtime |
@@ -562,6 +563,8 @@ The three new stages are **non-negotiable**:
 All three go through the same pipe. Under the 17-and-3 principle, the pipe captures 17 signature-bearing labels per record and commits them to the 17-store with provenance preserved end-to-end.
 
 Source specs: `2026-05-14_SPEC_ingestion-pipe.md`, `2026-05-14_pipe-rewrite_synthesis.md` (Ewan Bramley + Plex/Perplexity Computer).
+
+**Implementation repo:** [`brain-ingest`](https://github.com/Amplified-Partners/brain-ingest) — preservation, chunking, embedding, and write pipeline for the Amplified Brain (created 2026-05-18).
 
 ---
 
@@ -657,6 +660,7 @@ If it is not in GitHub, it is not real.
 | [`amplified-machine`](https://github.com/Amplified-Partners/amplified-machine) | Beast server deployment configs, Docker compose stacks | Active — Infra |
 | [`marketing-engine`](https://github.com/Amplified-Partners/marketing-engine) | Automated content pipeline — pillar-to-atom, Kaizen loops, multi-platform publishing | Active — Marketing |
 | [`amplified-knowledge-mcp`](https://github.com/Amplified-Partners/amplified-knowledge-mcp) | MCP server for AI agent access to knowledge graph | Active — Infra |
+| [`brain-ingest`](https://github.com/Amplified-Partners/brain-ingest) | Brain Ingest Pipe — preservation, chunking, embedding, and write pipeline for the Brain | Active — Infra |
 | [`anthropic-token-proxy`](https://github.com/Amplified-Partners/anthropic-token-proxy) | Local reverse proxy — prompt caching, semantic caching | Active — Infra |
 | [`mission-control`](https://github.com/Amplified-Partners/mission-control) | Enterprise governance dashboard — code review, decision tracking | Active — Dashboard |
 | [`voice-ai`](https://github.com/Amplified-Partners/voice-ai) | Voice processing pipeline | Active |
@@ -952,6 +956,18 @@ These are not decorative. They are the signal.
 ---
 
 ## Changelog
+
+### v8 — 2026-05-19 (24h refresh)
+
+- **§ 5 Beast:** Container status verified via SSH — 45 running (unchanged). All healthy except Vellum (still unhealthy). One stopped container: `RETIRED-docker-postgres-1` (Exited 5 days ago, legacy).
+- **§ 5 Vellum:** Added Ingestion Gate and Pattern Transfer Gate as capabilities. Pattern Transfer Gate evaluates bridge candidates with min-rule enforcement (PR #140, 2026-05-18).
+- **§ 6 Ingestion Pipe:** Added reference to new [`brain-ingest`](https://github.com/Amplified-Partners/brain-ingest) repo — the implementation repo for the ingestion pipe (preservation, chunking, embedding, write pipeline).
+- **§ 7 GitHub:** Added `brain-ingest` repo to Infrastructure & Tooling. Org total: 40 repos (was 39).
+- **§ 7 GitHub (CRM):** Major code quality audit — 5 PRs merged: amp-shape taxonomy headers (#64), Makefile with standard contract targets (#66), dead code removal (#67), archive reorganisation (#68), docs/noise cleanup (#65).
+- **§ 7 GitHub (ground-truth):** No new merges since v7.
+- **Linear:** AMP-180 (Canonical Estate) now In Review. AMP-115 (Knowledge MCP for Mirror) and AMP-70 (GitHub branch protection) now Done. AMP-147 (Devon always-on ops) still In Progress. AMP-356 (Ingestion Pipe v2) still In Review.
+
+Signed-by: Devon-de8a | 2026-05-19 | devin-de8a29f5e89746ea96d34f29ca1eec64
 
 ### v7 — 2026-05-18 (24h refresh)
 
