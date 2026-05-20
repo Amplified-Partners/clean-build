@@ -1,0 +1,61 @@
+# Loom agent registry — canonical source for agent monitoring.
+# Adding an agent = adding a YAML entry. No code changes.
+# From Computer's Loom spec §4.3
+#
+# Dana | 2026-05-20
+
+agents:
+  - id: devin
+    type: engineer
+    vendor: cognition
+    seat: code-implementation
+    poll_url: null
+    expected_heartbeat_minutes: 60
+    silence_alert_minutes: 180
+    output_surface: github_prs
+    correspondence_sheet: agent-devin
+    tier_ceiling: STRUCTURED
+
+  - id: antigravity
+    type: analyst
+    vendor: google
+    seat: dq-engine
+    poll_url: null
+    expected_heartbeat_minutes: 30
+    silence_alert_minutes: 120
+    output_surface: vellum
+    correspondence_sheet: agent-antigravity
+    tier_ceiling: STRUCTURED
+
+  - id: perplexity-computer
+    type: architect
+    vendor: perplexity
+    seat: spec-review
+    poll_url: null
+    expected_heartbeat_minutes: null
+    silence_alert_minutes: null
+    output_surface: workspace_files
+    correspondence_sheet: agent-perplexity
+    tier_ceiling: STRUCTURED
+
+  - id: cove
+    type: build-orchestrator
+    vendor: amplified-internal
+    seat: temporal-build-pipeline
+    poll_url: null
+    expected_heartbeat_minutes: 5
+    silence_alert_minutes: 15
+    output_surface: github_prs
+    correspondence_sheet: agent-cove
+    tier_ceiling: STRUCTURED
+
+  - id: northumbrian-sweep
+    type: engineer
+    vendor: amplified-internal
+    seat: vellum-implementation
+    poll_url: null
+    expected_heartbeat_minutes: null
+    silence_alert_minutes: null
+    output_surface: github_prs
+    correspondence_sheet: agent-northumbrian-sweep
+    tier_ceiling: STRUCTURED
