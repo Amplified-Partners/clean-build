@@ -12,7 +12,13 @@ Text routing (via keyword matching, upgradeable to LLM):
   "decide/decision/approved/go" → decision
   Fallback → general_reply
 
+§3.3 fix (2026-05-20): confidence numbers replaced with honest
+match_type and confidence_basis labels. The old 0.95/0.80/0.50
+numbers were INTUITED designer judgement dressed as MEASURED
+probabilities — the min-rule forbids this.
+
 Devon-b5dc | 2026-05-14
+Hardened by Dana | 2026-05-20 | §3.3 drop INTUITED-dressed-as-MEASURED confidence numbers
 """
 
 from __future__ import annotations
@@ -32,6 +38,8 @@ IntentKind = Literal[
     "general_reply",
 ]
 
+MatchType = Literal["exact_emoji", "keyword", "fallback"]
+
 EMOJI_MAP: dict[str, IntentKind] = {
     "👍": "acknowledge",
     "thumbsup": "acknowledge",
@@ -42,7 +50,6 @@ EMOJI_MAP: dict[str, IntentKind] = {
     "🔥": "escalate",
     "❓": "clarify",
     "question": "clarify",
-    "❓": "clarify",
 }
 
 KEYWORD_PATTERNS: list[tuple[re.Pattern[str], IntentKind]] = [
@@ -55,9 +62,17 @@ KEYWORD_PATTERNS: list[tuple[re.Pattern[str], IntentKind]] = [
 
 @dataclass(frozen=True)
 class Intent:
+    """Classified intent from a human reply.
+
+    match_type and confidence_basis replace the old numeric confidence
+    field (§3.3). These are honest STRUCTURED labels — not INTUITED
+    numbers pretending to be calibrated probabilities.
+    """
+
     kind: IntentKind
     raw_content: str
-    confidence: float
+    match_type: MatchType
+    confidence_basis: str
     extracted_action: str
 
 
@@ -69,7 +84,8 @@ def classify_reply(content: str) -> Intent:
         return Intent(
             kind=EMOJI_MAP[stripped],
             raw_content=content,
-            confidence=0.95,
+            match_type="exact_emoji",
+            confidence_basis="exact emoji match — deterministic",
             extracted_action=stripped,
         )
 
@@ -79,13 +95,15 @@ def classify_reply(content: str) -> Intent:
             return Intent(
                 kind=intent_kind,
                 raw_content=content,
-                confidence=0.80,
+                match_type="keyword",
+                confidence_basis="keyword pattern match — deterministic, designer-selected patterns",
                 extracted_action=match.group(0),
             )
 
     return Intent(
         kind="general_reply",
         raw_content=content,
-        confidence=0.50,
+        match_type="fallback",
+        confidence_basis="no pattern matched — fallback classification",
         extracted_action=stripped,
     )

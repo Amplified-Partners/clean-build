@@ -1,6 +1,7 @@
 """Token models for share-link scoped access.
 
 Devon-b5dc | 2026-05-14
+Hardened by Dana | 2026-05-20 | §3.1 revocation metadata (revoked_at, revoked_by)
 """
 
 from __future__ import annotations
@@ -24,6 +25,8 @@ class ShareToken(BaseModel):
     expires_at: datetime | None = None
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     revoked: bool = False
+    revoked_at: datetime | None = None
+    revoked_by: str | None = None
 
     @property
     def is_expired(self) -> bool:

@@ -15,6 +15,7 @@ Ewan's replies (emoji or text) are classified into intents and routed:
 - general_reply → log as comment + structured prompt
 
 Devon-b5dc | 2026-05-14
+Hardened by Dana | 2026-05-20 | §3.3 honest confidence_basis, §2.2 epistemic_tier on entries
 """
 
 from __future__ import annotations
@@ -70,6 +71,7 @@ async def handle_reply(sheet_id: str, body: ReplyRequest) -> dict:
     entry_type = INTENT_TO_ENTRY_TYPE.get(intent.kind, "human_comment")
 
     # --- Entry 1: verbatim (radical attribution, untouched) ---
+    # Human replies are INTUITED — raw speech, no structured derivation
     prev_hash = sheet.latest_hash
     verbatim_entry = SheetEntry(
         sheet_id=sheet_id,
@@ -77,9 +79,11 @@ async def handle_reply(sheet_id: str, body: ReplyRequest) -> dict:
         content=body.content,
         prev_hash=prev_hash,
         entry_type=entry_type,
+        epistemic_tier="INTUITED",
         metadata={
             "intent": intent.kind,
-            "confidence": intent.confidence,
+            "match_type": intent.match_type,
+            "confidence_basis": intent.confidence_basis,
             "extracted_action": intent.extracted_action,
             "layer": "verbatim",
         },
@@ -106,6 +110,7 @@ async def handle_reply(sheet_id: str, body: ReplyRequest) -> dict:
             content=cleaned_text,
             prev_hash=sheet.latest_hash if sheet else verbatim_entry.entry_hash,
             entry_type="cleaned_prompt",
+            epistemic_tier="STRUCTURED",
             metadata={
                 "layer": "cleaned",
                 "source_entry_id": verbatim_entry.id,
@@ -125,7 +130,8 @@ async def handle_reply(sheet_id: str, body: ReplyRequest) -> dict:
         "entry_id": verbatim_entry.id,
         "entry_hash": verbatim_entry.entry_hash,
         "intent": intent.kind,
-        "confidence": intent.confidence,
+        "match_type": intent.match_type,
+        "confidence_basis": intent.confidence_basis,
         "entry_type": entry_type,
         "cleaned_entry_id": cleaned_entry_id,
         "cleaned_text": cleaned_text,
