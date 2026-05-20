@@ -1,12 +1,13 @@
 ---
 title: The Amplified Brain — Architecture, Estate, and Operating Map
-date: 2026-05-19
-version: 8
+date: 2026-05-20
+version: 9
 status: authoritative now
 refresh: This document MUST be refreshed every 24–48 hours by a scheduled Devon session.
 supersedes: Linear doc "The Amplified Brain Architecture (Where the Brain Lives)" (c655776f3baa)
 source-materials: Onboarding package (Devon-6098, 2026-05-14), 17-and-3 Principle (Ewan Bramley, 2026-05-14 21:19 BST), AI-is-a-Pudding insight, Systems Design & Three Specs methodology, Ingestion Pipe Rewrite spec, Linear-to-Vellum migration spec, Reflective Loop pattern audit, Perplexity Research (99 verified sources — pipeline metrics, AI council, Kaizen, governance-by-exception, 2026-05-14)
 signed-by:
+  - Devon-1b2b | 2026-05-20 | devin-1b2be5c1c53c42e6a027d37ed0caad83
   - Devon-de8a | 2026-05-19 | devin-de8a29f5e89746ea96d34f29ca1eec64
   - Devon-b27c | 2026-05-18 | devin-b27ce6b2b0674d08b7e553e843cc956a
   - Devon-9977 | 2026-05-17 | devin-9977948e4f1a4201823693be3bed5325
@@ -411,7 +412,7 @@ The sovereign compute infrastructure. Everything production runs here.
 | **RAM** | 256 GB DDR5 |
 | **Disk** | 1.8 TB RAID (`/dev/md2`), ~170 GB used (11%) |
 | **OS** | Ubuntu 24.04.4 LTS (Noble Numbat) |
-| **Containers** | 45 running |
+| **Containers** | 45 running (unverified 2026-05-20 — SSH keys rejected) |
 | **Docker network** | `amplified-net` |
 | **SSH (Devon)** | `ssh -i ~/.ssh/beastssh root@135.181.161.131` |
 
@@ -508,8 +509,13 @@ Compose: `/root/cove-repo/infrastructure/docker-compose.yml`
 | **Brain MCP Writer** | `brain-mcp-writer` | Write-path MCP for Brain database |
 | **Brain MCP Readonly** | `brain-mcp-readonly:8090` | Read-only MCP for Brain queries |
 | **Brain Web** | `brain-web` | Brain web interface |
-| **Vellum** | `vellum:8400` | Contact surface — Brief + Council + Correspondence + Ingestion Gate + Pattern Transfer Gate (unhealthy — investigating) |
+| **Vellum** | `vellum:8400` | Contact surface — Brief + Council + Correspondence + Ingestion Gate + Pattern Transfer Gate (unhealthy — investigating). Standalone repo now has PostgreSQL persistence, health endpoint, Dockerfile. |
 | **HUF HAUS Shapes** | `02_build/shapes/` (library, not container) | 15 base classes + 15 decorators — canonical code shape taxonomy, registry, and runtime invariants |
+| **Epistemic Core** | `02_build/epistemic_core/` (library, not container) | Single canonical epistemic source — tiers, min-rule, P0 policy, drift, promotion, Vellum emitter + query surface |
+| **Brain Curator** | `02_build/brain_curator/` (library, not container) | Post-write curation stages 3.5–9 — packet builder, route decider, epistemic tier, validation sampler, version families |
+| **Research Pipe** | `02_build/research_pipe/` (library, not container) | Research pipeline with portable spine integration, state machine, closure tracking |
+| **Marketing Consumer** | `02_build/marketing_consumer/` (library, not container) | Brevo adapter stub, dry-run proof loop, guardrails, state machine, Vellum integration |
+| **Sidecar** | `02_build/sidecar/` (library, not container) | Ephemeral context sidecar — lifecycle, cleanup, receipts for session context management |
 | **Infisical** | `infisical:8403` | Secrets management |
 | **OpenClaw Agents** | `openclaw-agents:8100` | OpenClaw agent runtime |
 | **Plumb Knowledge** | `plumb-knowledge-http` | Plumb agent knowledge HTTP server |
@@ -613,10 +619,11 @@ Vellum absorbs Linear's ticket-flow, agent-alerting, and loop-closing. Now deplo
 | Property | Value |
 |----------|-------|
 | **Architecture** | Multi-writer, hash-chained, attributed, additive-only, token-scoped |
-| **Beast container** | `vellum:8400` — Up 11 hours (unhealthy as of 2026-05-17 06:05 UTC) |
+| **Beast container** | `vellum:8400` — unhealthy (status unverified 2026-05-20 — SSH blocked) |
 | **Brief mode** | Running — 1-to-1 scoped exchanges (most ticket activity) |
 | **Council mode** | Running on Ewan's UI — cross-agent deliberation for big decisions |
 | **Correspondence mode** | Built — bidirectional async communication with intent routing (PR #115, 2026-05-17) |
+| **Standalone repo** | PostgreSQL persistence backend (PR #5), unified codebase: Council + Gate merged from clean-build (PR #4), health endpoint + Dockerfile (2026-05-19) |
 | **Migration spec** | `2026-05-14_SPEC_linear-to-vellum-migration.md` |
 
 Vellum is Ewan's UI + inter-agent comms + customer FAQ + updater into the pipe + delivery surface for customer artefacts. It closes the loop and alerts agents when a ticket is in for them.
@@ -679,7 +686,7 @@ If it is not in GitHub, it is not real.
 
 | Repo | Purpose | Status |
 |------|---------|--------|
-| [`vellum`](https://github.com/Amplified-Partners/vellum) | Vellum contact surface — hash-chained, additive-only, token-scoped agent/human comms | Active — Comms |
+| [`vellum`](https://github.com/Amplified-Partners/vellum) | Vellum contact surface — hash-chained, additive-only, token-scoped agent/human comms. Now with PostgreSQL persistence, health endpoint, Dockerfile, unified codebase. | Active — Comms |
 | [`amplified-hermes-team`](https://github.com/Amplified-Partners/amplified-hermes-team) | Agent orchestration framework — team manager, BATON protocol | Active |
 | [`agent-comms`](https://github.com/Amplified-Partners/agent-comms) | Agent status boards, handover files | Active — Comms |
 
@@ -956,6 +963,20 @@ These are not decorative. They are the signal.
 ---
 
 ## Changelog
+
+### v9 — 2026-05-20 (24h refresh)
+
+- **§ 0 Epistemic Status:** Reference implementation now supplemented by `02_build/epistemic_core/` — single canonical source for epistemic logic across the codebase, including Vellum event emission and query surface (PR #148).
+- **§ 5 Beast:** Container status unverified — SSH keys (`beastssh`, `beastkey`, `beastkey2`) all rejected by Beast. Status presumed unchanged from v8 (45 containers). Key rotation needed.
+- **§ 5 Build modules (new):** 5 new library packages added to `02_build/` via brain_curator Stage 4 implementation (PRs #148–#157, all merged 2026-05-19): `epistemic_core` (single canonical epistemic source with Vellum emitter/query), `brain_curator` (post-write curation stages 3.5–9), `research_pipe` (research pipeline with portable spine), `marketing_consumer` (Brevo adapter, dry-run proof loop), `sidecar` (ephemeral context management). Also: `brain-migration/guardrails.py`.
+- **§ 5 Vellum:** Standalone `vellum` repo gained PostgreSQL persistence backend (PR #5), unified codebase merging Council + Pattern Transfer Gate from clean-build (PR #4), health endpoint + Dockerfile for Beast deployment compat.
+- **§ 5 Code:** Intelligence modules removed from `02_build/` — AI's job, not Python's (commit fb30839). Logic Canon: 9 domain-agnostic algorithmic patterns extracted from Nexus (commit 05fc221).
+- **§ 7 GitHub (clean-build):** 9 PRs merged for brain_curator Stage 4 implementation (#148–#157) + brain_curator post-write module + Estate Chaos Case Study.
+- **§ 7 GitHub (crm):** No new merges since v8.
+- **§ 7 GitHub (vellum):** 2 PRs merged — PostgreSQL persistence (#5), unified codebase (#4).
+- **Linear:** AMP-358 (Extract 9 highest-signal atoms) new — In Review. AMP-349 (Marketing Engine) still In Progress. AMP-345 (APDS PUDDING rewrite) still In Progress. AMP-147 (Devon always-on ops) still In Progress.
+
+Signed-by: Devon-1b2b | 2026-05-20 | devin-1b2be5c1c53c42e6a027d37ed0caad83
 
 ### v8 — 2026-05-19 (24h refresh)
 
