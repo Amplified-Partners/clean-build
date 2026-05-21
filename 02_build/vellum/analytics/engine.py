@@ -351,7 +351,15 @@ class AnalyticsEngine:
 
         This bypasses PostgreSQL — for unit testing Brain queries
         without needing a live database connection.
+
+        Guarded: raises RuntimeError if called outside a test runner
+        (i.e. when 'pytest' or 'unittest' is not in sys.modules).
         """
+        import sys
+        if "pytest" not in sys.modules and "unittest" not in sys.modules:
+            raise RuntimeError(
+                "load_brain_test_data is test-only — cannot be called in production"
+            )
         if self._conn is None:
             return 0
         from vellum.analytics.brain_connector import _BRAIN_COLUMNS

@@ -205,6 +205,9 @@ async def brain_health(executed_by: str = "api") -> dict:
         if result.row_count == 0:
             return {"status": "no_data", "message": "Brain tables not loaded — call /brain/load first"}
         row = dict(zip(result.columns, result.rows[0]))
+        # If active count is 0, Brain is empty — no meaningful health to report
+        if row.get("active", 0) == 0 and row.get("total_packets", 0) == 0:
+            return {"status": "no_data", "message": "Brain tables empty — call /brain/load first"}
         return {
             "health_status": row.get("health_status", "UNKNOWN"),
             "metrics": row,

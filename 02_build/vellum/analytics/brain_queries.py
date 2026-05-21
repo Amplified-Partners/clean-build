@@ -429,10 +429,12 @@ BRAIN_QUERY_REGISTRY: dict[str, str] = {
            OR query_name IN (
                'curation_pipeline_health', 'curation_recent_runs',
                'curation_velocity', 'dedup_cluster_stats',
-               'evidence_density', 'evidence_orphans',
-               'stale_packets', 'stale_packet_summary',
-               'triangulation_summary', 'document_stats',
-               'relationship_stats', 'validation_verdict_distribution',
+               'dedup_largest_clusters', 'evidence_density',
+               'evidence_orphans', 'stale_packets',
+               'stale_packet_summary', 'triangulation_summary',
+               'triangulation_summary_lite', 'document_stats',
+               'document_pipeline_versions', 'relationship_stats',
+               'validation_verdict_distribution',
                'brain_health_score', 'packet_status_flow'
            )
         GROUP BY query_name

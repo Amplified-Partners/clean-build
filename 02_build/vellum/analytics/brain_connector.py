@@ -18,6 +18,7 @@ from __future__ import annotations
 import json
 import logging
 import os
+import re
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -40,6 +41,20 @@ def _get_dsn() -> str:
             "Set it to the PostgreSQL connection string for brain_reader."
         )
     return dsn
+
+
+_IDENTIFIER_RE = re.compile(r"^[a-z_][a-z0-9_]*$")
+
+
+def _assert_safe_identifier(name: str) -> str:
+    """Assert a string is a safe SQL identifier (defense-in-depth).
+
+    All table names are validated against BRAIN_TABLES keys, but this
+    adds a second layer: the name must also match [a-z_][a-z0-9_]*.
+    """
+    if not _IDENTIFIER_RE.match(name):
+        raise ValueError(f"Unsafe SQL identifier: {name!r}")
+    return name
 
 
 # ---------------------------------------------------------------------------
@@ -235,6 +250,7 @@ class BrainConnector:
                 if table not in BRAIN_TABLES:
                     log.warning("Unknown Brain table: %s — skipping", table)
                     continue
+                _assert_safe_identifier(table)
 
                 columns = _BRAIN_COLUMNS[table]
                 col_list = ", ".join(columns)
@@ -285,14 +301,17 @@ class BrainConnector:
         """
         counts: dict[str, int] = {}
         for table in BRAIN_TABLES:
+            _assert_safe_identifier(table)
             parquet_file = parquet_dir / f"{table}.parquet"
             if not parquet_file.exists():
                 log.debug("No Parquet file for %s — skipping", table)
                 continue
 
+            # Resolve to absolute path and escape single quotes for SQL safety
+            safe_path = str(parquet_file.resolve()).replace("'", "''")
             self._conn.execute(f"DELETE FROM {table}")
             self._conn.execute(
-                f"INSERT INTO {table} SELECT * FROM read_parquet('{parquet_file}')"
+                f"INSERT INTO {table} SELECT * FROM read_parquet('{safe_path}')"
             )
             count = self._conn.execute(f"SELECT COUNT(*) FROM {table}").fetchone()[0]
             counts[table] = count
