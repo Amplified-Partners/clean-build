@@ -1,12 +1,13 @@
 ---
 title: The Amplified Brain — Architecture, Estate, and Operating Map
-date: 2026-05-20
-version: 9
+date: 2026-05-21
+version: 10
 status: authoritative now
 refresh: This document MUST be refreshed every 24–48 hours by a scheduled Devon session.
 supersedes: Linear doc "The Amplified Brain Architecture (Where the Brain Lives)" (c655776f3baa)
 source-materials: Onboarding package (Devon-6098, 2026-05-14), 17-and-3 Principle (Ewan Bramley, 2026-05-14 21:19 BST), AI-is-a-Pudding insight, Systems Design & Three Specs methodology, Ingestion Pipe Rewrite spec, Linear-to-Vellum migration spec, Reflective Loop pattern audit, Perplexity Research (99 verified sources — pipeline metrics, AI council, Kaizen, governance-by-exception, 2026-05-14)
 signed-by:
+  - Devon-5442 | 2026-05-21 | devin-54427c2fe43041229b261ccb4a8dda80
   - Devon-1b2b | 2026-05-20 | devin-1b2be5c1c53c42e6a027d37ed0caad83
   - Devon-de8a | 2026-05-19 | devin-de8a29f5e89746ea96d34f29ca1eec64
   - Devon-b27c | 2026-05-18 | devin-b27ce6b2b0674d08b7e553e843cc956a
@@ -412,9 +413,9 @@ The sovereign compute infrastructure. Everything production runs here.
 | **RAM** | 256 GB DDR5 |
 | **Disk** | 1.8 TB RAID (`/dev/md2`), ~170 GB used (11%) |
 | **OS** | Ubuntu 24.04.4 LTS (Noble Numbat) |
-| **Containers** | 45 running (unverified 2026-05-20 — SSH keys rejected) |
+| **Containers** | 45 running (verified 2026-05-21 06:00 UTC — all healthy) |
 | **Docker network** | `amplified-net` |
-| **SSH (Devon)** | `ssh -i ~/.ssh/beastssh root@135.181.161.131` |
+| **SSH (Devon)** | `ssh -i ~/.ssh/beastkey root@135.181.161.131` (key: `beastssh` secret, ed25519) |
 
 **Rule: The Beast is the ONLY place where production intelligence is generated and stored.**
 
@@ -509,7 +510,8 @@ Compose: `/root/cove-repo/infrastructure/docker-compose.yml`
 | **Brain MCP Writer** | `brain-mcp-writer` | Write-path MCP for Brain database |
 | **Brain MCP Readonly** | `brain-mcp-readonly:8090` | Read-only MCP for Brain queries |
 | **Brain Web** | `brain-web` | Brain web interface |
-| **Vellum** | `vellum:8400` | Contact surface — Brief + Council + Correspondence + Ingestion Gate + Pattern Transfer Gate (unhealthy — investigating). Standalone repo now has PostgreSQL persistence, health endpoint, Dockerfile. |
+| **Vellum** | `vellum:8400` | Contact surface — Brief + Council + Correspondence + Ingestion Gate + Pattern Transfer Gate + Analytics Engine + Dashboard + Mode Guard (**healthy**, Up 38h). Standalone repo has PostgreSQL persistence, health endpoint, Dockerfile. Vellum 0.2.0 hardened (PR #161). |
+| **Loom** | `02_build/loom/` (library, not container) | Continuous orchestration layer linking Vellum + Brain + DuckDB + pipe + Linear. 5 workflows: `agent_watcher`, `brain_health`, `budget_guard`, `kaizen_generator`, `loop_closer`. Integration stubs for DQ (DuckDB analytics), Linear, ingestion pipe, Telegram, Vellum. Spec: `02_build/loom/LOOM_SPEC.md`. (PR #161) |
 | **HUF HAUS Shapes** | `02_build/shapes/` (library, not container) | 15 base classes + 15 decorators — canonical code shape taxonomy, registry, and runtime invariants |
 | **Epistemic Core** | `02_build/epistemic_core/` (library, not container) | Single canonical epistemic source — tiers, min-rule, P0 policy, drift, promotion, Vellum emitter + query surface |
 | **Brain Curator** | `02_build/brain_curator/` (library, not container) | Post-write curation stages 3.5–9 — packet builder, route decider, epistemic tier, validation sampler, version families |
@@ -612,17 +614,18 @@ Every issue belongs to a spine. No orphan issues. Issue naming: `AMP-` prefix (e
   - Priority (`!escalate` label, orange) — first priority at next session
   - Urgent (`!urgent` label, red) — triggers immediate Devin session via webhook
 
-#### Vellum — Deployed (unhealthy)
+#### Vellum — Deployed (healthy)
 
-Vellum absorbs Linear's ticket-flow, agent-alerting, and loop-closing. Now deployed on Beast as `vellum:8400` but reporting unhealthy — under investigation.
+Vellum absorbs Linear's ticket-flow, agent-alerting, and loop-closing. Deployed on Beast as `vellum:8400` — **healthy** (verified 2026-05-21).
 
 | Property | Value |
 |----------|-------|
 | **Architecture** | Multi-writer, hash-chained, attributed, additive-only, token-scoped |
-| **Beast container** | `vellum:8400` — unhealthy (status unverified 2026-05-20 — SSH blocked) |
+| **Beast container** | `vellum:8400` — **healthy** (verified 2026-05-21) |
 | **Brief mode** | Running — 1-to-1 scoped exchanges (most ticket activity) |
 | **Council mode** | Running on Ewan's UI — cross-agent deliberation for big decisions |
-| **Correspondence mode** | Built — bidirectional async communication with intent routing (PR #115, 2026-05-17) |
+| **Correspondence mode** | Running — bidirectional async communication with intent routing, analytics, dashboard (PR #115, hardened PR #161) |
+| **Ingestion + Analytics** | Running — ingestion connectors, analytics engine, mode guard (entry type isolation per mode), auth Ulysses boot check (PR #161) |
 | **Standalone repo** | PostgreSQL persistence backend (PR #5), unified codebase: Council + Gate merged from clean-build (PR #4), health endpoint + Dockerfile (2026-05-19) |
 | **Migration spec** | `2026-05-14_SPEC_linear-to-vellum-migration.md` |
 
@@ -963,6 +966,17 @@ These are not decorative. They are the signal.
 ---
 
 ## Changelog
+
+### v10 — 2026-05-21 (24h refresh)
+
+- **§ 5 Beast:** Container status verified via SSH (`root@` with `beastssh` key) — 45 containers running, all healthy. **Vellum now healthy** (was unhealthy since v6). Tailscale confirmed running (Up 11 days). SSH access restored (was rejected in v9).
+- **§ 5 Build modules (new):** **Loom** — new `02_build/loom/` continuous orchestration layer (PR #161). Links Vellum + Brain + DuckDB + pipe + Linear with self-monitoring. 5 workflows (`agent_watcher`, `brain_health`, `budget_guard`, `kaizen_generator`, `loop_closer`), integration stubs (DQ, Linear, pipe, Telegram, Vellum). 10 test files.
+- **§ 5 Vellum (clean-build):** Vellum 0.2.0 hardening (PR #161): analytics engine, correspondence mode routes, dashboard, ingestion connectors, mode guard (entry type isolation per mode), participant model, auth Ulysses boot check (refuses to start without auth outside dev mode). 10+ new test files.
+- **§ 7 Vellum status:** Changed from "unhealthy" to **healthy** on Beast.
+- **Linear:** AMP-360 (DuckDB Brain Analytics — Statistical Lens Foundation) new — In Review. AMP-359 (Vellum Sweeper Daemon) new — Backlog.
+- **GitHub (crm, ground-truth):** No new merges since v9.
+
+Signed-by: Devon-5442 | 2026-05-21 | devin-54427c2fe43041229b261ccb4a8dda80
 
 ### v9 — 2026-05-20 (24h refresh)
 
