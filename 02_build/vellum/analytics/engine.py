@@ -1,18 +1,21 @@
 """DuckDB analytics engine — the Fourth Seat.
 
-Read-only analytical queries over Vellum data. Exports sheet entries
-to Parquet for fast columnar queries. Named queries stored in the
-query registry — no ad-hoc SQL accumulation.
+Read-only analytical queries over Vellum AND Brain data. Exports
+sheet entries and Brain tables to Parquet for fast columnar queries.
+Named queries stored in the query registry — no ad-hoc SQL accumulation.
 
 Every query execution is witnessed: identity, query name, output hash,
 and timestamp are recorded for audit.
 
 Architecture (per Antigravity's spec):
-  - Nightly snapshot: exports Vellum entries to Parquet
+  - Nightly snapshot: exports Vellum entries + Brain tables to Parquet
   - Named queries: stored in registry, run via engine.run(query_name)
   - Vellum witnessing: every execution logged as a telemetry entry
+  - Brain connector: reads PostgreSQL Brain tables into DuckDB
+  - Three lenses: statistical (this file), semantic (future), structural (future)
 
 Dana | 2026-05-20 | DuckDB analytics engine — the Fourth Seat
+Dana | 2026-05-21 | Brain connector + statistical lens queries
 """
 
 from __future__ import annotations
@@ -190,11 +193,14 @@ QUERY_REGISTRY: dict[str, str] = {
 
 
 class AnalyticsEngine:
-    """DuckDB-powered analytics over Vellum data.
+    """DuckDB-powered analytics over Vellum and Brain data.
 
     Operates in two modes:
     1. Parquet mode: reads from exported Parquet files (production)
     2. Memory mode: loads entries directly from the Vellum store (dev/test)
+
+    Brain data is loaded via the BrainConnector (PostgreSQL → DuckDB)
+    or from Parquet snapshots (nightly cron).
 
     Every query execution is logged for anti-shelfware tracking.
     """
@@ -202,15 +208,18 @@ class AnalyticsEngine:
     def __init__(self, parquet_dir: Path | None = None) -> None:
         self._parquet_dir = parquet_dir
         self._query_log: list[dict] = []
+        self._brain_connector: Any = None
 
         if DUCKDB_AVAILABLE:
             self._conn = duckdb.connect(":memory:")
             self._init_tables()
+            self._init_brain_tables()
+            self._register_brain_queries()
         else:
             self._conn = None
 
     def _init_tables(self) -> None:
-        """Create in-memory tables for analytics."""
+        """Create in-memory tables for Vellum analytics."""
         if self._conn is None:
             return
         self._conn.execute("""
@@ -236,6 +245,19 @@ class AnalyticsEngine:
                 row_count INTEGER
             )
         """)
+
+    def _init_brain_tables(self) -> None:
+        """Create Brain table schemas in DuckDB for analytics."""
+        if self._conn is None:
+            return
+        from vellum.analytics.brain_connector import BrainConnector
+        self._brain_connector = BrainConnector(self._conn)
+        self._brain_connector.init_brain_tables()
+
+    def _register_brain_queries(self) -> None:
+        """Register Brain-specific queries in the unified registry."""
+        from vellum.analytics.brain_queries import BRAIN_QUERY_REGISTRY_LITE
+        QUERY_REGISTRY.update(BRAIN_QUERY_REGISTRY_LITE)
 
     async def load_from_store(self) -> int:
         """Load entries from the Vellum store into DuckDB.
@@ -285,6 +307,69 @@ class AnalyticsEngine:
         count = self._conn.execute("SELECT COUNT(*) FROM entries").fetchone()[0]
         log.info("Loaded %d entries from Parquet: %s", count, path)
         return count
+
+    # -----------------------------------------------------------------------
+    # Brain data loading
+    # -----------------------------------------------------------------------
+
+    async def load_brain_from_postgres(
+        self, tables: list[str] | None = None
+    ) -> dict[str, int]:
+        """Load Brain tables from PostgreSQL into DuckDB.
+
+        Uses the BrainConnector to read from the Brain's PostgreSQL
+        and load into DuckDB for analytics. Read-only.
+        """
+        if self._brain_connector is None:
+            raise RuntimeError("Brain connector not initialised")
+        return await self._brain_connector.load_from_postgres(tables)
+
+    def load_brain_from_parquet(self, parquet_dir: Path) -> dict[str, int]:
+        """Load Brain tables from Parquet snapshots into DuckDB.
+
+        Production path: nightly cron exports Postgres → Parquet,
+        then analytics loads from Parquet.
+        """
+        if self._brain_connector is None:
+            raise RuntimeError("Brain connector not initialised")
+        return self._brain_connector.load_from_parquet(parquet_dir)
+
+    def export_brain_to_parquet(self, output_dir: Path) -> dict[str, int]:
+        """Export Brain tables from DuckDB to Parquet."""
+        if self._brain_connector is None:
+            raise RuntimeError("Brain connector not initialised")
+        return self._brain_connector.export_to_parquet(output_dir)
+
+    def get_brain_load_log(self) -> list[dict]:
+        """Return the Brain load audit log."""
+        if self._brain_connector is None:
+            return []
+        return self._brain_connector.get_load_log()
+
+    def load_brain_test_data(self, table: str, rows: list[list]) -> int:
+        """Load test data directly into a Brain table (test only).
+
+        This bypasses PostgreSQL — for unit testing Brain queries
+        without needing a live database connection.
+
+        Guarded: raises RuntimeError if called outside a test runner
+        (i.e. when 'pytest' or 'unittest' is not in sys.modules).
+        """
+        import sys
+        if "pytest" not in sys.modules and "unittest" not in sys.modules:
+            raise RuntimeError(
+                "load_brain_test_data is test-only — cannot be called in production"
+            )
+        if self._conn is None:
+            return 0
+        from vellum.analytics.brain_connector import _BRAIN_COLUMNS
+        columns = _BRAIN_COLUMNS.get(table)
+        if not columns:
+            raise KeyError(f"Unknown Brain table: {table}")
+        placeholders = ", ".join(["?"] * len(columns))
+        for row in rows:
+            self._conn.execute(f"INSERT INTO {table} VALUES ({placeholders})", row)
+        return len(rows)
 
     def run(self, query_name: str, executed_by: str = "analytics-engine") -> QueryResult:
         """Run a named query from the registry.
