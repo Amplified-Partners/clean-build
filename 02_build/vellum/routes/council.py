@@ -6,10 +6,17 @@ POST /api/v1/sheets/{sheet_id}/council
   - Stores each response as a council_answer entry
   - Returns aggregated verdict + minority report
 
-The council runs on the Vellum sheet infrastructure — same hash chain,
-same attribution, same radical transparency.
+§3.4 verdict mapping (2026-05-20):
+  UNANIMOUS → council_answer, epistemic_tier=STRUCTURED
+  MAJORITY  → council_answer, epistemic_tier=STRUCTURED, dissent_recorded=True
+  SPLIT     → decision entry "escalated_to_human", epistemic_tier=INTUITED
+  
+The SPLIT case is critical: do NOT write a synthesised verdict when
+the Council could not agree. Doing so would launder a non-decision
+into a recorded decision.
 
 Devon-b5dc | 2026-05-14
+Hardened by Dana | 2026-05-20 | §3.4 council verdict mapping
 """
 
 from __future__ import annotations
@@ -145,23 +152,13 @@ async def submit_council_question(sheet_id: str, body: CouncilRequest) -> Counci
             await store.append_entry(sheet_id, debate_entry)
             round_2_entry_ids.append(debate_entry.id)
 
-    # --- Store verdict entry ---
+    # --- §3.4: Store verdict entry with epistemic tier mapping ---
     sheet = await store.get_sheet(sheet_id)
-    verdict_content = _format_verdict(result)
-    verdict_entry = SheetEntry(
+    verdict_entry = _build_verdict_entry(
         sheet_id=sheet_id,
-        author="council-aggregator",
-        content=verdict_content,
         prev_hash=sheet.latest_hash if sheet else "",
-        entry_type="council_answer",
-        metadata={
-            "layer": "council_verdict",
-            "verdict": result.verdict.value,
-            "agreement_score": result.agreement_score,
-            "escalate": result.escalate,
-            "escalation_reason": result.escalation_reason,
-            "source_question_id": question_entry.id,
-        },
+        result=result,
+        question_entry_id=question_entry.id,
     )
     await store.append_entry(sheet_id, verdict_entry)
 
@@ -174,6 +171,64 @@ async def submit_council_question(sheet_id: str, body: CouncilRequest) -> Counci
         answer_entry_ids=answer_entry_ids,
         round_2_needed=result.round_2_needed,
         round_2_entry_ids=round_2_entry_ids,
+    )
+
+
+def _build_verdict_entry(
+    *,
+    sheet_id: str,
+    prev_hash: str,
+    result: CouncilResult,
+    question_entry_id: str,
+) -> SheetEntry:
+    """Build the verdict entry with §3.4 epistemic tier mapping.
+
+    UNANIMOUS → council_answer, STRUCTURED
+    MAJORITY  → council_answer, STRUCTURED, dissent_recorded=True
+    SPLIT     → decision "escalated_to_human", INTUITED (no synthesised verdict)
+    """
+    if result.verdict == Verdict.SPLIT:
+        # SPLIT: do NOT synthesise a verdict. Write an escalation marker.
+        # This prevents laundering a non-decision into a recorded decision.
+        return SheetEntry(
+            sheet_id=sheet_id,
+            author="council-aggregator",
+            content="Council split — escalated to human. No synthesised verdict recorded.",
+            prev_hash=prev_hash,
+            entry_type="decision",
+            epistemic_tier="INTUITED",
+            metadata={
+                "layer": "council_verdict",
+                "verdict": "split",
+                "escalate": True,
+                "escalation_reason": result.escalation_reason,
+                "source_question_id": question_entry_id,
+                "requires_human_followup": True,
+            },
+        )
+
+    # UNANIMOUS or MAJORITY — write as STRUCTURED council_answer
+    verdict_content = _format_verdict(result)
+    verdict_metadata: dict = {
+        "layer": "council_verdict",
+        "verdict": result.verdict.value,
+        "agreement_score": result.agreement_score,
+        "escalate": result.escalate,
+        "escalation_reason": result.escalation_reason,
+        "source_question_id": question_entry_id,
+    }
+
+    if result.verdict == Verdict.MAJORITY:
+        verdict_metadata["dissent_recorded"] = True
+
+    return SheetEntry(
+        sheet_id=sheet_id,
+        author="council-aggregator",
+        content=verdict_content,
+        prev_hash=prev_hash,
+        entry_type="council_answer",
+        epistemic_tier="STRUCTURED",
+        metadata=verdict_metadata,
     )
 
 

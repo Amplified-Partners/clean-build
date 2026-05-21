@@ -1,6 +1,7 @@
 """Sheet and tenant models.
 
 Devon-b5dc | 2026-05-14
+Hardened by Dana | 2026-05-20 | §2.3 add telemetry mode
 """
 
 from __future__ import annotations
@@ -11,7 +12,7 @@ from uuid import uuid4
 
 from pydantic import BaseModel, Field
 
-SheetMode = Literal["brief", "correspondence", "council"]
+SheetMode = Literal["brief", "correspondence", "council", "telemetry"]
 EpistemicTier = Literal["INTUITED", "STRUCTURED", "MEASURED", "PROVEN"]
 
 

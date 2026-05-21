@@ -83,7 +83,7 @@ class TestIntentRouter:
     def test_thumbsup_acknowledge(self) -> None:
         intent = classify_reply("\U0001f44d")
         assert intent.kind == "acknowledge"
-        assert intent.confidence >= 0.9
+        assert intent.match_type == "exact_emoji"
 
     def test_warning_escalate(self) -> None:
         intent = classify_reply("\u26a0\ufe0f")
@@ -112,7 +112,7 @@ class TestIntentRouter:
     def test_general_fallback(self) -> None:
         intent = classify_reply("sounds good mate")
         assert intent.kind == "general_reply"
-        assert intent.confidence <= 0.6
+        assert intent.match_type == "fallback"
 
 
 # ── Storage ──
