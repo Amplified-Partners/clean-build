@@ -158,3 +158,75 @@ async def query_log() -> dict:
     """Return the query execution log for anti-shelfware tracking."""
     engine = _get_engine()
     return {"log": engine.get_query_log()}
+
+
+# ---------------------------------------------------------------------------
+# Brain analytics routes
+# ---------------------------------------------------------------------------
+
+
+@router.post("/brain/load")
+async def load_brain_data() -> dict:
+    """Load Brain tables from PostgreSQL into DuckDB.
+
+    Requires BRAIN_READER_DSN environment variable. Read-only connection.
+    Production uses Parquet snapshots; this endpoint is for on-demand loading.
+    """
+    engine = _get_engine()
+    if not DUCKDB_AVAILABLE:
+        await _witness_degradation()
+        raise HTTPException(status_code=503, detail="DuckDB not installed")
+
+    try:
+        counts = await engine.load_brain_from_postgres()
+        return {
+            "status": "ok",
+            "tables": counts,
+            "total_rows": sum(counts.values()),
+        }
+    except RuntimeError as e:
+        raise HTTPException(status_code=503, detail=str(e))
+
+
+@router.get("/brain/health")
+async def brain_health(executed_by: str = "api") -> dict:
+    """Brain health traffic light — single-glance score.
+
+    Returns active packets, quarantined, stale, orphan counts, and a
+    GREEN/AMBER/RED status. Glanceable governance.
+    """
+    engine = _get_engine()
+    if not DUCKDB_AVAILABLE:
+        await _witness_degradation()
+        raise HTTPException(status_code=503, detail="DuckDB not installed")
+
+    try:
+        result = engine.run("brain_health_score", executed_by=executed_by)
+        if result.row_count == 0:
+            return {"status": "no_data", "message": "Brain tables not loaded — call /brain/load first"}
+        row = dict(zip(result.columns, result.rows[0]))
+        return {
+            "health_status": row.get("health_status", "UNKNOWN"),
+            "metrics": row,
+            "output_hash": result.output_hash,
+            "executed_by": result.executed_by,
+        }
+    except KeyError:
+        raise HTTPException(status_code=404, detail="brain_health_score query not available")
+
+
+@router.get("/brain/queries")
+async def list_brain_queries() -> dict:
+    """List all Brain-specific named queries."""
+    from vellum.analytics.brain_queries import BRAIN_QUERY_REGISTRY_LITE
+    return {
+        "queries": sorted(BRAIN_QUERY_REGISTRY_LITE.keys()),
+        "count": len(BRAIN_QUERY_REGISTRY_LITE),
+    }
+
+
+@router.get("/brain/log")
+async def brain_load_log() -> dict:
+    """Return the Brain data load audit log."""
+    engine = _get_engine()
+    return {"log": engine.get_brain_load_log()}
